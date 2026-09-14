@@ -219,7 +219,11 @@ function render(d){
     let sSpecial="";
     if(LANG==="en"){                          // 영문판: 한글 특이일 대신 개장상태 카드
       if(d.kr_status){const st=d.kr_status;
-        sSpecial='<div class="card injh"><h3>KR Market</h3><div class="srow" style="font-weight:700;color:'+(st.open?"#00a868":"#ff433d")+'">'+(st.open?"✅ Open":"🔴 "+st.en)+'</div></div>';}
+        let h='<div class="card injh"><h3>Korea Market Status <span class="chdr">expiry = 2nd Thu · holidays = weekend + 2026</span></h3>';
+        h+='<div class="srow" style="font-weight:700;color:'+(st.open?"#00a868":"#ff433d")+'">'+(st.open?"✅ Open":"🔴 "+st.en)+'</div>';
+        if(st.today_exp)h+='<div class="srow" style="font-weight:700;color:#e0a020">⚠ '+(st.today_quad?"Quadruple witching today":"Options expiry today")+'</div>';
+        else if(st.next_exp)h+='<div class="srow">Next expiry '+st.next_exp+(st.next_quad?" (quad witching)":" (options)")+'</div>';
+        sSpecial=h+'</div>';}
     }else{
       sSpecial=d.special?'<div class="card injh">'+d.special+'</div>':"";
     }
