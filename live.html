@@ -191,10 +191,7 @@ function render(d){
       if(gr.title==="국내")live=krLiveNow();   // 국내 지수: 평일 08~20시만
       else if(gr.title==="미국 지수"||gr.title==="원자재")live=gr.rt&&usLiveNow();  // 미국 CFD: 주말 휴장
       const tag=live?'<span class="tag live">'+L("live")+'</span>':'<span class="tag delay">'+L("closed")+'</span>';
-      let extra="";
-      if(gr.title==="국내"&&d.kr_status&&!d.kr_status.open){const st=d.kr_status,txt=(LANG==="en"?st.en:st.ko);
-        extra='<div class="srow" style="color:#ff433d;font-weight:700;padding:3px 2px 6px">🔴 '+txt+'</div>';}  // 휴장(주말·공휴일)일 때만 사유 표시
-      sGroups+='<div class="card"><h3>'+tr(gr.title)+' '+tag+'</h3>'+extra+gr.items.map(pcrow).join("")+'</div>';
+      sGroups+='<div class="card"><h3>'+tr(gr.title)+' '+tag+'</h3>'+gr.items.map(pcrow).join("")+'</div>';
     }
     let sKrates="";
     if(d.krates&&d.krates.length){
@@ -219,7 +216,13 @@ function render(d){
         return '<div class="brow"><span class="bn">'+tr(c.nm)+'</span><span class="bbar">'+bar+'</span>'
           +'<span class="bp" style="color:'+col+'">'+(up?"+":"")+c.pct.toFixed(2)+'%</span></div>';}).join("")+'</div>';
     }
-    let sSpecial=(d.special&&LANG!=="en")?'<div class="card injh">'+d.special+'</div>':"";  // 특이일은 한글 전용
+    let sSpecial="";
+    if(LANG==="en"){                          // 영문판: 한글 특이일 대신 개장상태 카드
+      if(d.kr_status){const st=d.kr_status;
+        sSpecial='<div class="card injh"><h3>KR Market</h3><div class="srow" style="font-weight:700;color:'+(st.open?"#00a868":"#ff433d")+'">'+(st.open?"✅ Open":"🔴 "+st.en)+'</div></div>';}
+    }else{
+      sSpecial=d.special?'<div class="card injh">'+d.special+'</div>':"";
+    }
     let sCalendar="";
     if(d.calendar&&d.calendar.length){
       sCalendar='<div class="card"><h3>'+L("calH")+'</h3>'+d.calendar.map(c=>
