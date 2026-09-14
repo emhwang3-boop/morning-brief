@@ -170,7 +170,9 @@ try{var _vid=localStorage.getItem("brief_vid");if(!_vid){_vid=Date.now().toStrin
     else if(/telegram|t\.me/i.test(_r))_src="tg";else _src=_r?"ref":"direct";}
   if(HUB)fetch(HUB.replace(/\/$/,"")+"/hit?vid="+_vid+"&src="+encodeURIComponent(_src),{mode:"no-cors"}).catch(function(){});}catch(e){}  // 방문 카운트+경로
 // ---- 언어(한/영) ----
-let LANG="ko"; try{LANG=localStorage.getItem("brief_lang")||"ko";}catch(e){}
+let LANG="ko"; try{var _lp=(new URLSearchParams(location.search)).get("lang");
+  LANG=(_lp==="en"||_lp==="ko")?_lp:(localStorage.getItem("brief_lang")||"ko");
+  localStorage.setItem("brief_lang",LANG);}catch(e){}
 const NM={"국내":"KR Indices","미국 지수":"US Indices","미국 야간선물":"US Futures (Night)","아시아":"Asia",
  "금리·채권":"Rates / Bonds","환율·달러":"FX / Dollar","원자재":"Commodities",
  "코스피":"KOSPI","코스닥":"KOSDAQ","코스피200":"KOSPI200","코스피200 야간선물":"KOSPI200 Night Fut.",
