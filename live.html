@@ -279,7 +279,7 @@ async function loadChart(){
   const d=await krFetch("chart","code="+stkCode+"&tf="+stkTf,14);
   if(!d||!d.bars){E("stkChartLbl").textContent="차트 없음";return;}
   setChart(d);
-  E("stkChartLbl").textContent="헐 리본 HMA"+d.hl+" · SMA"+d.gate+" · 빨강=저항 초록=지지 · 밀어서 과거·핀치 확대";
+  E("stkChartLbl").textContent="헐 리본 HMA"+d.hl+" · SMA"+d.gate+" · 밀어서 과거·핀치 확대";
 }
 document.querySelectorAll("#stkTf button").forEach(b=>b.onclick=()=>{
   stkTf=b.dataset.tf;
@@ -305,8 +305,6 @@ function drawChart(){
   let lo=Infinity,hi=-Infinity;
   for(let i=start;i<end;i++){lo=Math.min(lo,bars[i][3]);hi=Math.max(hi,bars[i][2]);
     for(const a of [hma,sma]){const v=a[i];if(v!=null){lo=Math.min(lo,v);hi=Math.max(hi,v);}}}
-  const wl=CH.walls||{};
-  for(const w of [wl.up,wl.dn])if(w&&Math.abs(w[0]/cur-1)<0.3){lo=Math.min(lo,w[0]);hi=Math.max(hi,w[0]);}
   if(!(hi>lo))hi=lo+1; const pd=(hi-lo)*0.06; lo-=pd; hi+=pd;
   const X=i=>x0+(x1-x0)*(cnt<=1?0.5:(i-start)/(cnt-1)), Y=v=>y1-(y1-y0)*(v-lo)/(hi-lo);
   GEO={x0,x1,y0,y1,start,cnt,lo,hi,N};
@@ -322,12 +320,6 @@ function drawChart(){
     const ref=hma[i-2],up=(ref!=null)?(b>ref):(b>=a);ctx.strokeStyle=up?"#00c853":"#ff433d";
     ctx.beginPath();ctx.moveTo(X(i-1),Y(a));ctx.lineTo(X(i),Y(b));ctx.stroke();}
   ctx.lineCap="butt";
-  const drawWall=(w,isUp)=>{if(!w)return;const y=Y(w[0]);if(y<y0||y>y1)return;
-    const col=isUp?"#ff6b6b":"#26c281";ctx.strokeStyle=col;ctx.lineWidth=1+2*(w[1]||0);
-    ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(x0,y);ctx.lineTo(x1,y);ctx.stroke();ctx.setLineDash([]);
-    ctx.fillStyle=col;ctx.font="9px sans-serif";ctx.textAlign="left";
-    ctx.fillText(Math.round(w[0]).toLocaleString(),x0+2,y-2);};
-  drawWall(wl.up,true); drawWall(wl.dn,false);
   ctx.textAlign="left";ctx.font="10px sans-serif";
   const subc=(getComputedStyle(document.body).getPropertyValue("--sub")||"#889").trim();
   ctx.fillStyle=subc;ctx.fillText(Math.round(hi).toLocaleString(),x1+3,y0+8);
