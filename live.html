@@ -163,7 +163,12 @@ function grpTag(t){return TAG[t]||'<span class="tag delay">D 지연</span>';}
 // 배포 허브(Cloudflare WebSocket). 비우면 data.json 폴링(로컬/깃허브).
 const HUB="https://brief-live-hub.emhwang3.workers.dev";  // Cloudflare WebSocket 허브
 try{var _vid=localStorage.getItem("brief_vid");if(!_vid){_vid=Date.now().toString(36)+Math.random().toString(36).slice(2,8);localStorage.setItem("brief_vid",_vid);}
-  if(HUB)fetch(HUB.replace(/\/$/,"")+"/hit?vid="+_vid,{mode:"no-cors"}).catch(function(){});}catch(e){}  // 방문 카운트
+  var _src="";try{_src=(new URLSearchParams(location.search)).get("src")||"";}catch(e){}
+  if(!_src){var _r=document.referrer||"";
+    if(/youtu/i.test(_r))_src="yt";else if(/x\.com|twitter|t\.co/i.test(_r))_src="x";
+    else if(/naver|blog/i.test(_r))_src="blog";else if(/kakao|kko|daum/i.test(_r))_src="kt";
+    else if(/telegram|t\.me/i.test(_r))_src="tg";else _src=_r?"ref":"direct";}
+  if(HUB)fetch(HUB.replace(/\/$/,"")+"/hit?vid="+_vid+"&src="+encodeURIComponent(_src),{mode:"no-cors"}).catch(function(){});}catch(e){}  // 방문 카운트+경로
 // ---- 언어(한/영) ----
 let LANG="ko"; try{LANG=localStorage.getItem("brief_lang")||"ko";}catch(e){}
 const NM={"국내":"KR Indices","미국 지수":"US Indices","미국 야간선물":"US Futures (Night)","아시아":"Asia",
