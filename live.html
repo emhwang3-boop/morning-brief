@@ -60,10 +60,12 @@ h1 .lv{color:#ff433d;font-size:12px;font-weight:800;vertical-align:super;margin-
 <div class="gauges" id="gauges"></div>
 <div id="cards"></div>
 
-<div class="card">
+<div class="card" id="coin-card">
   <h3>암호화폐 <span class="tag live">● 바이낸스</span></h3>
   <div id="coin"><div class="soonrow">불러오는 중…</div></div>
 </div>
+
+<div id="news"></div>
 
 <div class="foot" id="foot">국내 지수 = 코스콤 실시간(연동 예정) · 코인 = 바이낸스 실시간 · <b>D = 지연 시세</b><br>장중 실시간 브리핑 — 프로토타입</div>
 
@@ -100,49 +102,52 @@ function render(d){
       if(d.gauges.fg!=null)g+='<div class="stat"><div class="n" style="color:'+(d.gauges.fg>=75?"#ff433d":(d.gauges.fg<=25?"#00a868":"#e0a020"))+'">'+d.gauges.fg+'</div><div class="l">공포·탐욕</div></div>';
     }
     document.getElementById("gauges").innerHTML=g;
-    // 카드들
-    let h="";
+    // 카드 조각들(순서: 특이일 → 캘린더 → 주요자산막대 → 지수그룹 → 한국금리 → 장단기 → [코인] → 뉴스)
+    let sGroups="";
     for(const gr of d.groups){
       if(!gr.items.length)continue;
       const tag=gr.rt?'<span class="tag live">● 실시간</span>':'<span class="tag delay">D 지연</span>';
-      h+='<div class="card"><h3>'+gr.title+' '+tag+'</h3>'+gr.items.map(pcrow).join("")+'</div>';
+      sGroups+='<div class="card"><h3>'+gr.title+' '+tag+'</h3>'+gr.items.map(pcrow).join("")+'</div>';
     }
+    let sKrates="";
     if(d.krates&&d.krates.length){
-      h+='<div class="card"><h3>한국 금리 <span class="tag delay">D 지연</span></h3>'
+      sKrates='<div class="card"><h3>한국 금리 <span class="tag delay">D 지연</span></h3>'
         +d.krates.map(k=>{const c=k.chg>0?"up":(k.chg<0?"dn":"fl"),a=k.chg>0?"▲":(k.chg<0?"▼":"");
           return'<div class="row"><span class="nm">'+k.nm+'</span><span class="rt"><span class="val">'+k.val+'</span>'
           +'<span class="pc '+c+'">'+a+Math.abs(k.chg).toFixed(2)+'%p</span></span></div>';}).join("")+'</div>';
     }
+    let sSpreads="";
     if(d.spreads&&d.spreads.length){
-      h+='<div class="card"><h3>장단기 금리차이 <span style="color:var(--soon);font-weight:400;font-size:11px">음수=역전</span></h3>'
+      sSpreads='<div class="card"><h3>장단기 금리차이 <span style="color:var(--soon);font-weight:400;font-size:11px">음수=역전</span></h3>'
         +d.spreads.map(s=>'<div class="row"><span class="nm">'+s.nm+'</span><span class="rt"><span class="val">'+s.val+'</span>'
           +'<span class="pc '+(s.inv?"dn":"up")+'">'+(s.inv?"역전⚠":"정상")+'</span></span></div>').join("")+'</div>';
     }
-    // 주요 자산 막대
+    let sChanges="";
     if(d.changes&&d.changes.length){
       const mx=Math.max.apply(null,d.changes.map(c=>Math.abs(c.pct)).concat([1]));
-      h+='<div class="card"><h3>주요 자산 전일대비</h3>'+d.changes.map(c=>{
+      sChanges='<div class="card"><h3>주요 자산 전일대비</h3>'+d.changes.map(c=>{
         const up=c.pct>=0,half=Math.abs(c.pct)/mx*50,col=up?"#00a868":"#ff433d";
         const bar=up?'<span style="position:absolute;left:50%;top:0;height:11px;width:'+half+'%;background:'+col+';border-radius:0 3px 3px 0"></span>'
                     :'<span style="position:absolute;right:50%;top:0;height:11px;width:'+half+'%;background:'+col+';border-radius:3px 0 0 3px"></span>';
         return '<div class="brow"><span class="bn">'+c.nm+'</span><span class="bbar">'+bar+'</span>'
           +'<span class="bp" style="color:'+col+'">'+(up?"+":"")+c.pct.toFixed(2)+'%</span></div>';}).join("")+'</div>';
     }
-    // 국내 증시 특이일 (서버 special HTML 주입)
-    if(d.special)h+='<div class="card injh">'+d.special+'</div>';
-    // 경제지표 일정
+    let sSpecial=d.special?'<div class="card injh">'+d.special+'</div>':"";
+    let sCalendar="";
     if(d.calendar&&d.calendar.length){
-      h+='<div class="card"><h3>경제지표 일정 (오늘)</h3>'+d.calendar.map(c=>
+      sCalendar='<div class="card"><h3>경제지표 일정 (오늘)</h3>'+d.calendar.map(c=>
         '<div class="crow"><span class="ct">'+c.t+'</span><span class="cc">'+c.cc+'</span>'
         +'<span class="ci">'+c.title+'</span><span class="cd">'+c.imp+'</span></div>').join("")+'</div>';
     }
-    // 헤드라인 뉴스
+    let sNews="";
     if(d.news&&d.news.length){
-      h+='<div class="card"><h3>헤드라인 뉴스</h3>'+d.news.map(s=>
+      sNews='<div class="card"><h3>헤드라인 뉴스</h3>'+d.news.map(s=>
         '<div class="nhd">'+s.src+'</div>'+(s.items||[]).map(it=>
           '<a class="nrow" href="'+it.u+'" target="_blank" rel="noopener">'+it.t+'</a>').join("")).join("")+'</div>';
     }
-    document.getElementById("cards").innerHTML=h;
+    // 코인은 #coin-card(3초 갱신) 독립 슬롯 → #cards 는 장단기까지, #news 는 그 아래
+    document.getElementById("cards").innerHTML=sSpecial+sCalendar+sChanges+sGroups+sKrates+sSpreads;
+    document.getElementById("news").innerHTML=sNews;
   }
 }
 async function loadData(){
