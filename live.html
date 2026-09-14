@@ -195,7 +195,7 @@ function render(d){
     }
     let sKrates="";
     if(d.krates&&d.krates.length){
-      sKrates='<div class="card"><h3>'+L("krateH")+' <span class="tag delay">'+L("delay")+'</span></h3>'
+      sKrates='<div class="card"><h3>'+L("krateH")+' <span class="tag delay">'+(krLiveNow()?L("delay"):L("closed"))+'</span></h3>'
         +d.krates.map(k=>{const c=k.chg>0?"up":(k.chg<0?"dn":"fl"),a=k.chg>0?"▲":(k.chg<0?"▼":"");
           return'<div class="row"><span class="nm">'+tr(k.nm)+'</span><span class="rt">'+spark(k.spark)+'<span class="val">'+k.val+'</span>'
           +'<span class="pc '+c+'">'+a+Math.abs(k.chg).toFixed(2)+'%p</span></span></div>';}).join("")+'</div>';
