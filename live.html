@@ -86,6 +86,20 @@ h1 .lv{color:#ff433d;font-size:12px;font-weight:800;vertical-align:super;margin-
   <div id="stkChartLbl" class="stkcl" hidden></div>
 </div>
 
+<div class="card" id="coin2">
+  <h3>코인 조회 <span class="tag live">● 바이낸스</span></h3>
+  <input id="coinq" class="stkq" placeholder="코인 심볼 (예: BTC, ETH, SOL)" autocomplete="off">
+  <div id="coinResults" class="stkres"></div>
+  <div id="coinDetail"></div>
+  <div id="coinTf" class="stktf" hidden>
+    <button data-tf="3">3분</button><button data-tf="5">5분</button>
+    <button data-tf="15">15분</button><button data-tf="30">30분</button>
+    <button data-tf="60">60분</button><button data-tf="D" class="on">일</button>
+  </div>
+  <canvas id="coinChart" class="stkchart" hidden></canvas>
+  <div id="coinChartLbl" class="stkcl" hidden></div>
+</div>
+
 <div class="gauges" id="gauges"></div>
 <div id="cards"></div>
 
@@ -278,7 +292,7 @@ async function loadChart(){
   E("stkChartLbl").textContent="차트 불러오는 중…";
   const d=await krFetch("chart","code="+stkCode+"&tf="+stkTf,14);
   if(!d||!d.bars){E("stkChartLbl").textContent="차트 없음";return;}
-  setChart(d);
+  stkChart.setData(d);
   E("stkChartLbl").textContent="헐 리본 HMA"+d.hl+" · SMA"+d.gate+" · 밀어서 과거·핀치 확대";
 }
 document.querySelectorAll("#stkTf button").forEach(b=>b.onclick=()=>{
@@ -286,82 +300,160 @@ document.querySelectorAll("#stkTf button").forEach(b=>b.onclick=()=>{
   document.querySelectorAll("#stkTf button").forEach(x=>x.classList.toggle("on",x===b));
   loadChart();
 });
-// ---- 인터랙티브 헐 차트 (팬/줌·십자선·측정자·지지저항) ----
-let CH=null, VIEW={start:0,count:120}, CROSS=null, GEO=null;
+// ---- 공용 헐 차트 엔진 (팬/줌·십자선, 옵션: 지지저항·미결제약정) ----
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-function setChart(d){
-  CH=d; const N=d.bars.length;
-  VIEW.count=Math.min(120,N||1); VIEW.start=Math.max(0,N-VIEW.count);
-  CROSS=null; drawChart();
-}
-function drawChart(){
-  const cv=E("stkChart"); if(!CH||!CH.bars.length)return;
-  const bars=CH.bars,hma=CH.hma,sma=CH.sma,N=bars.length,W=cv.clientWidth,H=cv.clientHeight;
-  const dpr=window.devicePixelRatio||1; cv.width=W*dpr; cv.height=H*dpr;
-  const ctx=cv.getContext("2d"); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,W,H);
-  let cnt=clamp(Math.round(VIEW.count),20,N), start=clamp(Math.round(VIEW.start),0,Math.max(0,N-cnt));
-  VIEW.count=cnt; VIEW.start=start; const end=start+cnt;
-  const x0=6,x1=W-54,y0=8,y1=H-16, cur=bars[N-1][4];
-  let lo=Infinity,hi=-Infinity;
-  for(let i=start;i<end;i++){lo=Math.min(lo,bars[i][3]);hi=Math.max(hi,bars[i][2]);
-    for(const a of [hma,sma]){const v=a[i];if(v!=null){lo=Math.min(lo,v);hi=Math.max(hi,v);}}}
-  if(!(hi>lo))hi=lo+1; const pd=(hi-lo)*0.06; lo-=pd; hi+=pd;
-  const X=i=>x0+(x1-x0)*(cnt<=1?0.5:(i-start)/(cnt-1)), Y=v=>y1-(y1-y0)*(v-lo)/(hi-lo);
-  GEO={x0,x1,y0,y1,start,cnt,lo,hi,N};
-  const cw=Math.max(1,(x1-x0)/cnt*0.62);
-  for(let i=start;i<end;i++){const b=bars[i],up=b[4]>=b[1],col=up?"#00a868":"#ff433d",xc=X(i);
-    ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=1;
-    ctx.beginPath();ctx.moveTo(xc,Y(b[2]));ctx.lineTo(xc,Y(b[3]));ctx.stroke();
-    const yo=Y(b[1]),yc=Y(b[4]);ctx.fillRect(xc-cw/2,Math.min(yo,yc),cw,Math.max(1,Math.abs(yc-yo)));}
-  ctx.strokeStyle="#8a93a3";ctx.lineWidth=1.3;ctx.beginPath();let st=false;
-  for(let i=start;i<end;i++){const v=sma[i];if(v==null){st=false;continue;}const xx=X(i),yy=Y(v);if(!st){ctx.moveTo(xx,yy);st=true;}else ctx.lineTo(xx,yy);}ctx.stroke();
-  ctx.lineWidth=2.6;ctx.lineCap="round";
-  for(let i=Math.max(start,1);i<end;i++){const a=hma[i-1],b=hma[i];if(a==null||b==null)continue;
-    const ref=hma[i-2],up=(ref!=null)?(b>ref):(b>=a);ctx.strokeStyle=up?"#00c853":"#ff433d";
-    ctx.beginPath();ctx.moveTo(X(i-1),Y(a));ctx.lineTo(X(i),Y(b));ctx.stroke();}
-  ctx.lineCap="butt";
-  ctx.textAlign="left";ctx.font="10px sans-serif";
-  const subc=(getComputedStyle(document.body).getPropertyValue("--sub")||"#889").trim();
-  ctx.fillStyle=subc;ctx.fillText(Math.round(hi).toLocaleString(),x1+3,y0+8);
-  ctx.fillText(Math.round(lo).toLocaleString(),x1+3,y1);
-  ctx.fillStyle="#5db4ff";ctx.fillText(Math.round(cur).toLocaleString(),x1+3,clamp(Y(cur),y0+8,y1));
-  if(CROSS!=null){const ci=clamp(CROSS.i,start,end-1),xc=X(ci),b=bars[ci];
-    ctx.strokeStyle="rgba(140,150,170,0.75)";ctx.lineWidth=0.7;ctx.setLineDash([3,3]);
-    ctx.beginPath();ctx.moveTo(xc,y0);ctx.lineTo(xc,y1);ctx.stroke();
-    if(CROSS.py!=null){ctx.beginPath();ctx.moveTo(x0,CROSS.py);ctx.lineTo(x1,CROSS.py);ctx.stroke();}
-    ctx.setLineDash([]);
-    ctx.fillStyle="#0b1220";ctx.fillRect(xc-38,y1+1,76,13);ctx.fillStyle="#cfd6e0";ctx.font="9px sans-serif";ctx.textAlign="center";ctx.fillText(b[0],xc,y1+11);
-    if(CROSS.py!=null){const pv=lo+(y1-CROSS.py)/(y1-y0)*(hi-lo);
-      ctx.fillStyle="#0b1220";ctx.fillRect(x1+1,CROSS.py-7,53,14);ctx.fillStyle="#5db4ff";ctx.textAlign="left";ctx.fillText(Math.round(pv).toLocaleString(),x1+3,CROSS.py+3);}
-    ctx.fillStyle=subc;ctx.textAlign="left";ctx.font="10px sans-serif";
-    ctx.fillText("시"+Math.round(b[1]).toLocaleString()+" 고"+Math.round(b[2]).toLocaleString()+" 저"+Math.round(b[3]).toLocaleString()+" 종"+Math.round(b[4]).toLocaleString(),x0+2,y0+9);}
-}
-(function(){
-  const cv=E("stkChart"); if(!cv)return;
+function jwma(v,n){const out=new Array(v.length).fill(null),den=n*(n+1)/2;
+  for(let i=n-1;i<v.length;i++){let s=0,ok=true;for(let k=0;k<n;k++){const x=v[i-n+1+k];if(x==null){ok=false;break;}s+=x*(k+1);}if(ok)out[i]=s/den;}return out;}
+function jhma(v,L){const h=Math.floor(L/2),r=Math.round(Math.sqrt(L)),w1=jwma(v,h),w2=jwma(v,L);
+  const raw=v.map((_,i)=>(w1[i]!=null&&w2[i]!=null)?2*w1[i]-w2[i]:null);return jwma(raw,r);}
+function jsma(v,w){const out=new Array(v.length).fill(null);let s=0;for(let i=0;i<v.length;i++){s+=v[i];if(i>=w)s-=v[i-w];if(i>=w-1)out[i]=s/w;}return out;}
+function jwalls(raw,cur){const seg=raw.slice(-240).filter(b=>b[4]>0);if(seg.length<20||cur<=0)return{up:null,dn:null};
+  let lo=Math.min.apply(null,seg.map(b=>b[3])),hi=Math.max.apply(null,seg.map(b=>b[2]));if(hi<=lo)return{up:null,dn:null};
+  const bins=24,step=(hi-lo)/bins,vol=new Array(bins).fill(0);
+  for(const b of seg){const v=b[5]||0;if(v<=0)continue;let k=Math.floor(((b[2]+b[3]+b[4])/3-lo)/step);k=clamp(k,0,bins-1);vol[k]+=v;}
+  const mx=Math.max.apply(null,vol)||1,peaks=[];
+  for(let i=1;i<bins-1;i++)if(vol[i]>vol[i-1]&&vol[i]>vol[i+1]&&vol[i]>0)peaks.push([lo+step*(i+0.5),vol[i]/mx]);
+  const up=peaks.filter(p=>p[0]>cur),dn=peaks.filter(p=>p[0]<cur);
+  return{up:up.length?up.reduce((a,b)=>a[0]<b[0]?a:b):null,dn:dn.length?dn.reduce((a,b)=>a[0]>b[0]?a:b):null};}
+function makeChart(cid,opt){
+  opt=opt||{}; const cv=E(cid); const NF=opt.fmt||(v=>Math.round(v).toLocaleString());
+  let CH=null,VIEW={start:0,count:120},CROSS=null,GEO=null;
+  function setData(d){CH=d;const N=d.bars.length;VIEW.count=Math.min(120,N||1);VIEW.start=Math.max(0,N-VIEW.count);CROSS=null;draw();}
+  function draw(){
+    if(!CH||!CH.bars.length)return;
+    const bars=CH.bars,hma=CH.hma,sma=CH.sma,N=bars.length,W=cv.clientWidth,H=cv.clientHeight;
+    const dpr=window.devicePixelRatio||1;cv.width=W*dpr;cv.height=H*dpr;
+    const ctx=cv.getContext("2d");ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);
+    let cnt=clamp(Math.round(VIEW.count),20,N),start=clamp(Math.round(VIEW.start),0,Math.max(0,N-cnt));
+    VIEW.count=cnt;VIEW.start=start;const end=start+cnt,cur=bars[N-1][4];
+    const oiOn=opt.oi&&CH.oi&&CH.oi.slice(start,end).some(v=>v!=null);
+    const x0=6,x1=W-56,y0=8,yEnd=H-16,yP=oiOn?y0+(yEnd-y0)*0.70:yEnd,oiTop=yP+8,oiBot=yEnd;
+    let lo=Infinity,hi=-Infinity;
+    for(let i=start;i<end;i++){lo=Math.min(lo,bars[i][3]);hi=Math.max(hi,bars[i][2]);
+      for(const a of [hma,sma]){const v=a[i];if(v!=null){lo=Math.min(lo,v);hi=Math.max(hi,v);}}}
+    if(opt.walls&&CH.walls)for(const w of [CH.walls.up,CH.walls.dn])if(w&&Math.abs(w[0]/cur-1)<0.35){lo=Math.min(lo,w[0]);hi=Math.max(hi,w[0]);}
+    if(!(hi>lo))hi=lo+1;const pd=(hi-lo)*0.06;lo-=pd;hi+=pd;
+    const X=i=>x0+(x1-x0)*(cnt<=1?0.5:(i-start)/(cnt-1)),Y=v=>yP-(yP-y0)*(v-lo)/(hi-lo);
+    GEO={x0,x1,y0,yEnd,start,cnt,N};
+    const cw=Math.max(1,(x1-x0)/cnt*0.62);
+    for(let i=start;i<end;i++){const b=bars[i],up=b[4]>=b[1],col=up?"#00a868":"#ff433d",xc=X(i);
+      ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(xc,Y(b[2]));ctx.lineTo(xc,Y(b[3]));ctx.stroke();
+      const yo=Y(b[1]),yc=Y(b[4]);ctx.fillRect(xc-cw/2,Math.min(yo,yc),cw,Math.max(1,Math.abs(yc-yo)));}
+    ctx.strokeStyle="#8a93a3";ctx.lineWidth=1.3;ctx.beginPath();let s2=false;
+    for(let i=start;i<end;i++){const v=sma[i];if(v==null){s2=false;continue;}const xx=X(i),yy=Y(v);if(!s2){ctx.moveTo(xx,yy);s2=true;}else ctx.lineTo(xx,yy);}ctx.stroke();
+    ctx.lineWidth=2.6;ctx.lineCap="round";
+    for(let i=Math.max(start,1);i<end;i++){const a=hma[i-1],b=hma[i];if(a==null||b==null)continue;
+      const ref=hma[i-2],up=(ref!=null)?(b>ref):(b>=a);ctx.strokeStyle=up?"#00c853":"#ff433d";
+      ctx.beginPath();ctx.moveTo(X(i-1),Y(a));ctx.lineTo(X(i),Y(b));ctx.stroke();}
+    ctx.lineCap="butt";
+    if(opt.walls&&CH.walls){const dw=(w,isUp)=>{if(!w)return;const y=Y(w[0]);if(y<y0||y>yP)return;
+      const col=isUp?"#ff6b6b":"#26c281";ctx.strokeStyle=col;ctx.lineWidth=1+2*(w[1]||0);
+      ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(x0,y);ctx.lineTo(x1,y);ctx.stroke();ctx.setLineDash([]);
+      ctx.fillStyle=col;ctx.font="9px sans-serif";ctx.textAlign="left";ctx.fillText(NF(w[0]),x0+2,y-2);};
+      dw(CH.walls.up,true);dw(CH.walls.dn,false);}
+    const subc=(getComputedStyle(document.body).getPropertyValue("--sub")||"#889").trim();
+    ctx.textAlign="left";ctx.font="10px sans-serif";ctx.fillStyle=subc;
+    ctx.fillText(NF(hi),x1+3,y0+8);ctx.fillText(NF(lo),x1+3,yP);
+    ctx.fillStyle="#5db4ff";ctx.fillText(NF(cur),x1+3,clamp(Y(cur),y0+8,yP));
+    if(oiOn){let olo=Infinity,ohi=-Infinity;for(let i=start;i<end;i++){const v=CH.oi[i];if(v!=null){olo=Math.min(olo,v);ohi=Math.max(ohi,v);}}
+      if(!(ohi>olo))ohi=olo+1;const OY=v=>oiBot-(oiBot-oiTop)*(v-olo)/(ohi-olo);
+      ctx.strokeStyle="rgba(140,150,170,0.25)";ctx.lineWidth=0.6;ctx.beginPath();ctx.moveTo(x0,yP+3);ctx.lineTo(x1,yP+3);ctx.stroke();
+      ctx.strokeStyle="#d1a52e";ctx.lineWidth=1.5;ctx.beginPath();let os=false;
+      for(let i=start;i<end;i++){const v=CH.oi[i];if(v==null){os=false;continue;}const xx=X(i),yy=OY(v);if(!os){ctx.moveTo(xx,yy);os=true;}else ctx.lineTo(xx,yy);}ctx.stroke();
+      ctx.fillStyle="#d1a52e";ctx.font="9px sans-serif";ctx.textAlign="left";ctx.fillText("미결제약정",x0+2,oiTop+8);}
+    if(CROSS!=null){const ci=clamp(CROSS.i,start,end-1),xc=X(ci),b=bars[ci];
+      ctx.strokeStyle="rgba(140,150,170,0.75)";ctx.lineWidth=0.7;ctx.setLineDash([3,3]);
+      ctx.beginPath();ctx.moveTo(xc,y0);ctx.lineTo(xc,yEnd);ctx.stroke();
+      if(CROSS.py!=null&&CROSS.py<=yP){ctx.beginPath();ctx.moveTo(x0,CROSS.py);ctx.lineTo(x1,CROSS.py);ctx.stroke();}
+      ctx.setLineDash([]);
+      ctx.fillStyle="#0b1220";ctx.fillRect(xc-40,yEnd+1,80,13);ctx.fillStyle="#cfd6e0";ctx.font="9px sans-serif";ctx.textAlign="center";ctx.fillText(b[0],xc,yEnd+11);
+      if(CROSS.py!=null&&CROSS.py<=yP){const pv=lo+(yP-CROSS.py)/(yP-y0)*(hi-lo);
+        ctx.fillStyle="#0b1220";ctx.fillRect(x1+1,CROSS.py-7,55,14);ctx.fillStyle="#5db4ff";ctx.textAlign="left";ctx.fillText(NF(pv),x1+3,CROSS.py+3);}
+      ctx.fillStyle=subc;ctx.textAlign="left";ctx.font="10px sans-serif";
+      ctx.fillText("시"+NF(b[1])+" 고"+NF(b[2])+" 저"+NF(b[3])+" 종"+NF(b[4]),x0+2,y0+9);}
+  }
   let down=false,sx=0,sStart=0,pinch=null;
   const rel=(e)=>{const r=cv.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return{x:t.clientX-r.left,y:t.clientY-r.top};};
   const idxAt=(px)=>GEO?clamp(Math.round(GEO.start+(px-GEO.x0)/(GEO.x1-GEO.x0)*(GEO.cnt-1)),0,GEO.N-1):0;
   const barW=()=>GEO?(GEO.x1-GEO.x0)/GEO.cnt:1;
   cv.addEventListener("mousemove",e=>{if(!CH)return;const p=rel(e);
     if(down){VIEW.start=clamp(sStart-Math.round((p.x-sx)/barW()),0,CH.bars.length-VIEW.count);}
-    CROSS={i:idxAt(p.x),py:p.y};drawChart();});
+    CROSS={i:idxAt(p.x),py:p.y};draw();});
   cv.addEventListener("mousedown",e=>{if(e.button!==0)return;const p=rel(e);down=true;sx=p.x;sStart=VIEW.start;});
   window.addEventListener("mouseup",()=>{down=false;});
-  cv.addEventListener("mouseleave",()=>{down=false;CROSS=null;drawChart();});
+  cv.addEventListener("mouseleave",()=>{down=false;CROSS=null;draw();});
   cv.addEventListener("wheel",e=>{if(!CH)return;e.preventDefault();const p=rel(e),N=CH.bars.length;
     const f=e.deltaY>0?1.18:1/1.18,nc=clamp(Math.round(VIEW.count*f),20,N),ci=idxAt(p.x),frac=(ci-VIEW.start)/VIEW.count;
-    VIEW.start=clamp(Math.round(ci-frac*nc),0,N-nc);VIEW.count=nc;drawChart();},{passive:false});
+    VIEW.start=clamp(Math.round(ci-frac*nc),0,N-nc);VIEW.count=nc;draw();},{passive:false});
   cv.addEventListener("touchstart",e=>{if(!CH)return;
     if(e.touches.length===2){pinch={d:Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY),c:VIEW.count};down=false;return;}
-    const p=rel(e);down=true;sx=p.x;sStart=VIEW.start;CROSS={i:idxAt(p.x),py:p.y};drawChart();},{passive:false});
+    const p=rel(e);down=true;sx=p.x;sStart=VIEW.start;CROSS={i:idxAt(p.x),py:p.y};draw();},{passive:false});
   cv.addEventListener("touchmove",e=>{if(!CH)return;e.preventDefault();
     if(e.touches.length===2&&pinch){const nd=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
-      const N=CH.bars.length,nc=clamp(Math.round(pinch.c*pinch.d/Math.max(1,nd)),20,N),e0=VIEW.start+VIEW.count;VIEW.count=nc;VIEW.start=clamp(e0-nc,0,N-nc);drawChart();return;}
-    const p=rel(e);
-    if(down){VIEW.start=clamp(sStart-Math.round((p.x-sx)/barW()),0,CH.bars.length-VIEW.count);}
-    CROSS={i:idxAt(p.x),py:p.y};drawChart();},{passive:false});
+      const N=CH.bars.length,nc=clamp(Math.round(pinch.c*pinch.d/Math.max(1,nd)),20,N),e0=VIEW.start+VIEW.count;VIEW.count=nc;VIEW.start=clamp(e0-nc,0,N-nc);draw();return;}
+    const p=rel(e);if(down){VIEW.start=clamp(sStart-Math.round((p.x-sx)/barW()),0,CH.bars.length-VIEW.count);}
+    CROSS={i:idxAt(p.x),py:p.y};draw();},{passive:false});
   cv.addEventListener("touchend",()=>{down=false;pinch=null;});
-})();
+  return {setData};
+}
+const coinFmt=v=>v>=1000?Math.round(v).toLocaleString():(v>=1?v.toFixed(2):(+v.toPrecision(4)).toString());
+const stkChart=makeChart("stkChart",{});
+const coinChart=makeChart("coinChart",{walls:true,oi:true,fmt:coinFmt});
+
+// ---- 코인 조회 (바이낸스, 클라이언트) ----
+let coinSym=null, coinTf="D", coinTimer=null, coinSearchTimer=null, coinList=null, coinLast=[];
+function coinFmtTime(ms,tf){const d=new Date(ms),p=n=>String(n).padStart(2,"0"),md=p(d.getMonth()+1)+"/"+p(d.getDate());
+  return tf==="D"?md:md+" "+p(d.getHours())+":"+p(d.getMinutes());}
+async function coinSyms(){
+  if(coinList)return coinList;
+  try{const ei=await fetch("https://api.binance.com/api/v3/exchangeInfo").then(r=>r.json());
+    coinList=ei.symbols.filter(s=>s.quoteAsset==="USDT"&&s.status==="TRADING").map(s=>s.baseAsset);}catch(e){coinList=[];}
+  return coinList;
+}
+E("coinq").addEventListener("input",function(){clearTimeout(coinSearchTimer);const q=this.value.trim().toUpperCase();
+  if(q.length<1){E("coinResults").innerHTML="";coinLast=[];return;}
+  coinSearchTimer=setTimeout(async()=>{const all=await coinSyms();
+    const rows=all.filter(b=>b.startsWith(q)).slice(0,20).map(b=>({sym:b+"USDT",name:b}));coinLast=rows;
+    E("coinResults").innerHTML=rows.map(r=>'<a onclick="pickCoin(\''+r.sym+'\',\''+r.name+'\')"><span>'+r.name+'</span><span class="c">'+r.sym+'</span></a>').join("")||'<div class="soonrow">결과 없음</div>';
+  },300);
+});
+E("coinq").addEventListener("keydown",function(e){if(e.key==="Enter"&&coinLast.length){pickCoin(coinLast[0].sym,coinLast[0].name);this.blur();}});
+function pickCoin(sym,name){coinSym=sym;E("coinResults").innerHTML="";E("coinq").value=name+" ("+sym+")";
+  E("coinTf").hidden=false;E("coinChart").hidden=false;E("coinChartLbl").hidden=false;
+  E("coinDetail").innerHTML='<div class="soonrow">불러오는 중…</div>';
+  loadCoinDetail();loadCoin2Chart();clearInterval(coinTimer);coinTimer=setInterval(loadCoinDetail,3000);}
+async function loadCoinDetail(){if(!coinSym)return;
+  try{const d=await fetch("https://api.binance.com/api/v3/ticker/24hr?symbol="+coinSym).then(r=>r.json());
+    const p=parseFloat(d.priceChangePercent),cls=p>0?"up":(p<0?"dn":"fl"),arw=p>0?"▲":(p<0?"▼":"");
+    E("coinDetail").innerHTML='<div class="stkhd">'+coinSym.replace("USDT","")+' <span style="color:var(--sub);font-size:13px;font-weight:600">'+coinSym+'</span></div>'
+     +'<table class="stktab">'
+     +'<tr><td class="k">현재가</td><td class="v">$'+coinFmt(+d.lastPrice)+'</td></tr>'
+     +'<tr><td class="k">24시간 변동율</td><td class="v '+cls+'">'+arw+Math.abs(p).toFixed(2)+'%</td></tr>'
+     +'<tr><td class="k">거래량(24h)</td><td class="v">'+Math.round(+d.volume).toLocaleString()+'</td></tr>'
+     +'<tr><td class="k">거래대금(24h)</td><td class="v">$'+Math.round(+d.quoteVolume).toLocaleString()+'</td></tr>'
+     +'</table>';
+  }catch(e){}
+}
+document.querySelectorAll("#coinTf button").forEach(b=>b.onclick=()=>{coinTf=b.dataset.tf;
+  document.querySelectorAll("#coinTf button").forEach(x=>x.classList.toggle("on",x===b));loadCoin2Chart();});
+async function loadCoin2Chart(){if(!coinSym)return;E("coinChartLbl").textContent="차트 불러오는 중…";
+  const iv={"3":"3m","5":"5m","15":"15m","30":"30m","60":"1h","D":"1d"}[coinTf]||"1d";
+  let kl;try{kl=await fetch("https://api.binance.com/api/v3/klines?symbol="+coinSym+"&interval="+iv+"&limit=400").then(r=>r.json());}catch(e){E("coinChartLbl").textContent="차트 없음";return;}
+  if(!Array.isArray(kl)||!kl.length){E("coinChartLbl").textContent="차트 없음";return;}
+  const bars=kl.map(c=>[coinFmtTime(c[0],coinTf),+c[1],+c[2],+c[3],+c[4]]);
+  const raw=kl.map(c=>[c[0],+c[1],+c[2],+c[3],+c[4],+c[7]]);
+  const closes=bars.map(b=>b[4]),cur=closes[closes.length-1];
+  const hma=jhma(closes,55),sma=jsma(closes,60),walls=jwalls(raw,cur);
+  let oi=null;
+  try{const per={"3":"5m","5":"5m","15":"15m","30":"30m","60":"1h","D":"1d"}[coinTf]||"1d";
+    const oh=await fetch("https://fapi.binance.com/futures/data/openInterestHist?symbol="+coinSym+"&period="+per+"&limit=400").then(r=>r.json());
+    if(Array.isArray(oh)&&oh.length){const os=oh.map(o=>[o.timestamp,+o.sumOpenInterest]);
+      oi=kl.map(c=>{const t=c[0];let best=null,bd=Infinity;for(const s of os){const dd=Math.abs(s[0]-t);if(dd<bd){bd=dd;best=s[1];}}return best;});}
+  }catch(e){}
+  coinChart.setData({bars,hma,sma,hl:55,gate:60,walls,oi});
+  E("coinChartLbl").textContent="헐 리본 HMA55 · SMA60 · 빨강=저항 초록=지지"+(oi?" · 아래=미결제약정":"")+" · 밀어서 과거·핀치";
+}
 
 // ---- 시계 · 테마 ----
 function tick(){const d=new Date();document.getElementById("clk").textContent=
