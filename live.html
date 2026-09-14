@@ -153,7 +153,9 @@ function render(d){
     let sGroups="";
     for(const gr of d.groups){
       if(!gr.items.length)continue;
-      const tag=gr.rt?'<span class="tag live">● 실시간</span>':'<span class="tag delay">D 지연</span>';
+      let live=gr.rt;
+      if(gr.title==="국내")live=krLiveNow();   // 국내 지수는 평일 08~20시만 실시간(그 외 장마감)
+      const tag=live?'<span class="tag live">● 실시간</span>':'<span class="tag delay">장마감</span>';
       sGroups+='<div class="card"><h3>'+gr.title+' '+tag+'</h3>'+gr.items.map(pcrow).join("")+'</div>';
     }
     let sKrates="";
@@ -470,8 +472,9 @@ function tick(){const d=new Date();document.getElementById("clk").textContent=
   d.toLocaleTimeString("ko-KR",{hour12:false});}
 tick();setInterval(tick,1000);
 // 종목 실시간 태그 — 정규장(평일 09:00~15:30 KST)만 켠다. 그 외엔 지연.
-function updStkTag(){const k=new Date(Date.now()+new Date().getTimezoneOffset()*60000+324e5);
-  const wd=k.getDay()>=1&&k.getDay()<=5,m=k.getHours()*60+k.getMinutes(),live=wd&&m>=480&&m<1200; // 08:00~20:00
+function krLiveNow(){const k=new Date(Date.now()+new Date().getTimezoneOffset()*60000+324e5);
+  const m=k.getHours()*60+k.getMinutes();return k.getDay()>=1&&k.getDay()<=5&&m>=480&&m<1200;} // 평일 08:00~20:00
+function updStkTag(){const live=krLiveNow();
   const el=E("stkTag");if(el){el.className="tag "+(live?"live":"delay");el.textContent=live?"● 실시간":"지연(장마감)";}}
 updStkTag();setInterval(updStkTag,20000);
 function apply(t){document.body.classList.toggle("light",t==="light");document.getElementById("tg").textContent=t==="light"?"☀️":"🌙";}
