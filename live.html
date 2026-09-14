@@ -279,7 +279,7 @@ async function loadChart(){
   const d=await krFetch("chart","code="+stkCode+"&tf="+stkTf,14);
   if(!d||!d.bars){E("stkChartLbl").textContent="차트 없음";return;}
   setChart(d);
-  E("stkChartLbl").textContent="헐 리본 HMA"+d.hl+" · SMA"+d.gate+" · 빨강선=저항 초록선=지지 · 밀어서 과거 · 우클릭/길게=측정자";
+  E("stkChartLbl").textContent="헐 리본 HMA"+d.hl+" · SMA"+d.gate+" · 빨강=저항 초록=지지 · 밀어서 과거·핀치 확대";
 }
 document.querySelectorAll("#stkTf button").forEach(b=>b.onclick=()=>{
   stkTf=b.dataset.tf;
@@ -287,12 +287,12 @@ document.querySelectorAll("#stkTf button").forEach(b=>b.onclick=()=>{
   loadChart();
 });
 // ---- 인터랙티브 헐 차트 (팬/줌·십자선·측정자·지지저항) ----
-let CH=null, VIEW={start:0,count:120}, CROSS=null, RULER=null, GEO=null;
+let CH=null, VIEW={start:0,count:120}, CROSS=null, GEO=null;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 function setChart(d){
   CH=d; const N=d.bars.length;
   VIEW.count=Math.min(120,N||1); VIEW.start=Math.max(0,N-VIEW.count);
-  CROSS=null; RULER=null; drawChart();
+  CROSS=null; drawChart();
 }
 function drawChart(){
   const cv=E("stkChart"); if(!CH||!CH.bars.length)return;
@@ -325,21 +325,14 @@ function drawChart(){
   const drawWall=(w,isUp)=>{if(!w)return;const y=Y(w[0]);if(y<y0||y>y1)return;
     const col=isUp?"#ff6b6b":"#26c281";ctx.strokeStyle=col;ctx.lineWidth=1+2*(w[1]||0);
     ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(x0,y);ctx.lineTo(x1,y);ctx.stroke();ctx.setLineDash([]);
-    ctx.fillStyle=col;ctx.font="9px sans-serif";ctx.textAlign="right";
-    const pc=(w[0]/cur-1)*100;
-    ctx.fillText((isUp?"저항 ":"지지 ")+Math.round(w[0]).toLocaleString()+" ("+(pc>=0?"+":"")+pc.toFixed(1)+"%)",x1-2,y-2);};
+    ctx.fillStyle=col;ctx.font="9px sans-serif";ctx.textAlign="left";
+    ctx.fillText(Math.round(w[0]).toLocaleString(),x0+2,y-2);};
   drawWall(wl.up,true); drawWall(wl.dn,false);
   ctx.textAlign="left";ctx.font="10px sans-serif";
   const subc=(getComputedStyle(document.body).getPropertyValue("--sub")||"#889").trim();
   ctx.fillStyle=subc;ctx.fillText(Math.round(hi).toLocaleString(),x1+3,y0+8);
   ctx.fillText(Math.round(lo).toLocaleString(),x1+3,y1);
   ctx.fillStyle="#5db4ff";ctx.fillText(Math.round(cur).toLocaleString(),x1+3,clamp(Y(cur),y0+8,y1));
-  if(RULER!=null&&CROSS!=null){const i0=clamp(RULER,start,end-1),i1=clamp(CROSS.i,start,end-1);
-    const xa=X(i0),xb=X(i1);ctx.fillStyle="rgba(93,180,255,0.12)";ctx.fillRect(Math.min(xa,xb),y0,Math.abs(xb-xa),y1-y0);
-    const c0=bars[i0][4],c1=bars[i1][4],dp=c1-c0,pct=(c1/c0-1)*100,nb=Math.abs(i1-i0);
-    ctx.strokeStyle="#5db4ff";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(xa,Y(c0));ctx.lineTo(xb,Y(c1));ctx.stroke();
-    ctx.fillStyle="#5db4ff";ctx.font="10px sans-serif";ctx.textAlign="left";
-    ctx.fillText((pct>=0?"+":"")+pct.toFixed(2)+"% / "+(dp>=0?"+":"")+Math.round(dp).toLocaleString()+" / "+nb+"봉",Math.min(xa,xb)+4,y0+22);}
   if(CROSS!=null){const ci=clamp(CROSS.i,start,end-1),xc=X(ci),b=bars[ci];
     ctx.strokeStyle="rgba(140,150,170,0.75)";ctx.lineWidth=0.7;ctx.setLineDash([3,3]);
     ctx.beginPath();ctx.moveTo(xc,y0);ctx.lineTo(xc,y1);ctx.stroke();
@@ -353,7 +346,7 @@ function drawChart(){
 }
 (function(){
   const cv=E("stkChart"); if(!cv)return;
-  let down=false,sx=0,sStart=0,lpTimer=null,pinch=null;
+  let down=false,sx=0,sStart=0,pinch=null;
   const rel=(e)=>{const r=cv.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return{x:t.clientX-r.left,y:t.clientY-r.top};};
   const idxAt=(px)=>GEO?clamp(Math.round(GEO.start+(px-GEO.x0)/(GEO.x1-GEO.x0)*(GEO.cnt-1)),0,GEO.N-1):0;
   const barW=()=>GEO?(GEO.x1-GEO.x0)/GEO.cnt:1;
@@ -366,18 +359,16 @@ function drawChart(){
   cv.addEventListener("wheel",e=>{if(!CH)return;e.preventDefault();const p=rel(e),N=CH.bars.length;
     const f=e.deltaY>0?1.18:1/1.18,nc=clamp(Math.round(VIEW.count*f),20,N),ci=idxAt(p.x),frac=(ci-VIEW.start)/VIEW.count;
     VIEW.start=clamp(Math.round(ci-frac*nc),0,N-nc);VIEW.count=nc;drawChart();},{passive:false});
-  cv.addEventListener("contextmenu",e=>{e.preventDefault();RULER=(RULER!=null)?null:(CROSS?CROSS.i:(GEO?GEO.start+GEO.cnt-1:0));drawChart();});
   cv.addEventListener("touchstart",e=>{if(!CH)return;
-    if(e.touches.length===2){pinch={d:Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY),c:VIEW.count};if(lpTimer)clearTimeout(lpTimer);lpTimer=null;down=false;return;}
-    const p=rel(e);down=true;sx=p.x;sStart=VIEW.start;CROSS={i:idxAt(p.x),py:p.y};drawChart();
-    lpTimer=setTimeout(()=>{RULER=(RULER!=null)?null:idxAt(p.x);drawChart();},500);},{passive:false});
+    if(e.touches.length===2){pinch={d:Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY),c:VIEW.count};down=false;return;}
+    const p=rel(e);down=true;sx=p.x;sStart=VIEW.start;CROSS={i:idxAt(p.x),py:p.y};drawChart();},{passive:false});
   cv.addEventListener("touchmove",e=>{if(!CH)return;e.preventDefault();
     if(e.touches.length===2&&pinch){const nd=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
       const N=CH.bars.length,nc=clamp(Math.round(pinch.c*pinch.d/Math.max(1,nd)),20,N),e0=VIEW.start+VIEW.count;VIEW.count=nc;VIEW.start=clamp(e0-nc,0,N-nc);drawChart();return;}
-    const p=rel(e);if(Math.abs(p.x-sx)>8&&lpTimer){clearTimeout(lpTimer);lpTimer=null;}
+    const p=rel(e);
     if(down){VIEW.start=clamp(sStart-Math.round((p.x-sx)/barW()),0,CH.bars.length-VIEW.count);}
     CROSS={i:idxAt(p.x),py:p.y};drawChart();},{passive:false});
-  cv.addEventListener("touchend",()=>{down=false;pinch=null;if(lpTimer)clearTimeout(lpTimer);lpTimer=null;});
+  cv.addEventListener("touchend",()=>{down=false;pinch=null;});
 })();
 
 // ---- 시계 · 테마 ----
