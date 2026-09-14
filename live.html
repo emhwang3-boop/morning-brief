@@ -134,6 +134,8 @@ function grpTag(t){return TAG[t]||'<span class="tag delay">D 지연</span>';}
 
 // 배포 허브(Cloudflare WebSocket). 비우면 data.json 폴링(로컬/깃허브).
 const HUB="https://brief-live-hub.emhwang3.workers.dev";  // Cloudflare WebSocket 허브
+try{var _vid=localStorage.getItem("brief_vid");if(!_vid){_vid=Date.now().toString(36)+Math.random().toString(36).slice(2,8);localStorage.setItem("brief_vid",_vid);}
+  if(HUB)fetch(HUB.replace(/\/$/,"")+"/hit?vid="+_vid,{mode:"no-cors"}).catch(function(){});}catch(e){}  // 방문 카운트
 function render(d){
   {
     document.getElementById("asof").textContent=d.asof+" 기준"+(d.__snap?" · 스냅샷":"");
