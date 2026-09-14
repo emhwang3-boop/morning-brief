@@ -469,7 +469,7 @@ function tick(){const d=new Date();document.getElementById("clk").textContent=
 tick();setInterval(tick,1000);
 // 종목 실시간 태그 — 정규장(평일 09:00~15:30 KST)만 켠다. 그 외엔 지연.
 function updStkTag(){const k=new Date(Date.now()+new Date().getTimezoneOffset()*60000+324e5);
-  const wd=k.getDay()>=1&&k.getDay()<=5,m=k.getHours()*60+k.getMinutes(),live=wd&&m>=540&&m<930;
+  const wd=k.getDay()>=1&&k.getDay()<=5,m=k.getHours()*60+k.getMinutes(),live=wd&&m>=480&&m<1200; // 08:00~20:00
   const el=E("stkTag");if(el){el.className="tag "+(live?"live":"delay");el.textContent=live?"● 실시간":"지연(장마감)";}}
 updStkTag();setInterval(updStkTag,20000);
 function apply(t){document.body.classList.toggle("light",t==="light");document.getElementById("tg").textContent=t==="light"?"☀️":"🌙";}
