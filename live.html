@@ -300,7 +300,7 @@ document.querySelectorAll("#stkTf button").forEach(b=>b.onclick=()=>{
   document.querySelectorAll("#stkTf button").forEach(x=>x.classList.toggle("on",x===b));
   loadChart();
 });
-// ---- 공용 헐 차트 엔진 (팬/줌·십자선, 옵션: 지지저항·미결제약정) ----
+// ---- 공용 헐 차트 엔진 (팬/줌·십자선, 옵션: 지지저항·청산맵) ----
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 function jwma(v,n){const out=new Array(v.length).fill(null),den=n*(n+1)/2;
   for(let i=n-1;i<v.length;i++){let s=0,ok=true;for(let k=0;k<n;k++){const x=v[i-n+1+k];if(x==null){ok=false;break;}s+=x*(k+1);}if(ok)out[i]=s/den;}return out;}
@@ -315,6 +315,18 @@ function jwalls(raw,cur){const seg=raw.slice(-240).filter(b=>b[4]>0);if(seg.leng
   for(let i=1;i<bins-1;i++)if(vol[i]>vol[i-1]&&vol[i]>vol[i+1]&&vol[i]>0)peaks.push([lo+step*(i+0.5),vol[i]/mx]);
   const up=peaks.filter(p=>p[0]>cur),dn=peaks.filter(p=>p[0]<cur);
   return{up:up.length?up.reduce((a,b)=>a[0]<b[0]?a:b):null,dn:dn.length?dn.reduce((a,b)=>a[0]>b[0]?a:b):null};}
+function jliq(raw,cur){const bins=48,lb=240,mmr=0.005,levs=[10,25,50,100];
+  const seg=raw.slice(-lb).filter(b=>b[4]>0);if(seg.length<20||cur<=0)return[];
+  let lo=Math.min.apply(null,seg.map(b=>b[3])),hi=Math.max.apply(null,seg.map(b=>b[2]));if(hi<=lo)return[];
+  const step=(hi-lo)/bins,grid=new Array(bins).fill(0);
+  for(const b of seg){let v=b[5]||0;if(v<=0)v=1;const p=(b[2]+b[3]+b[4])/3;
+    for(const L of levs)for(const liq of [p*(1-1/L)/(1-mmr),p*(1+1/L)/(1+mmr)])
+      if(liq>=lo&&liq<hi)grid[Math.min(bins-1,Math.floor((liq-lo)/step))]+=v;}
+  const mx=Math.max.apply(null,grid)||1,out=[];
+  for(let i=0;i<bins;i++){const s=grid[i]/mx;if(s<=0)continue;
+    const lft=i>0?grid[i-1]:-1,rgt=i<bins-1?grid[i+1]:-1;
+    if(grid[i]>=lft&&grid[i]>=rgt&&s>=0.25)out.push([lo+step*(i+0.5),s]);}
+  return out;}
 function makeChart(cid,opt){
   opt=opt||{}; const cv=E(cid); const NF=opt.fmt||(v=>Math.round(v).toLocaleString());
   let CH=null,VIEW={start:0,count:120},CROSS=null,GEO=null;
@@ -326,8 +338,7 @@ function makeChart(cid,opt){
     const ctx=cv.getContext("2d");ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);
     let cnt=clamp(Math.round(VIEW.count),20,N),start=clamp(Math.round(VIEW.start),0,Math.max(0,N-cnt));
     VIEW.count=cnt;VIEW.start=start;const end=start+cnt,cur=bars[N-1][4];
-    const oiOn=opt.oi&&CH.oi&&CH.oi.slice(start,end).some(v=>v!=null);
-    const x0=6,x1=W-56,y0=8,yEnd=H-16,yP=oiOn?y0+(yEnd-y0)*0.70:yEnd,oiTop=yP+8,oiBot=yEnd;
+    const x0=6,x1=W-56,y0=8,yEnd=H-16,yP=yEnd;
     let lo=Infinity,hi=-Infinity;
     for(let i=start;i<end;i++){lo=Math.min(lo,bars[i][3]);hi=Math.max(hi,bars[i][2]);
       for(const a of [hma,sma]){const v=a[i];if(v!=null){lo=Math.min(lo,v);hi=Math.max(hi,v);}}}
@@ -335,6 +346,9 @@ function makeChart(cid,opt){
     if(!(hi>lo))hi=lo+1;const pd=(hi-lo)*0.06;lo-=pd;hi+=pd;
     const X=i=>x0+(x1-x0)*(cnt<=1?0.5:(i-start)/(cnt-1)),Y=v=>yP-(yP-y0)*(v-lo)/(hi-lo);
     GEO={x0,x1,y0,yEnd,start,cnt,N};
+    if(opt.liq&&CH.liq)for(const lv of CH.liq){const y=Y(lv[0]);if(y<y0||y>yP)continue;
+      const a=0.9*Math.pow(clamp(lv[1],0,1),1.7);if(a<0.09)continue;
+      ctx.fillStyle="rgba(255,214,0,"+a.toFixed(3)+")";for(let x=x0;x<x1;x+=7)ctx.fillRect(x,y-3,6,6);}
     const cw=Math.max(1,(x1-x0)/cnt*0.62);
     for(let i=start;i<end;i++){const b=bars[i],up=b[4]>=b[1],col=up?"#00a868":"#ff433d",xc=X(i);
       ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=1;
@@ -356,12 +370,6 @@ function makeChart(cid,opt){
     ctx.textAlign="left";ctx.font="10px sans-serif";ctx.fillStyle=subc;
     ctx.fillText(NF(hi),x1+3,y0+8);ctx.fillText(NF(lo),x1+3,yP);
     ctx.fillStyle="#5db4ff";ctx.fillText(NF(cur),x1+3,clamp(Y(cur),y0+8,yP));
-    if(oiOn){let olo=Infinity,ohi=-Infinity;for(let i=start;i<end;i++){const v=CH.oi[i];if(v!=null){olo=Math.min(olo,v);ohi=Math.max(ohi,v);}}
-      if(!(ohi>olo))ohi=olo+1;const OY=v=>oiBot-(oiBot-oiTop)*(v-olo)/(ohi-olo);
-      ctx.strokeStyle="rgba(140,150,170,0.25)";ctx.lineWidth=0.6;ctx.beginPath();ctx.moveTo(x0,yP+3);ctx.lineTo(x1,yP+3);ctx.stroke();
-      ctx.strokeStyle="#d1a52e";ctx.lineWidth=1.5;ctx.beginPath();let os=false;
-      for(let i=start;i<end;i++){const v=CH.oi[i];if(v==null){os=false;continue;}const xx=X(i),yy=OY(v);if(!os){ctx.moveTo(xx,yy);os=true;}else ctx.lineTo(xx,yy);}ctx.stroke();
-      ctx.fillStyle="#d1a52e";ctx.font="9px sans-serif";ctx.textAlign="left";ctx.fillText("미결제약정",x0+2,oiTop+8);}
     if(CROSS!=null){const ci=clamp(CROSS.i,start,end-1),xc=X(ci),b=bars[ci];
       ctx.strokeStyle="rgba(140,150,170,0.75)";ctx.lineWidth=0.7;ctx.setLineDash([3,3]);
       ctx.beginPath();ctx.moveTo(xc,y0);ctx.lineTo(xc,yEnd);ctx.stroke();
@@ -399,7 +407,7 @@ function makeChart(cid,opt){
 }
 const coinFmt=v=>v>=1000?Math.round(v).toLocaleString():(v>=1?v.toFixed(2):(+v.toPrecision(4)).toString());
 const stkChart=makeChart("stkChart",{});
-const coinChart=makeChart("coinChart",{walls:true,oi:true,fmt:coinFmt});
+const coinChart=makeChart("coinChart",{walls:true,liq:true,fmt:coinFmt});
 
 // ---- 코인 조회 (바이낸스, 클라이언트) ----
 let coinSym=null, coinTf="D", coinTimer=null, coinSearchTimer=null, coinList=null, coinLast=[];
@@ -444,15 +452,9 @@ async function loadCoin2Chart(){if(!coinSym)return;E("coinChartLbl").textContent
   const bars=kl.map(c=>[coinFmtTime(c[0],coinTf),+c[1],+c[2],+c[3],+c[4]]);
   const raw=kl.map(c=>[c[0],+c[1],+c[2],+c[3],+c[4],+c[7]]);
   const closes=bars.map(b=>b[4]),cur=closes[closes.length-1];
-  const hma=jhma(closes,55),sma=jsma(closes,60),walls=jwalls(raw,cur);
-  let oi=null;
-  try{const per={"3":"5m","5":"5m","15":"15m","30":"30m","60":"1h","D":"1d"}[coinTf]||"1d";
-    const oh=await fetch("https://fapi.binance.com/futures/data/openInterestHist?symbol="+coinSym+"&period="+per+"&limit=400").then(r=>r.json());
-    if(Array.isArray(oh)&&oh.length){const os=oh.map(o=>[o.timestamp,+o.sumOpenInterest]);
-      oi=kl.map(c=>{const t=c[0];let best=null,bd=Infinity;for(const s of os){const dd=Math.abs(s[0]-t);if(dd<bd){bd=dd;best=s[1];}}return best;});}
-  }catch(e){}
-  coinChart.setData({bars,hma,sma,hl:55,gate:60,walls,oi});
-  E("coinChartLbl").textContent="헐 리본 HMA55 · SMA60 · 빨강=저항 초록=지지"+(oi?" · 아래=미결제약정":"")+" · 밀어서 과거·핀치";
+  const hma=jhma(closes,55),sma=jsma(closes,60),walls=jwalls(raw,cur),liq=jliq(raw,cur);
+  coinChart.setData({bars,hma,sma,hl:55,gate:60,walls,liq});
+  E("coinChartLbl").textContent="헐 리본 HMA55 · SMA60 · 빨강=저항 초록=지지 · 노랑=청산맵(어림) · 밀어서 과거·핀치";
 }
 
 // ---- 시계 · 테마 ----
