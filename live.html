@@ -59,6 +59,20 @@ h1 .lv{color:#ff433d;font-size:12px;font-weight:800;vertical-align:super;margin-
 .nrow{display:block;color:var(--nm);text-decoration:none;font-size:13px;padding:5px 2px;border-bottom:1px solid var(--bd);opacity:.9}
 .injh .srow{padding:6px 2px;color:var(--nm);font-size:14px}
 .injh h3{color:var(--sub);font-size:13px;margin-bottom:4px}.injh .chdr{color:var(--soon);font-size:11px;font-weight:400}
+@media(max-width:440px){
+ body{padding:10px 10px 40px}
+ h1{font-size:17px}h1 .lv{font-size:10px;margin-left:2px}
+ .clock{font-size:10.5px}.tgl{padding:4px 6px;font-size:13px}.right{gap:6px}
+ .gauges{gap:6px}.stat{padding:9px 4px}.stat .n{font-size:21px}.stat .l{font-size:10px}
+ .gnote{font-size:10px}
+ .nm{font-size:14px}.val{font-size:14px}.pc{font-size:12px;min-width:44px}.rt{gap:5px}
+ .card{padding:9px 11px}.card h3{font-size:12px}
+ .brow{grid-template-columns:64px 1fr 52px}.bn{font-size:12px}.bp{font-size:11px}
+ .stktab{font-size:12.5px}.stkhd{font-size:15px}
+ .crow{font-size:12px}.nrow{font-size:12px}
+ .tag{font-size:9.5px;padding:2px 5px}
+ .stktf button{font-size:11px;min-width:38px}
+}
 .stkq{width:100%;padding:9px 11px;font-size:15px;border:1px solid var(--bd);border-radius:9px;background:var(--bg);color:var(--nm)}
 .stkres a{display:flex;justify-content:space-between;gap:8px;padding:8px 6px;border-bottom:1px solid var(--bd);color:var(--nm);text-decoration:none;font-size:14px;cursor:pointer}
 .stkres a:last-child{border-bottom:none}.stkres a .c{color:var(--sub);font-variant-numeric:tabular-nums}
@@ -127,7 +141,7 @@ h1 .lv{color:#ff433d;font-size:12px;font-weight:800;vertical-align:super;margin-
 // ---- 스파크라인 ----
 function spark(a){
   if(!a||a.length<2)return"";
-  const w=54,h=18,lo=Math.min(...a),hi=Math.max(...a),rg=(hi-lo)||1,n=a.length;
+  const w=(window.innerWidth<440?38:54),h=18,lo=Math.min(...a),hi=Math.max(...a),rg=(hi-lo)||1,n=a.length;
   const up=a[a.length-1]>=a[0],c=up?"#00a868":"#ff433d";
   let p="";for(let i=0;i<n;i++){p+=(i?" ":"")+(2+(w-4)*i/(n-1)).toFixed(1)+","+(h-2-(h-4)*(a[i]-lo)/rg).toFixed(1);}
   return'<svg width="'+w+'" height="'+h+'" style="vertical-align:middle"><polyline points="'+p+'" fill="none" stroke="'+c+'" stroke-width="1.4"/></svg>';
