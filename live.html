@@ -371,7 +371,7 @@ function makeChart(cid,opt){
     ctx.fillText(NF(hi),x1+3,y0+8);ctx.fillText(NF(lo),x1+3,yP);
     ctx.fillStyle="#5db4ff";ctx.fillText(NF(cur),x1+3,clamp(Y(cur),y0+8,yP));
     if(CROSS!=null){const ci=clamp(CROSS.i,start,end-1),xc=X(ci),b=bars[ci];
-      ctx.strokeStyle="rgba(140,150,170,0.75)";ctx.lineWidth=0.7;ctx.setLineDash([3,3]);
+      ctx.strokeStyle="#ffffff";ctx.lineWidth=0.8;ctx.setLineDash([3,3]);
       ctx.beginPath();ctx.moveTo(xc,y0);ctx.lineTo(xc,yEnd);ctx.stroke();
       if(CROSS.py!=null&&CROSS.py<=yP){ctx.beginPath();ctx.moveTo(x0,CROSS.py);ctx.lineTo(x1,CROSS.py);ctx.stroke();}
       ctx.setLineDash([]);
