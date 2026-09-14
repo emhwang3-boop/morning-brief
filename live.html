@@ -296,7 +296,7 @@ async function loadChart(){
   const d=await krFetch("chart","code="+stkCode+"&tf="+stkTf,14);
   if(!d||!d.bars){E("stkChartLbl").textContent="차트 없음";return;}
   stkChart.setData(d);
-  E("stkChartLbl").textContent="헐 리본 HMA"+d.hl+" · SMA"+d.gate+" · 밀어서 과거·핀치 확대";
+  E("stkChartLbl").textContent="헐 리본 HMA"+d.hl+" · SMA"+d.gate+" · 빨강=저항 초록=지지 · 밀어서 과거·핀치";
 }
 document.querySelectorAll("#stkTf button").forEach(b=>b.onclick=()=>{
   stkTf=b.dataset.tf;
@@ -411,7 +411,7 @@ function makeChart(cid,opt){
   return {setData,patchLast};
 }
 const coinFmt=v=>v>=1000?Math.round(v).toLocaleString():(v>=1?v.toFixed(2):(+v.toPrecision(4)).toString());
-const stkChart=makeChart("stkChart",{});
+const stkChart=makeChart("stkChart",{walls:true});
 const coinChart=makeChart("coinChart",{walls:true,liq:true,fmt:coinFmt});
 
 // ---- 코인 조회 (바이낸스, 클라이언트) ----
