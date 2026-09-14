@@ -49,6 +49,20 @@ h1 .lv{color:#ff433d;font-size:12px;font-weight:800;vertical-align:super;margin-
 .nrow{display:block;color:var(--nm);text-decoration:none;font-size:13px;padding:5px 2px;border-bottom:1px solid var(--bd);opacity:.9}
 .injh .srow{padding:6px 2px;color:var(--nm);font-size:14px}
 .injh h3{color:var(--sub);font-size:13px;margin-bottom:4px}.injh .chdr{color:var(--soon);font-size:11px;font-weight:400}
+.stkq{width:100%;padding:9px 11px;font-size:15px;border:1px solid var(--bd);border-radius:9px;background:var(--bg);color:var(--nm)}
+.stkres a{display:flex;justify-content:space-between;gap:8px;padding:8px 6px;border-bottom:1px solid var(--bd);color:var(--nm);text-decoration:none;font-size:14px;cursor:pointer}
+.stkres a:last-child{border-bottom:none}.stkres a .c{color:var(--sub);font-variant-numeric:tabular-nums}
+.stktab{width:100%;border-collapse:collapse;margin-top:9px;font-size:13.5px}
+.stktab td{padding:6px 4px;border-bottom:1px solid var(--bd)}
+.stktab tr:last-child td{border-bottom:none}
+.stktab td.k{color:var(--sub);white-space:nowrap}
+.stktab td.v{text-align:right;font-weight:800;font-variant-numeric:tabular-nums;color:var(--nm)}
+.stkhd{font-size:17px;font-weight:800;color:var(--nm);margin-top:2px}
+.stkchart{width:100%;height:230px;margin-top:10px;display:block;border-radius:8px}
+.stkcl{font-size:11px;color:var(--sub);margin-top:3px;text-align:center}
+.stktf{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+.stktf button{flex:1;min-width:42px;background:var(--bg);border:1px solid var(--bd);color:var(--sub);border-radius:7px;padding:5px 0;font-size:12px;cursor:pointer}
+.stktf button.on{background:#1b3a5a;color:#5db4ff;border-color:#2a5580}
 </style></head><body>
 <div class="top">
   <h1>일일브리핑<span class="lv">● LIVE</span></h1>
@@ -56,6 +70,20 @@ h1 .lv{color:#ff433d;font-size:12px;font-weight:800;vertical-align:super;margin-
    <button class="tgl" id="tg" onclick="toggle()">🌙</button></div>
 </div>
 <div class="asof" id="asof">불러오는 중…</div>
+
+<div class="card" id="stock">
+  <h3>종목 조회 <span class="tag delay">키움 실시간</span></h3>
+  <input id="stkq" class="stkq" placeholder="종목코드 또는 이름 (예: 005930, 삼성전자)" autocomplete="off">
+  <div id="stkResults" class="stkres"></div>
+  <div id="stkDetail"></div>
+  <div id="stkTf" class="stktf" hidden>
+    <button data-tf="D" class="on">일</button><button data-tf="60">60분</button>
+    <button data-tf="30">30분</button><button data-tf="15">15분</button>
+    <button data-tf="5">5분</button><button data-tf="3">3분</button>
+  </div>
+  <canvas id="stkChart" class="stkchart" hidden></canvas>
+  <div id="stkChartLbl" class="stkcl" hidden></div>
+</div>
 
 <div class="gauges" id="gauges"></div>
 <div id="cards"></div>
@@ -193,6 +221,92 @@ async function loadCoin(){
   }catch(e){document.getElementById("coin").innerHTML='<div class="soonrow">코인 불러오기 실패</div>';}
 }
 loadCoin();setInterval(loadCoin,3000);
+
+// ---- 종목 조회 (키움, 허브 릴레이) ----
+const KRB=HUB?HUB.replace(/\/$/,""):"";
+const E=id=>document.getElementById(id);
+let stkCode=null, stkTf="D", stkTimer=null, searchTimer=null;
+async function krFetch(op,qs,tries){
+  if(!KRB)return null; tries=tries||12;
+  for(let i=0;i<tries;i++){
+    try{const d=await fetch(KRB+"/kr/"+op+"?"+qs,{cache:"no-store"}).then(r=>r.json());
+      if(d&&d.ok)return d.data;}catch(e){}
+    await new Promise(r=>setTimeout(r,700));
+  }
+  return null;
+}
+E("stkq").addEventListener("input",function(){
+  clearTimeout(searchTimer); const q=this.value.trim();
+  if(q.length<1){E("stkResults").innerHTML="";return;}
+  searchTimer=setTimeout(async()=>{
+    const rows=await krFetch("search","q="+encodeURIComponent(q),4);
+    if(!rows){E("stkResults").innerHTML='<div class="soonrow">검색 중…</div>';return;}
+    E("stkResults").innerHTML=rows.map(r=>'<a onclick="pickStock(\''+r.code+'\',\''+(r.name||"").replace(/[\'"]/g,"")+'\')"><span>'+(r.name||"")+'</span><span class="c">'+r.code+'</span></a>').join("")||'<div class="soonrow">결과 없음</div>';
+  },350);
+});
+function pickStock(code,name){
+  stkCode=code; E("stkResults").innerHTML=""; E("stkq").value=name+" ("+code+")";
+  E("stkTf").hidden=false; E("stkChart").hidden=false; E("stkChartLbl").hidden=false;
+  E("stkDetail").innerHTML='<div class="soonrow">불러오는 중…</div>';
+  loadStock(); loadChart();
+  clearInterval(stkTimer); stkTimer=setInterval(loadStock,3000);
+}
+async function loadStock(){
+  if(!stkCode)return;
+  const d=await krFetch("stock","code="+stkCode,3);
+  if(!d||d.error)return;
+  const cls=x=>x>0?"up":(x<0?"dn":"fl"), arw=x=>x>0?"▲":(x<0?"▼":""), won=n=>Math.round(n).toLocaleString();
+  const co=d.chg_open, cp=d.chg_prev;
+  E("stkDetail").innerHTML=
+    '<div class="stkhd">'+d.name+' <span style="color:var(--sub);font-size:13px;font-weight:600">'+d.code+'</span></div>'
+   +'<table class="stktab">'
+   +'<tr><td class="k">현재가</td><td class="v">'+won(d.cur)+'</td></tr>'
+   +'<tr><td class="k">시초가 대비</td><td class="v '+cls(co)+'">'+arw(co)+Math.abs(co).toFixed(2)+'%</td></tr>'
+   +'<tr><td class="k">전일종가 대비</td><td class="v '+cls(cp)+'">'+arw(cp)+Math.abs(cp).toFixed(2)+'%</td></tr>'
+   +'<tr><td class="k">거래량</td><td class="v">'+won(d.vol)+'주</td></tr>'
+   +'<tr><td class="k">거래대금</td><td class="v">'+(d.value!=null?won(d.value)+'억':'-')+'</td></tr>'
+   +'<tr><td class="k">체결강도</td><td class="v '+(d.strength>=100?"up":(d.strength>0?"dn":"fl"))+'">'+(d.strength||0).toFixed(2)+'</td></tr>'
+   +'</table>';
+}
+async function loadChart(){
+  if(!stkCode)return;
+  E("stkChartLbl").textContent="차트 불러오는 중…";
+  const d=await krFetch("chart","code="+stkCode+"&tf="+stkTf,14);
+  if(!d||!d.bars){E("stkChartLbl").textContent="차트 없음";return;}
+  drawHull(E("stkChart"),d);
+  E("stkChartLbl").textContent="헐(HMA"+d.hl+", 주황) · SMA"+d.gate+"(회색) · "+(stkTf==="D"?"일봉":stkTf+"분봉")+" "+d.bars.length+"개";
+}
+document.querySelectorAll("#stkTf button").forEach(b=>b.onclick=()=>{
+  stkTf=b.dataset.tf;
+  document.querySelectorAll("#stkTf button").forEach(x=>x.classList.toggle("on",x===b));
+  loadChart();
+});
+function drawHull(cv,d){
+  const bars=d.bars,hma=d.hma,sma=d.sma,N=bars.length; if(!N)return;
+  const dpr=window.devicePixelRatio||1, W=cv.clientWidth, H=cv.clientHeight;
+  cv.width=W*dpr; cv.height=H*dpr;
+  const ctx=cv.getContext("2d"); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,W,H);
+  const x0=6,x1=W-48,y0=8,y1=H-8;
+  let lo=Infinity,hi=-Infinity;
+  for(const b of bars){lo=Math.min(lo,b[3]);hi=Math.max(hi,b[2]);}
+  for(const a of [hma,sma])for(const v of a)if(v!=null){lo=Math.min(lo,v);hi=Math.max(hi,v);}
+  if(!(hi>lo))hi=lo+1; const pd=(hi-lo)*0.06; lo-=pd; hi+=pd;
+  const X=i=>x0+(x1-x0)*(N<=1?0.5:i/(N-1)), Y=v=>y1-(y1-y0)*(v-lo)/(hi-lo);
+  const cw=Math.max(1,(x1-x0)/N*0.6);
+  for(let i=0;i<N;i++){const b=bars[i],up=b[4]>=b[1],col=up?"#00a868":"#ff433d",xc=X(i);
+    ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(xc,Y(b[2]));ctx.lineTo(xc,Y(b[3]));ctx.stroke();
+    const yo=Y(b[1]),yc=Y(b[4]);ctx.fillRect(xc-cw/2,Math.min(yo,yc),cw,Math.max(1,Math.abs(yc-yo)));}
+  const line=(arr,color,w)=>{ctx.strokeStyle=color;ctx.lineWidth=w;ctx.beginPath();let st=false;
+    for(let i=0;i<N;i++){const v=arr[i];if(v==null){st=false;continue;}const xx=X(i),yy=Y(v);
+      if(!st){ctx.moveTo(xx,yy);st=true;}else ctx.lineTo(xx,yy);}ctx.stroke();};
+  line(sma,"#8a93a3",1.3); line(hma,"#f0a020",2);
+  ctx.fillStyle=(getComputedStyle(document.body).getPropertyValue("--sub")||"#889").trim();
+  ctx.font="10px sans-serif";ctx.textAlign="left";
+  ctx.fillText(Math.round(hi).toLocaleString(),x1+3,y0+8);
+  ctx.fillText(Math.round(lo).toLocaleString(),x1+3,y1);
+  const lc=bars[N-1][4];ctx.fillStyle="#5db4ff";ctx.fillText(Math.round(lc).toLocaleString(),x1+3,Y(lc)+3);
+}
 
 // ---- 시계 · 테마 ----
 function tick(){const d=new Date();document.getElementById("clk").textContent=
