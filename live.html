@@ -93,6 +93,8 @@ body.light #installBar{background:#eaf3ff;border-color:#b9d5f5;color:#1a4b7a}
 .stkq{width:100%;padding:9px 11px;font-size:15px;border:1px solid var(--bd);border-radius:9px;background:var(--bg);color:var(--nm)}
 .stkres a{display:flex;justify-content:space-between;gap:8px;padding:8px 6px;border-bottom:1px solid var(--bd);color:var(--nm);text-decoration:none;font-size:14px;cursor:pointer}
 .stkres a:last-child{border-bottom:none}.stkres a .c{color:var(--sub);font-variant-numeric:tabular-nums}
+.mkt{font-size:9px;font-weight:800;color:var(--soon);border:1px solid var(--bd);border-radius:4px;padding:0 3px;vertical-align:middle}
+.mkt.us{color:#5db4ff;border-color:#2a5580}
 .stktab{width:100%;border-collapse:collapse;margin-top:9px;font-size:13.5px}
 .stktab td{padding:6px 4px;border-bottom:1px solid var(--bd)}
 .stktab tr:last-child td{border-bottom:none}
@@ -228,7 +230,7 @@ const T={title:{ko:"일일브리핑",en:"Daily Brief"},stockH:{ko:"종목 조회
  chg24:{ko:"24시간 변동율",en:"24h Change"},vol24:{ko:"거래량(24h)",en:"Volume (24h)"},tv24:{ko:"거래대금(24h)",en:"Turnover (24h)"},
  inverted:{ko:"역전⚠",en:"inverted⚠"},normal:{ko:"정상",en:"normal"},loading:{ko:"불러오는 중…",en:"Loading…"},
  chartLoading:{ko:"차트 불러오는 중…",en:"Loading chart…"},chartNone:{ko:"차트 없음",en:"No chart"},
- stkPH:{ko:"종목코드 또는 이름 (예: 005930, 삼성전자)",en:"Code or name (e.g. 005930, Samsung)"},
+ stkPH:{ko:"국내·미국 (예: 005930, 삼성, AAPL, Tesla)",en:"KR·US (e.g. 005930, AAPL, Tesla)"},
  coinPH:{ko:"코인 심볼 (예: BTC, ETH, SOL)",en:"Coin symbol (e.g. BTC, ETH, SOL)"},
  asof:{ko:" 기준",en:""},binance:{ko:"● 바이낸스",en:"● Binance"},snap:{ko:" · 스냅샷",en:" · snapshot"}};
 function L(k){const t=T[k];return t?(t[LANG]||t.ko):k;}
@@ -363,6 +365,7 @@ loadCoin();setInterval(loadCoin,3000);
 const KRB=HUB?HUB.replace(/\/$/,""):"";
 const E=id=>document.getElementById(id);
 let stkCode=null, stkTf="D", stkTimer=null, searchTimer=null, lastResults=[];
+let stkMarket="kr", usResults=[], usDaily=null, searchSeq=0;
 async function krFetch(op,qs,tries){
   if(!KRB)return null; tries=tries||12;
   for(let i=0;i<tries;i++){
@@ -372,25 +375,94 @@ async function krFetch(op,qs,tries){
   }
   return null;
 }
+async function usFetch(op,qs){ if(!KRB)return null;
+  try{return await fetch(KRB+"/us/"+op+"?"+qs,{cache:"no-store"}).then(r=>r.json());}catch(e){return null;} }
+function usMoney(n){n=+n;const a=Math.abs(n);
+  if(a>=1e9)return "$"+(n/1e9).toFixed(2)+"B"; if(a>=1e6)return "$"+(n/1e6).toFixed(1)+"M";
+  return "$"+Math.round(n).toLocaleString();}
+function usPrice(n){return "$"+(+n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
+const US_KT={"D":8,"60":5,"30":4,"15":3,"5":2,"3":1};
+function usFmtT(t,tf){const d=new Date(t*1000),p=n=>String(n).padStart(2,"0");
+  return tf==="D"?(p(d.getMonth()+1)+"/"+p(d.getDate())):(p(d.getMonth()+1)+"/"+p(d.getDate())+" "+p(d.getHours())+":"+p(d.getMinutes()));}
+function renderStkResults(){
+  const en=LANG==="en";
+  let h=(lastResults||[]).map(r=>{const dn=((en&&r.en)?r.en:r.name)||r.code;
+    return '<a onclick="pickStock(\''+r.code+'\',\''+dn.replace(/[\'"]/g,"")+'\')"><span>'+dn+' <span class="mkt">KR</span></span><span class="c">'+r.code+'</span></a>';}).join("");
+  h+=(usResults||[]).map(r=>{const dn=(r.name||r.tick).replace(/[\'"]/g,"");
+    return '<a onclick="pickStockUS(\''+r.code+'\',\''+dn+'\')"><span>'+dn+' <span class="mkt us">US</span></span><span class="c">'+r.tick+'</span></a>';}).join("");
+  E("stkResults").innerHTML=h||'<div class="soonrow">'+(en?"No results":"결과 없음")+'</div>';
+}
 E("stkq").addEventListener("input",function(){
   clearTimeout(searchTimer); const q=this.value.trim();
-  if(q.length<1){E("stkResults").innerHTML="";lastResults=[];return;}
-  searchTimer=setTimeout(async()=>{
-    const rows=await krFetch("search","q="+encodeURIComponent(q),4);
-    lastResults=rows||[];
-    if(!rows){E("stkResults").innerHTML='<div class="soonrow">검색 중…</div>';return;}
-    E("stkResults").innerHTML=rows.map(r=>{const dn=((LANG==="en"&&r.en)?r.en:r.name)||r.code;return '<a onclick="pickStock(\''+r.code+'\',\''+dn.replace(/[\'"]/g,"")+'\')"><span>'+dn+'</span><span class="c">'+r.code+'</span></a>';}).join("")||'<div class="soonrow">결과 없음</div>';
+  if(q.length<1){E("stkResults").innerHTML="";lastResults=[];usResults=[];return;}
+  const seq=++searchSeq;
+  searchTimer=setTimeout(function(){
+    E("stkResults").innerHTML='<div class="soonrow">'+(LANG==="en"?"Searching…":"검색 중…")+'</div>';
+    const latin=/[A-Za-z]/.test(q)&&!/[가-힣]/.test(q);
+    lastResults=[]; usResults=[];
+    if(latin)usFetch("search","q="+encodeURIComponent(q)).then(function(d){if(seq!==searchSeq)return;usResults=(d&&d.data)||[];renderStkResults();});
+    krFetch("search","q="+encodeURIComponent(q),4).then(function(rows){if(seq!==searchSeq)return;lastResults=rows||[];renderStkResults();});
   },350);
 });
 E("stkq").addEventListener("keydown",function(e){
-  if(e.key==="Enter"&&lastResults.length){const r=lastResults[0];pickStock(r.code,(LANG==="en"&&r.en)?r.en:r.name);this.blur();}
+  if(e.key!=="Enter")return;
+  if(lastResults.length){const r=lastResults[0];pickStock(r.code,(LANG==="en"&&r.en)?r.en:r.name);this.blur();}
+  else if(usResults.length){const r=usResults[0];pickStockUS(r.code,r.name);this.blur();}
 });
 function pickStock(code,name){
-  stkCode=code; E("stkResults").innerHTML=""; E("stkq").value=name+" ("+code+")";
+  stkCode=code; stkMarket="kr"; E("stkResults").innerHTML=""; E("stkq").value=name+" ("+code+")";
   E("stkTf").hidden=false; E("stkChart").hidden=false; E("stkChartLbl").hidden=false;
   E("stkDetail").innerHTML='<div class="soonrow">'+L("loading")+'</div>';
   loadStock(); loadChart();
   clearInterval(stkTimer); stkTimer=setInterval(loadStock,3000);
+}
+function pickStockUS(code,name){
+  stkCode=code; stkMarket="us"; usDaily=null; E("stkResults").innerHTML=""; E("stkq").value=name+" ("+code.replace(/\.US$/,"")+")";
+  E("stkTf").hidden=false; E("stkChart").hidden=false; E("stkChartLbl").hidden=false;
+  E("stkDetail").innerHTML='<div class="soonrow">'+L("loading")+'</div>';
+  loadChartUS(); loadStockUS();
+  clearInterval(stkTimer); stkTimer=setInterval(loadStockUS,3000);
+}
+async function loadStockUS(){
+  if(!stkCode||stkMarket!=="us")return;
+  const rk=await Promise.all([
+    usFetch("kline","code="+encodeURIComponent(stkCode)+"&type=8&num=2"),
+    usFetch("quote","codes="+encodeURIComponent(stkCode))]);
+  const k=rk[0],tr=rk[1];
+  const rl=(k&&k.data&&k.data[0]&&k.data[0].respList)||[];
+  if(!rl.length)return;
+  const today=rl[0], prev=rl[1]||rl[0];
+  const price=(tr&&tr.data&&tr.data[0]&&+tr.data[0].p)||+today.c;
+  const open=+today.o, prevc=+prev.c, vol=+today.v, tv=+today.vw;
+  const co=open?(price-open)/open*100:0, cp=prevc?(price-prevc)/prevc*100:0;
+  const cls=x=>x>0?"up":(x<0?"dn":"fl"),arw=x=>x>0?"▲":(x<0?"▼":"");
+  const en=LANG==="en", tick=stkCode.replace(/\.US$/,"");
+  E("stkDetail").innerHTML=
+    '<div class="stkhd">'+tick+' <span style="color:var(--sub);font-size:13px;font-weight:600">US</span></div>'
+   +'<table class="stktab">'
+   +'<tr><td class="k">'+L("price")+'</td><td class="v">'+usPrice(price)+'</td></tr>'
+   +'<tr><td class="k">'+L("vsOpen")+'</td><td class="v '+cls(co)+'">'+arw(co)+Math.abs(co).toFixed(2)+'%</td></tr>'
+   +'<tr><td class="k">'+L("vsPrev")+'</td><td class="v '+cls(cp)+'">'+arw(cp)+Math.abs(cp).toFixed(2)+'%</td></tr>'
+   +'<tr><td class="k">'+L("vol")+'</td><td class="v">'+Math.round(vol).toLocaleString()+(en?"":"주")+'</td></tr>'
+   +'<tr><td class="k">'+L("turnover")+'</td><td class="v">'+usMoney(tv)+'</td></tr>'
+   +'</table>';
+  stkChart.patchLast(price);
+}
+async function loadChartUS(){
+  if(!stkCode||stkMarket!=="us")return;
+  E("stkChartLbl").textContent=L("chartLoading");
+  const kt=US_KT[stkTf]||8;
+  const k=await usFetch("kline","code="+encodeURIComponent(stkCode)+"&type="+kt+"&num=250");
+  const rl=(k&&k.data&&k.data[0]&&k.data[0].respList)||[];
+  if(rl.length<2){E("stkChartLbl").textContent=L("chartNone");return;}
+  const asc=rl.slice().reverse();
+  const bars=asc.map(b=>[usFmtT(+b.t,stkTf),+b.o,+b.h,+b.l,+b.c]);
+  const raw=asc.map(b=>[+b.t,+b.o,+b.h,+b.l,+b.c,+b.v]);
+  const closes=bars.map(b=>b[4]),cur=closes[closes.length-1];
+  const hma=jhma(closes,55),sma=jsma(closes,60),walls=jwalls(raw,cur);
+  stkChart.setData({bars,hma,sma,hl:55,gate:60,walls});
+  E("stkChartLbl").textContent=LANG==="en"?("Hull MA55 · SMA60 · red=resist green=support · drag/pinch")
+    :("헐 이동평균선 HMA55 · SMA60 · 빨강=저항 초록=지지 · 밀어서 과거·핀치");
 }
 async function loadStock(){
   if(!stkCode)return;
@@ -423,7 +495,7 @@ async function loadChart(){
 document.querySelectorAll("#stkTf button").forEach(b=>b.onclick=()=>{
   stkTf=b.dataset.tf;
   document.querySelectorAll("#stkTf button").forEach(x=>x.classList.toggle("on",x===b));
-  loadChart();
+  stkMarket==="us"?loadChartUS():loadChart();
 });
 // ---- 공용 헐 차트 엔진 (팬/줌·십자선, 옵션: 지지저항·청산맵) ----
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -533,7 +605,7 @@ function makeChart(cid,opt){
   return {setData,patchLast};
 }
 const coinFmt=v=>v>=1000?Math.round(v).toLocaleString():(v>=1?v.toFixed(2):(+v.toPrecision(4)).toString());
-const stkChart=makeChart("stkChart",{walls:true});
+const stkChart=makeChart("stkChart",{walls:true,fmt:v=>Math.abs(v)>=1000?Math.round(v).toLocaleString():(+v).toLocaleString(undefined,{maximumFractionDigits:2})});
 const coinChart=makeChart("coinChart",{walls:true,liq:true,fmt:coinFmt});
 
 // ---- 코인 조회 (바이낸스, 클라이언트) ----
