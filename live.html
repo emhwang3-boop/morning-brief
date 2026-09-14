@@ -286,6 +286,7 @@ async function loadStock(){
    +'<tr><td class="k">거래대금</td><td class="v">'+(d.value!=null?won(d.value)+'억':'-')+'</td></tr>'
    +'<tr><td class="k">체결강도</td><td class="v '+(d.strength>=100?"up":(d.strength>0?"dn":"fl"))+'">'+(d.strength||0).toFixed(2)+'</td></tr>'
    +'</table>';
+  stkChart.patchLast(d.cur);          // 차트 마지막 봉 종가를 현재가와 일치
 }
 async function loadChart(){
   if(!stkCode)return;
@@ -403,7 +404,9 @@ function makeChart(cid,opt){
     const p=rel(e);if(down){VIEW.start=clamp(sStart-Math.round((p.x-sx)/barW()),0,CH.bars.length-VIEW.count);}
     CROSS={i:idxAt(p.x),py:p.y};draw();},{passive:false});
   cv.addEventListener("touchend",()=>{down=false;pinch=null;});
-  return {setData};
+  function patchLast(price){if(!CH||!CH.bars.length||!(price>0))return;
+    const b=CH.bars[CH.bars.length-1];b[4]=price;if(price>b[2])b[2]=price;if(price<b[3])b[3]=price;draw();}
+  return {setData,patchLast};
 }
 const coinFmt=v=>v>=1000?Math.round(v).toLocaleString():(v>=1?v.toFixed(2):(+v.toPrecision(4)).toString());
 const stkChart=makeChart("stkChart",{});
@@ -441,6 +444,7 @@ async function loadCoinDetail(){if(!coinSym)return;
      +'<tr><td class="k">거래량(24h)</td><td class="v">'+Math.round(+d.volume).toLocaleString()+'</td></tr>'
      +'<tr><td class="k">거래대금(24h)</td><td class="v">$'+Math.round(+d.quoteVolume).toLocaleString()+'</td></tr>'
      +'</table>';
+    coinChart.patchLast(+d.lastPrice);   // 차트 마지막 봉 종가를 현재가와 일치
   }catch(e){}
 }
 document.querySelectorAll("#coinTf button").forEach(b=>b.onclick=()=>{coinTf=b.dataset.tf;
