@@ -456,9 +456,9 @@ async function loadCoin2Chart(){if(!coinSym)return;E("coinChartLbl").textContent
   const bars=kl.map(c=>[coinFmtTime(c[0],coinTf),+c[1],+c[2],+c[3],+c[4]]);
   const raw=kl.map(c=>[c[0],+c[1],+c[2],+c[3],+c[4],+c[7]]);
   const closes=bars.map(b=>b[4]),cur=closes[closes.length-1];
-  const hma=jhma(closes,55),sma=jsma(closes,60),walls=jwalls(raw,cur),liq=jliq(raw,cur);
-  coinChart.setData({bars,hma,sma,hl:55,gate:60,walls,liq});
-  E("coinChartLbl").textContent="헐 리본 HMA55 · SMA60 · 빨강=저항 초록=지지 · 노랑=청산맵(어림) · 밀어서 과거·핀치";
+  const hma=jhma(closes,100),sma=jsma(closes,120),walls=jwalls(raw,cur),liq=jliq(raw,cur);
+  coinChart.setData({bars,hma,sma,hl:100,gate:120,walls,liq});
+  E("coinChartLbl").textContent="헐 리본 HMA100 · SMA120 · 빨강=저항 초록=지지 · 노랑=청산맵(어림) · 밀어서 과거·핀치";
 }
 
 // ---- 시계 · 테마 ----
