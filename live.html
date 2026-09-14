@@ -74,7 +74,7 @@ h1 .lv{color:#ff433d;font-size:12px;font-weight:800;vertical-align:super;margin-
 <div class="asof" id="asof">불러오는 중…</div>
 
 <div class="card" id="stock">
-  <h3>종목 조회 <span class="tag live">● 실시간</span></h3>
+  <h3>종목 조회 <span class="tag live" id="stkTag">● 실시간</span></h3>
   <input id="stkq" class="stkq" placeholder="종목코드 또는 이름 (예: 005930, 삼성전자)" autocomplete="off">
   <div id="stkResults" class="stkres"></div>
   <div id="stkDetail"></div>
@@ -467,6 +467,11 @@ async function loadCoin2Chart(){if(!coinSym)return;E("coinChartLbl").textContent
 function tick(){const d=new Date();document.getElementById("clk").textContent=
   d.toLocaleTimeString("ko-KR",{hour12:false});}
 tick();setInterval(tick,1000);
+// 종목 실시간 태그 — 정규장(평일 09:00~15:30 KST)만 켠다. 그 외엔 지연.
+function updStkTag(){const k=new Date(Date.now()+new Date().getTimezoneOffset()*60000+324e5);
+  const wd=k.getDay()>=1&&k.getDay()<=5,m=k.getHours()*60+k.getMinutes(),live=wd&&m>=540&&m<930;
+  const el=E("stkTag");if(el){el.className="tag "+(live?"live":"delay");el.textContent=live?"● 실시간":"지연(장마감)";}}
+updStkTag();setInterval(updStkTag,20000);
 function apply(t){document.body.classList.toggle("light",t==="light");document.getElementById("tg").textContent=t==="light"?"☀️":"🌙";}
 function toggle(){const t=document.body.classList.contains("light")?"dark":"light";try{localStorage.setItem("brief_theme",t);}catch(e){}apply(t);}
 (function(){let t;try{t=localStorage.getItem("brief_theme");}catch(e){}
