@@ -67,8 +67,9 @@ h1 .lv{color:#ff433d;font-size:12px;font-weight:800;vertical-align:super;margin-
 .stktf button.on{background:#1b3a5a;color:#5db4ff;border-color:#2a5580}
 </style></head><body>
 <div class="top">
-  <h1>일일브리핑<span class="lv">● LIVE</span></h1>
+  <h1 id="ttl">일일브리핑<span class="lv">● LIVE</span></h1>
   <div class="right"><span class="clock" id="clk">--:--:--</span>
+   <button class="tgl" id="lng" onclick="toggleLang()">EN</button>
    <button class="tgl" id="tg" onclick="toggle()">🌙</button></div>
 </div>
 <div class="asof" id="asof">불러오는 중…</div>
@@ -125,7 +126,7 @@ function spark(a){
 }
 function pcrow(it){
   const p=it.pct,cls=p>0?"up":(p<0?"dn":"fl"),arw=p>0?"▲":(p<0?"▼":"");
-  return'<div class="row"><span class="nm">'+it.nm+'</span><span class="rt">'
+  return'<div class="row"><span class="nm">'+tr(it.nm)+'</span><span class="rt">'
     +spark(it.spark)+'<span class="val">'+it.val+'</span>'
     +'<span class="pc '+cls+'">'+arw+Math.abs(p).toFixed(2)+'%</span></span></div>';
 }
@@ -136,17 +137,50 @@ function grpTag(t){return TAG[t]||'<span class="tag delay">D 지연</span>';}
 const HUB="https://brief-live-hub.emhwang3.workers.dev";  // Cloudflare WebSocket 허브
 try{var _vid=localStorage.getItem("brief_vid");if(!_vid){_vid=Date.now().toString(36)+Math.random().toString(36).slice(2,8);localStorage.setItem("brief_vid",_vid);}
   if(HUB)fetch(HUB.replace(/\/$/,"")+"/hit?vid="+_vid,{mode:"no-cors"}).catch(function(){});}catch(e){}  // 방문 카운트
+// ---- 언어(한/영) ----
+let LANG="ko"; try{LANG=localStorage.getItem("brief_lang")||"ko";}catch(e){}
+const NM={"국내":"KR Indices","미국 지수":"US Indices","미국 야간선물":"US Futures (Night)","아시아":"Asia",
+ "금리·채권":"Rates / Bonds","환율·달러":"FX / Dollar","원자재":"Commodities",
+ "코스피":"KOSPI","코스닥":"KOSDAQ","코스피200":"KOSPI200","코스피200 야간선물":"KOSPI200 Night Fut.",
+ "S&P500":"S&P500","나스닥100":"NASDAQ100","다우":"Dow","러셀2000":"Russell2000","반도체(SOX)":"SOX",
+ "S&P 선물":"S&P Futures","나스닥 선물":"NASDAQ Futures","니케이225":"Nikkei225","상하이":"Shanghai","항셍":"Hang Seng",
+ "미 10년물":"US 10Y","미 13주":"US 13W","미 30년물":"US 30Y",
+ "원/달러":"USD/KRW","달러지수":"Dollar Index","엔/달러":"USD/JPY","위안/달러":"USD/CNY",
+ "WTI 원유":"WTI Crude","브렌트":"Brent","금":"Gold","구리":"Copper","천연가스":"Nat Gas",
+ "한국 기준금리":"BOK Base Rate","CD 91일":"CD 91D","국고채 3년":"KTB 3Y","국고채 10년":"KTB 10Y",
+ "미국 10Y−13주":"US 10Y−13W","한국 10Y−3Y":"KR 10Y−3Y",
+ "한국":"Korea","미국":"US","중국":"China","일본":"Japan","유로존":"Eurozone","독일":"Germany","영국":"UK","유럽":"Europe"};
+function tr(k){return LANG==="en"?(NM[k]||k):k;}
+const T={title:{ko:"일일브리핑",en:"Daily Brief"},stockH:{ko:"종목 조회",en:"Stock Search"},coinH:{ko:"코인 조회",en:"Coin Search"},
+ krateH:{ko:"한국 금리",en:"Korea Rates"},spreadH:{ko:"장단기 금리차이",en:"Yield Spread"},spreadN:{ko:"음수=역전",en:"neg=inverted"},
+ changesH:{ko:"주요 자산 전일대비",en:"Key Assets"},calH:{ko:"경제지표 일정 (오늘)",en:"Economic Calendar (Today)"},newsH:{ko:"헤드라인 뉴스",en:"Headlines (KR)"},coinCardH:{ko:"암호화폐",en:"Crypto"},
+ live:{ko:"● 실시간",en:"● LIVE"},delay:{ko:"D 지연",en:"D delayed"},closed:{ko:"장마감",en:"Closed"},delayed2:{ko:"지연(장마감)",en:"Delayed (Closed)"},
+ mtemp:{ko:"시장온도",en:"Mkt Temp"},vixL:{ko:"VIX · 공포",en:"VIX · Fear"},fgL:{ko:"공포·탐욕",en:"Fear & Greed"},
+ gnote:{ko:"시장온도 · VIX · 공포·탐욕 — 주식시장 기준",en:"Market Temp · VIX · Fear&Greed — stock market basis"},
+ price:{ko:"현재가",en:"Price"},vsOpen:{ko:"시초가 대비",en:"vs Open"},vsPrev:{ko:"전일종가 대비",en:"vs Prev Close"},
+ vol:{ko:"거래량",en:"Volume"},turnover:{ko:"거래대금",en:"Turnover"},strength:{ko:"체결강도",en:"Trade Strength"},
+ chg24:{ko:"24시간 변동율",en:"24h Change"},vol24:{ko:"거래량(24h)",en:"Volume (24h)"},tv24:{ko:"거래대금(24h)",en:"Turnover (24h)"},
+ inverted:{ko:"역전⚠",en:"inverted⚠"},normal:{ko:"정상",en:"normal"},loading:{ko:"불러오는 중…",en:"Loading…"},
+ chartLoading:{ko:"차트 불러오는 중…",en:"Loading chart…"},chartNone:{ko:"차트 없음",en:"No chart"},
+ stkPH:{ko:"종목코드 또는 이름 (예: 005930, 삼성전자)",en:"Code or name (e.g. 005930, Samsung)"},
+ coinPH:{ko:"코인 심볼 (예: BTC, ETH, SOL)",en:"Coin symbol (e.g. BTC, ETH, SOL)"},
+ asof:{ko:" 기준",en:""},binance:{ko:"● 바이낸스",en:"● Binance"},snap:{ko:" · 스냅샷",en:" · snapshot"}};
+function L(k){const t=T[k];return t?(t[LANG]||t.ko):k;}
+const TEMPW={ko:["차가움","서늘","미지근","따뜻","뜨거움"],en:["Cold","Cool","Neutral","Warm","Hot"]};
+const TFW={"3":{ko:"3분",en:"3m"},"5":{ko:"5분",en:"5m"},"15":{ko:"15분",en:"15m"},"30":{ko:"30분",en:"30m"},"60":{ko:"60분",en:"60m"},"D":{ko:"일",en:"1D"}};
+function toggleLang(){LANG=LANG==="en"?"ko":"en";try{localStorage.setItem("brief_lang",LANG);}catch(e){}applyLang();}
 function render(d){
+  window._lastD=d;
   {
-    document.getElementById("asof").textContent=d.asof+" 기준"+(d.__snap?" · 스냅샷":"");
+    document.getElementById("asof").textContent=d.asof+L("asof")+(d.__snap?L("snap"):"");
     // 게이지 (+ 시장온도)
     let g="";
-    if(d.temp!=null){const t=d.temp,lab=t<=25?"차가움":t<=45?"서늘":t<=60?"미지근":t<=75?"따뜻":"뜨거움",
+    if(d.temp!=null){const t=d.temp,li=t<=25?0:t<=45?1:t<=60?2:t<=75?3:4,lab=TEMPW[LANG][li],
       col=t>=70?"#ff433d":(t<=30?"#3b82f6":"#e0a020");
-      g+='<div class="stat"><div class="n" style="color:'+col+'">'+t+'°</div><div class="l">시장온도 · '+lab+'</div></div>';}
+      g+='<div class="stat"><div class="n" style="color:'+col+'">'+t+'°</div><div class="l">'+L("mtemp")+' · '+lab+'</div></div>';}
     if(d.gauges){
-      if(d.gauges.vix!=null)g+='<div class="stat"><div class="n" style="color:'+(d.gauges.vix<20?"#00a868":(d.gauges.vix>30?"#ff433d":"#e0a020"))+'">'+d.gauges.vix+'</div><div class="l">VIX · 공포</div></div>';
-      if(d.gauges.fg!=null)g+='<div class="stat"><div class="n" style="color:'+(d.gauges.fg>=75?"#ff433d":(d.gauges.fg<=25?"#00a868":"#e0a020"))+'">'+d.gauges.fg+'</div><div class="l">공포·탐욕</div></div>';
+      if(d.gauges.vix!=null)g+='<div class="stat"><div class="n" style="color:'+(d.gauges.vix<20?"#00a868":(d.gauges.vix>30?"#ff433d":"#e0a020"))+'">'+d.gauges.vix+'</div><div class="l">'+L("vixL")+'</div></div>';
+      if(d.gauges.fg!=null)g+='<div class="stat"><div class="n" style="color:'+(d.gauges.fg>=75?"#ff433d":(d.gauges.fg<=25?"#00a868":"#e0a020"))+'">'+d.gauges.fg+'</div><div class="l">'+L("fgL")+'</div></div>';
     }
     document.getElementById("gauges").innerHTML=g;
     // 카드 조각들(순서: 특이일 → 캘린더 → 주요자산막대 → 지수그룹 → 한국금리 → 장단기 → [코인] → 뉴스)
@@ -156,42 +190,42 @@ function render(d){
       let live=gr.rt;
       if(gr.title==="국내")live=krLiveNow();   // 국내 지수: 평일 08~20시만
       else if(gr.title==="미국 지수"||gr.title==="원자재")live=gr.rt&&usLiveNow();  // 미국 CFD: 주말 휴장
-      const tag=live?'<span class="tag live">● 실시간</span>':'<span class="tag delay">장마감</span>';
-      sGroups+='<div class="card"><h3>'+gr.title+' '+tag+'</h3>'+gr.items.map(pcrow).join("")+'</div>';
+      const tag=live?'<span class="tag live">'+L("live")+'</span>':'<span class="tag delay">'+L("closed")+'</span>';
+      sGroups+='<div class="card"><h3>'+tr(gr.title)+' '+tag+'</h3>'+gr.items.map(pcrow).join("")+'</div>';
     }
     let sKrates="";
     if(d.krates&&d.krates.length){
-      sKrates='<div class="card"><h3>한국 금리 <span class="tag delay">D 지연</span></h3>'
+      sKrates='<div class="card"><h3>'+L("krateH")+' <span class="tag delay">'+L("delay")+'</span></h3>'
         +d.krates.map(k=>{const c=k.chg>0?"up":(k.chg<0?"dn":"fl"),a=k.chg>0?"▲":(k.chg<0?"▼":"");
-          return'<div class="row"><span class="nm">'+k.nm+'</span><span class="rt">'+spark(k.spark)+'<span class="val">'+k.val+'</span>'
+          return'<div class="row"><span class="nm">'+tr(k.nm)+'</span><span class="rt">'+spark(k.spark)+'<span class="val">'+k.val+'</span>'
           +'<span class="pc '+c+'">'+a+Math.abs(k.chg).toFixed(2)+'%p</span></span></div>';}).join("")+'</div>';
     }
     let sSpreads="";
     if(d.spreads&&d.spreads.length){
-      sSpreads='<div class="card"><h3>장단기 금리차이 <span style="color:var(--soon);font-weight:400;font-size:11px">음수=역전</span></h3>'
-        +d.spreads.map(s=>'<div class="row"><span class="nm">'+s.nm+'</span><span class="rt"><span class="val">'+s.val+'</span>'
-          +'<span class="pc '+(s.inv?"dn":"up")+'">'+(s.inv?"역전⚠":"정상")+'</span></span></div>').join("")+'</div>';
+      sSpreads='<div class="card"><h3>'+L("spreadH")+' <span style="color:var(--soon);font-weight:400;font-size:11px">'+L("spreadN")+'</span></h3>'
+        +d.spreads.map(s=>'<div class="row"><span class="nm">'+tr(s.nm)+'</span><span class="rt"><span class="val">'+s.val+'</span>'
+          +'<span class="pc '+(s.inv?"dn":"up")+'">'+(s.inv?L("inverted"):L("normal"))+'</span></span></div>').join("")+'</div>';
     }
     let sChanges="";
     if(d.changes&&d.changes.length){
       const mx=Math.max.apply(null,d.changes.map(c=>Math.abs(c.pct)).concat([1]));
-      sChanges='<div class="card"><h3>주요 자산 전일대비</h3>'+d.changes.map(c=>{
+      sChanges='<div class="card"><h3>'+L("changesH")+'</h3>'+d.changes.map(c=>{
         const up=c.pct>=0,half=Math.abs(c.pct)/mx*50,col=up?"#00a868":"#ff433d";
         const bar=up?'<span style="position:absolute;left:50%;top:0;height:11px;width:'+half+'%;background:'+col+';border-radius:0 3px 3px 0"></span>'
                     :'<span style="position:absolute;right:50%;top:0;height:11px;width:'+half+'%;background:'+col+';border-radius:3px 0 0 3px"></span>';
-        return '<div class="brow"><span class="bn">'+c.nm+'</span><span class="bbar">'+bar+'</span>'
+        return '<div class="brow"><span class="bn">'+tr(c.nm)+'</span><span class="bbar">'+bar+'</span>'
           +'<span class="bp" style="color:'+col+'">'+(up?"+":"")+c.pct.toFixed(2)+'%</span></div>';}).join("")+'</div>';
     }
-    let sSpecial=d.special?'<div class="card injh">'+d.special+'</div>':"";
+    let sSpecial=(d.special&&LANG!=="en")?'<div class="card injh">'+d.special+'</div>':"";  // 특이일은 한글 전용
     let sCalendar="";
     if(d.calendar&&d.calendar.length){
-      sCalendar='<div class="card"><h3>경제지표 일정 (오늘)</h3>'+d.calendar.map(c=>
-        '<div class="crow"><span class="ct">'+c.t+'</span><span class="cc">'+c.cc+'</span>'
+      sCalendar='<div class="card"><h3>'+L("calH")+'</h3>'+d.calendar.map(c=>
+        '<div class="crow"><span class="ct">'+c.t+'</span><span class="cc">'+tr(c.cc)+'</span>'
         +'<span class="ci">'+c.title+'</span><span class="cd">'+c.imp+'</span></div>').join("")+'</div>';
     }
     let sNews="";
     if(d.news&&d.news.length){
-      sNews='<div class="card"><h3>헤드라인 뉴스</h3>'+d.news.map(s=>
+      sNews='<div class="card"><h3>'+L("newsH")+'</h3>'+d.news.map(s=>
         '<div class="nhd">'+s.src+'</div>'+(s.items||[]).map(it=>
           '<a class="nrow" href="'+it.u+'" target="_blank" rel="noopener">'+it.t+'</a>').join("")).join("")+'</div>';
     }
@@ -264,16 +298,16 @@ E("stkq").addEventListener("input",function(){
     const rows=await krFetch("search","q="+encodeURIComponent(q),4);
     lastResults=rows||[];
     if(!rows){E("stkResults").innerHTML='<div class="soonrow">검색 중…</div>';return;}
-    E("stkResults").innerHTML=rows.map(r=>'<a onclick="pickStock(\''+r.code+'\',\''+(r.name||"").replace(/[\'"]/g,"")+'\')"><span>'+(r.name||"")+'</span><span class="c">'+r.code+'</span></a>').join("")||'<div class="soonrow">결과 없음</div>';
+    E("stkResults").innerHTML=rows.map(r=>{const dn=((LANG==="en"&&r.en)?r.en:r.name)||r.code;return '<a onclick="pickStock(\''+r.code+'\',\''+dn.replace(/[\'"]/g,"")+'\')"><span>'+dn+'</span><span class="c">'+r.code+'</span></a>';}).join("")||'<div class="soonrow">결과 없음</div>';
   },350);
 });
 E("stkq").addEventListener("keydown",function(e){
-  if(e.key==="Enter"&&lastResults.length){pickStock(lastResults[0].code,lastResults[0].name);this.blur();}
+  if(e.key==="Enter"&&lastResults.length){const r=lastResults[0];pickStock(r.code,(LANG==="en"&&r.en)?r.en:r.name);this.blur();}
 });
 function pickStock(code,name){
   stkCode=code; E("stkResults").innerHTML=""; E("stkq").value=name+" ("+code+")";
   E("stkTf").hidden=false; E("stkChart").hidden=false; E("stkChartLbl").hidden=false;
-  E("stkDetail").innerHTML='<div class="soonrow">불러오는 중…</div>';
+  E("stkDetail").innerHTML='<div class="soonrow">'+L("loading")+'</div>';
   loadStock(); loadChart();
   clearInterval(stkTimer); stkTimer=setInterval(loadStock,3000);
 }
@@ -283,25 +317,27 @@ async function loadStock(){
   if(!d||d.error)return;
   const cls=x=>x>0?"up":(x<0?"dn":"fl"), arw=x=>x>0?"▲":(x<0?"▼":""), won=n=>Math.round(n).toLocaleString();
   const co=d.chg_open, cp=d.chg_prev;
+  const nm=(LANG==="en"&&d.en)?d.en:d.name;
   E("stkDetail").innerHTML=
-    '<div class="stkhd">'+d.name+' <span style="color:var(--sub);font-size:13px;font-weight:600">'+d.code+'</span></div>'
+    '<div class="stkhd">'+nm+' <span style="color:var(--sub);font-size:13px;font-weight:600">'+d.code+'</span></div>'
    +'<table class="stktab">'
-   +'<tr><td class="k">현재가</td><td class="v">'+won(d.cur)+'</td></tr>'
-   +'<tr><td class="k">시초가 대비</td><td class="v '+cls(co)+'">'+arw(co)+Math.abs(co).toFixed(2)+'%</td></tr>'
-   +'<tr><td class="k">전일종가 대비</td><td class="v '+cls(cp)+'">'+arw(cp)+Math.abs(cp).toFixed(2)+'%</td></tr>'
-   +'<tr><td class="k">거래량</td><td class="v">'+won(d.vol)+'주</td></tr>'
-   +'<tr><td class="k">거래대금</td><td class="v">'+(d.value!=null?won(d.value)+'억':'-')+'</td></tr>'
-   +'<tr><td class="k">체결강도</td><td class="v '+(d.strength>=100?"up":(d.strength>0?"dn":"fl"))+'">'+(d.strength||0).toFixed(2)+'</td></tr>'
+   +'<tr><td class="k">'+L("price")+'</td><td class="v">'+won(d.cur)+'</td></tr>'
+   +'<tr><td class="k">'+L("vsOpen")+'</td><td class="v '+cls(co)+'">'+arw(co)+Math.abs(co).toFixed(2)+'%</td></tr>'
+   +'<tr><td class="k">'+L("vsPrev")+'</td><td class="v '+cls(cp)+'">'+arw(cp)+Math.abs(cp).toFixed(2)+'%</td></tr>'
+   +'<tr><td class="k">'+L("vol")+'</td><td class="v">'+won(d.vol)+(LANG==="en"?"":"주")+'</td></tr>'
+   +'<tr><td class="k">'+L("turnover")+'</td><td class="v">'+(d.value!=null?won(d.value)+(LANG==="en"?"억KRW":"억"):'-')+'</td></tr>'
+   +'<tr><td class="k">'+L("strength")+'</td><td class="v '+(d.strength>=100?"up":(d.strength>0?"dn":"fl"))+'">'+(d.strength||0).toFixed(2)+'</td></tr>'
    +'</table>';
   stkChart.patchLast(d.cur);          // 차트 마지막 봉 종가를 현재가와 일치
 }
 async function loadChart(){
   if(!stkCode)return;
-  E("stkChartLbl").textContent="차트 불러오는 중…";
+  E("stkChartLbl").textContent=L("chartLoading");
   const d=await krFetch("chart","code="+stkCode+"&tf="+stkTf,14);
-  if(!d||!d.bars){E("stkChartLbl").textContent="차트 없음";return;}
+  if(!d||!d.bars){E("stkChartLbl").textContent=L("chartNone");return;}
   stkChart.setData(d);
-  E("stkChartLbl").textContent="헐 리본 HMA"+d.hl+" · SMA"+d.gate+" · 빨강=저항 초록=지지 · 밀어서 과거·핀치";
+  E("stkChartLbl").textContent=LANG==="en"?("Hull MA"+d.hl+" · SMA"+d.gate+" · red=resist green=support · drag/pinch")
+    :("헐 이동평균선 HMA"+d.hl+" · SMA"+d.gate+" · 빨강=저항 초록=지지 · 밀어서 과거·핀치");
 }
 document.querySelectorAll("#stkTf button").forEach(b=>b.onclick=()=>{
   stkTf=b.dataset.tf;
@@ -439,33 +475,34 @@ E("coinq").addEventListener("input",function(){clearTimeout(coinSearchTimer);con
 E("coinq").addEventListener("keydown",function(e){if(e.key==="Enter"&&coinLast.length){pickCoin(coinLast[0].sym,coinLast[0].name);this.blur();}});
 function pickCoin(sym,name){coinSym=sym;E("coinResults").innerHTML="";E("coinq").value=name+" ("+sym+")";
   E("coinTf").hidden=false;E("coinChart").hidden=false;E("coinChartLbl").hidden=false;
-  E("coinDetail").innerHTML='<div class="soonrow">불러오는 중…</div>';
+  E("coinDetail").innerHTML='<div class="soonrow">'+L("loading")+'</div>';
   loadCoinDetail();loadCoin2Chart();clearInterval(coinTimer);coinTimer=setInterval(loadCoinDetail,3000);}
 async function loadCoinDetail(){if(!coinSym)return;
   try{const d=await fetch("https://api.binance.com/api/v3/ticker/24hr?symbol="+coinSym).then(r=>r.json());
     const p=parseFloat(d.priceChangePercent),cls=p>0?"up":(p<0?"dn":"fl"),arw=p>0?"▲":(p<0?"▼":"");
     E("coinDetail").innerHTML='<div class="stkhd">'+coinSym.replace("USDT","")+' <span style="color:var(--sub);font-size:13px;font-weight:600">'+coinSym+'</span></div>'
      +'<table class="stktab">'
-     +'<tr><td class="k">현재가</td><td class="v">$'+coinFmt(+d.lastPrice)+'</td></tr>'
-     +'<tr><td class="k">24시간 변동율</td><td class="v '+cls+'">'+arw+Math.abs(p).toFixed(2)+'%</td></tr>'
-     +'<tr><td class="k">거래량(24h)</td><td class="v">'+Math.round(+d.volume).toLocaleString()+'</td></tr>'
-     +'<tr><td class="k">거래대금(24h)</td><td class="v">$'+Math.round(+d.quoteVolume).toLocaleString()+'</td></tr>'
+     +'<tr><td class="k">'+L("price")+'</td><td class="v">$'+coinFmt(+d.lastPrice)+'</td></tr>'
+     +'<tr><td class="k">'+L("chg24")+'</td><td class="v '+cls+'">'+arw+Math.abs(p).toFixed(2)+'%</td></tr>'
+     +'<tr><td class="k">'+L("vol24")+'</td><td class="v">'+Math.round(+d.volume).toLocaleString()+'</td></tr>'
+     +'<tr><td class="k">'+L("tv24")+'</td><td class="v">$'+Math.round(+d.quoteVolume).toLocaleString()+'</td></tr>'
      +'</table>';
     coinChart.patchLast(+d.lastPrice);   // 차트 마지막 봉 종가를 현재가와 일치
   }catch(e){}
 }
 document.querySelectorAll("#coinTf button").forEach(b=>b.onclick=()=>{coinTf=b.dataset.tf;
   document.querySelectorAll("#coinTf button").forEach(x=>x.classList.toggle("on",x===b));loadCoin2Chart();});
-async function loadCoin2Chart(){if(!coinSym)return;E("coinChartLbl").textContent="차트 불러오는 중…";
+async function loadCoin2Chart(){if(!coinSym)return;E("coinChartLbl").textContent=L("chartLoading");
   const iv={"3":"3m","5":"5m","15":"15m","30":"30m","60":"1h","D":"1d"}[coinTf]||"1d";
-  let kl;try{kl=await fetch("https://api.binance.com/api/v3/klines?symbol="+coinSym+"&interval="+iv+"&limit=400").then(r=>r.json());}catch(e){E("coinChartLbl").textContent="차트 없음";return;}
-  if(!Array.isArray(kl)||!kl.length){E("coinChartLbl").textContent="차트 없음";return;}
+  let kl;try{kl=await fetch("https://api.binance.com/api/v3/klines?symbol="+coinSym+"&interval="+iv+"&limit=400").then(r=>r.json());}catch(e){E("coinChartLbl").textContent=L("chartNone");return;}
+  if(!Array.isArray(kl)||!kl.length){E("coinChartLbl").textContent=L("chartNone");return;}
   const bars=kl.map(c=>[coinFmtTime(c[0],coinTf),+c[1],+c[2],+c[3],+c[4]]);
   const raw=kl.map(c=>[c[0],+c[1],+c[2],+c[3],+c[4],+c[7]]);
   const closes=bars.map(b=>b[4]),cur=closes[closes.length-1];
   const hma=jhma(closes,100),sma=jsma(closes,120),walls=jwalls(raw,cur),liq=jliq(raw,cur);
   coinChart.setData({bars,hma,sma,hl:100,gate:120,walls,liq});
-  E("coinChartLbl").textContent="헐 리본 HMA100 · SMA120 · 빨강=저항 초록=지지 · 노랑=청산맵(어림) · 밀어서 과거·핀치";
+  E("coinChartLbl").textContent=LANG==="en"?("Hull MA100 · SMA120 · red=resist green=support · yellow=liq map · drag/pinch")
+    :("헐 이동평균선 HMA100 · SMA120 · 빨강=저항 초록=지지 · 노랑=청산맵(어림) · 밀어서 과거·핀치");
 }
 
 // ---- 시계 · 테마 ----
@@ -479,8 +516,23 @@ function usLiveNow(){const k=new Date(Date.now()+new Date().getTimezoneOffset()*
   const d=k.getDay(),m=k.getHours()*60+k.getMinutes();  // 미국 CFD: 주말 휴장
   if(d===0)return false; if(d===6&&m>=360)return false; if(d===1&&m<420)return false; return true;}
 function updStkTag(){const live=krLiveNow();
-  const el=E("stkTag");if(el){el.className="tag "+(live?"live":"delay");el.textContent=live?"● 실시간":"지연(장마감)";}}
+  const el=E("stkTag");if(el){el.className="tag "+(live?"live":"delay");el.textContent=live?L("live"):L("delayed2");}}
 updStkTag();setInterval(updStkTag,20000);
+function applyLang(){
+  var b=E("lng");if(b)b.textContent=LANG==="en"?"한":"EN";
+  var t=E("ttl");if(t)t.innerHTML=L("title")+'<span class="lv">● LIVE</span>';
+  var gn=document.querySelector(".gnote");if(gn)gn.textContent=L("gnote");
+  E("stkq").placeholder=L("stkPH");E("coinq").placeholder=L("coinPH");
+  var sh=document.querySelector("#stock h3");if(sh)sh.innerHTML=L("stockH")+' <span class="tag live" id="stkTag">● 실시간</span>';
+  var ch=document.querySelector("#coin2 h3");if(ch)ch.innerHTML=L("coinH")+' <span class="tag live">'+L("binance")+'</span>';
+  var cc=document.querySelector("#coin-card h3");if(cc)cc.innerHTML=L("coinCardH")+' <span class="tag live">'+L("binance")+'</span>';
+  document.querySelectorAll("#stkTf button,#coinTf button").forEach(function(x){var w=TFW[x.dataset.tf];if(w)x.textContent=w[LANG];});
+  updStkTag();
+  if(window._lastD)render(window._lastD);
+  if(stkCode)loadStock();
+  if(coinSym)loadCoinDetail();
+}
+applyLang();
 function apply(t){document.body.classList.toggle("light",t==="light");document.getElementById("tg").textContent=t==="light"?"☀️":"🌙";}
 function toggle(){const t=document.body.classList.contains("light")?"dark":"light";try{localStorage.setItem("brief_theme",t);}catch(e){}apply(t);}
 (function(){let t;try{t=localStorage.getItem("brief_theme");}catch(e){}
