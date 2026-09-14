@@ -184,20 +184,23 @@ try{var _vid=localStorage.getItem("brief_vid");if(!_vid){_vid=Date.now().toStrin
   if(HUB)fetch(HUB.replace(/\/$/,"")+"/hit?vid="+_vid+"&src="+encodeURIComponent(_src),{mode:"no-cors"}).catch(function(){});}catch(e){}  // 방문 카운트+경로
 // ---- PWA(홈 화면 앱) ----
 if("serviceWorker" in navigator){try{navigator.serviceWorker.register("sw.js").catch(function(){});}catch(e){}}
-var _deferPrompt=null;
+var _deferPrompt=null,_iosHint=false;
 function _standalone(){try{return window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true;}catch(e){return false;}}
 function _installDismissed(){try{return localStorage.getItem("brief_install_x")==="1";}catch(e){return false;}}
 function dismissInstall(){try{localStorage.setItem("brief_install_x","1");}catch(e){}var b=document.getElementById("installBar");if(b)b.hidden=true;}
 function doInstall(){if(_deferPrompt){_deferPrompt.prompt();_deferPrompt.userChoice.then(function(){_deferPrompt=null;dismissInstall();});}}
+function _il(){var en=(typeof LANG!=="undefined"&&LANG==="en");
+  var t=document.getElementById("installTxt"),b=document.getElementById("installBtn");if(!t)return;
+  if(_iosHint){t.textContent=en?"📲 Tap Share → “Add to Home Screen” to use as an app":"📲 공유 버튼 → ‘홈 화면에 추가’로 앱처럼 쓰세요";if(b)b.hidden=true;}
+  else{t.textContent=en?"📲 Add to your home screen and open instantly":"📲 홈 화면에 앱으로 추가하고 바로 여세요";if(b){b.hidden=false;b.textContent=en?"Install":"설치";}}}
 window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();_deferPrompt=e;
-  if(!_standalone()&&!_installDismissed()){var b=document.getElementById("installBar");if(b)b.hidden=false;}});
+  if(!_standalone()&&!_installDismissed()){_il();var b=document.getElementById("installBar");if(b)b.hidden=false;}});
 window.addEventListener("appinstalled",function(){dismissInstall();});
 // iOS 사파리: beforeinstallprompt 없음 → 공유 버튼 안내
 try{var _ua=navigator.userAgent||"";var _iOS=/iPad|iPhone|iPod/.test(_ua)&&!window.MSStream;
   var _safari=/Safari/.test(_ua)&&!/CriOS|FxiOS|EdgiOS/.test(_ua);
   if(_iOS&&_safari&&!_standalone()&&!_installDismissed()){
-    setTimeout(function(){var b=document.getElementById("installBar"),t=document.getElementById("installTxt"),g=document.getElementById("installBtn");
-      if(b&&t){t.textContent="📲 공유 버튼 → ‘홈 화면에 추가’로 앱처럼 쓰세요";if(g)g.hidden=true;b.hidden=false;}},1200);}}catch(e){}
+    setTimeout(function(){_iosHint=true;_il();var b=document.getElementById("installBar");if(b)b.hidden=false;},1200);}}catch(e){}
 // ---- 언어(한/영) ----
 let LANG="ko"; try{var _lp=(new URLSearchParams(location.search)).get("lang");
   LANG=(_lp==="en"||_lp==="ko")?_lp:(localStorage.getItem("brief_lang")||"ko");
@@ -604,6 +607,7 @@ function applyLang(){
   var ch=document.querySelector("#coin2 h3");if(ch)ch.innerHTML=L("coinH")+' <span class="tag live">'+L("binance")+'</span>';
   var cc=document.querySelector("#coin-card h3");if(cc)cc.innerHTML=L("coinCardH")+' <span class="tag live">'+L("binance")+'</span>';
   document.querySelectorAll("#stkTf button,#coinTf button").forEach(function(x){var w=TFW[x.dataset.tf];if(w)x.textContent=w[LANG];});
+  try{if(typeof _il==="function"){var ib=document.getElementById("installBar");if(ib&&!ib.hidden)_il();}}catch(e){}
   updStkTag();
   if(window._lastD)render(window._lastD);
   if(stkCode)loadStock();
