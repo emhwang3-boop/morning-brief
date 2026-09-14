@@ -113,7 +113,7 @@ function render(d){
     if(d.krates&&d.krates.length){
       sKrates='<div class="card"><h3>한국 금리 <span class="tag delay">D 지연</span></h3>'
         +d.krates.map(k=>{const c=k.chg>0?"up":(k.chg<0?"dn":"fl"),a=k.chg>0?"▲":(k.chg<0?"▼":"");
-          return'<div class="row"><span class="nm">'+k.nm+'</span><span class="rt"><span class="val">'+k.val+'</span>'
+          return'<div class="row"><span class="nm">'+k.nm+'</span><span class="rt">'+spark(k.spark)+'<span class="val">'+k.val+'</span>'
           +'<span class="pc '+c+'">'+a+Math.abs(k.chg).toFixed(2)+'%p</span></span></div>';}).join("")+'</div>';
     }
     let sSpreads="";
@@ -173,12 +173,21 @@ else{loadData();setInterval(loadData,60000);}                  // 로컬/깃허�
 // ---- 코인 (바이낸스 실시간) ----
 const COINS=[["비트코인","BTCUSDT"],["이더리움","ETHUSDT"],["리플","XRPUSDT"],["솔라나","SOLUSDT"]];
 function fmt(n){n=+n;return n>=1000?n.toLocaleString(undefined,{maximumFractionDigits:0}):n.toLocaleString(undefined,{maximumFractionDigits:n>=1?2:4});}
+const coinSpark={};   // 심볼→최근 종가 배열(선그래프용, 5분마다 갱신)
+async function loadCoinKlines(){
+  for(const [nm,sym] of COINS){
+    try{const k=await fetch("https://api.binance.com/api/v3/klines?symbol="+sym+"&interval=1h&limit=30").then(r=>r.json());
+      coinSpark[sym]=k.map(c=>+c[4]);}catch(e){}
+  }
+}
+loadCoinKlines();setInterval(loadCoinKlines,300000);
 async function loadCoin(){
   try{const out=[];
     for(const [nm,sym] of COINS){
       const d=await fetch("https://api.binance.com/api/v3/ticker/24hr?symbol="+sym).then(r=>r.json());
       const p=parseFloat(d.priceChangePercent),cls=p>0?"up":(p<0?"dn":"fl"),arw=p>0?"▲":(p<0?"▼":"");
-      out.push('<div class="row"><span class="nm">'+nm+'</span><span class="rt"><span class="val">$'+fmt(d.lastPrice)+'</span>'
+      const sp=(coinSpark[sym]||[]).concat([+d.lastPrice]);
+      out.push('<div class="row"><span class="nm">'+nm+'</span><span class="rt">'+spark(sp)+'<span class="val">$'+fmt(d.lastPrice)+'</span>'
         +'<span class="pc '+cls+'">'+arw+Math.abs(p).toFixed(2)+'%</span></span></div>');}
     document.getElementById("coin").innerHTML=out.join("");
   }catch(e){document.getElementById("coin").innerHTML='<div class="soonrow">코인 불러오기 실패</div>';}
