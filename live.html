@@ -126,7 +126,7 @@ function spark(a){
 }
 function pcrow(it){
   const p=it.pct,cls=p>0?"up":(p<0?"dn":"fl"),arw=p>0?"▲":(p<0?"▼":"");
-  return'<div class="row"><span class="nm">'+tr(it.nm)+'</span><span class="rt">'
+  return'<div class="row"><span class="nm">'+tr(it.nm)+(it.d?' <span style="font-size:9px;color:#e0a020;font-weight:700;vertical-align:middle">D</span>':'')+'</span><span class="rt">'
     +spark(it.spark)+'<span class="val">'+it.val+'</span>'
     +'<span class="pc '+cls+'">'+arw+Math.abs(p).toFixed(2)+'%</span></span></div>';
 }
@@ -189,7 +189,7 @@ function render(d){
       if(!gr.items.length)continue;
       let live=gr.rt;
       if(gr.title==="국내")live=krLiveNow();   // 국내 지수: 평일 08~20시만
-      else if(gr.title==="미국 지수"||gr.title==="원자재")live=gr.rt&&usLiveNow();  // 미국 CFD: 주말 휴장
+      else if(gr.title==="미국 지수"||gr.title==="원자재"||gr.title==="환율·달러"||gr.title==="금리·채권")live=gr.rt&&usLiveNow();  // 미국·FX·금리 CFD: 주말 휴장
       const tag=live?'<span class="tag live">'+L("live")+'</span>':'<span class="tag delay">'+L("closed")+'</span>';
       sGroups+='<div class="card"><h3>'+tr(gr.title)+' '+tag+'</h3>'+gr.items.map(pcrow).join("")+'</div>';
     }
