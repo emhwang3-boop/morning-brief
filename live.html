@@ -191,7 +191,10 @@ function render(d){
       if(gr.title==="국내")live=krLiveNow();   // 국내 지수: 평일 08~20시만
       else if(gr.title==="미국 지수"||gr.title==="원자재")live=gr.rt&&usLiveNow();  // 미국 CFD: 주말 휴장
       const tag=live?'<span class="tag live">'+L("live")+'</span>':'<span class="tag delay">'+L("closed")+'</span>';
-      sGroups+='<div class="card"><h3>'+tr(gr.title)+' '+tag+'</h3>'+gr.items.map(pcrow).join("")+'</div>';
+      let extra="";
+      if(gr.title==="국내"&&d.kr_status){const st=d.kr_status,txt=(LANG==="en"?st.en:st.ko),c=st.open?"#00a868":"#ff433d";
+        extra='<div class="srow" style="color:'+c+';font-weight:700;padding:3px 2px 6px">'+(st.open?"🟢 ":"🔴 ")+txt+'</div>';}
+      sGroups+='<div class="card"><h3>'+tr(gr.title)+' '+tag+'</h3>'+extra+gr.items.map(pcrow).join("")+'</div>';
     }
     let sKrates="";
     if(d.krates&&d.krates.length){
@@ -224,8 +227,9 @@ function render(d){
         +'<span class="ci">'+c.title+'</span><span class="cd">'+c.imp+'</span></div>').join("")+'</div>';
     }
     let sNews="";
-    if(d.news&&d.news.length){
-      sNews='<div class="card"><h3>'+L("newsH")+'</h3>'+d.news.map(s=>
+    const newsSrc=(LANG==="en"&&d.ennews&&d.ennews.length)?d.ennews:d.news;
+    if(newsSrc&&newsSrc.length){
+      sNews='<div class="card"><h3>'+(LANG==="en"?"Headlines":"헤드라인 뉴스")+'</h3>'+newsSrc.map(s=>
         '<div class="nhd">'+s.src+'</div>'+(s.items||[]).map(it=>
           '<a class="nrow" href="'+it.u+'" target="_blank" rel="noopener">'+it.t+'</a>').join("")).join("")+'</div>';
     }
