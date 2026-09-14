@@ -3,6 +3,7 @@
 <title>일일브리핑 LIVE</title>
 <style>
 *{margin:0;box-sizing:border-box}
+[hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 :root{--bg:#0f1420;--card:#171d2b;--bd:#222a3a;--tx:#f4f5f7;--sub:#9aa4b2;--nm:#e8ecf2;--soon:#6b7688}
 body.light{--bg:#f4f5f7;--card:#ffffff;--bd:#e6e8ec;--tx:#1a1a1a;--sub:#667;--nm:#222;--soon:#9aa}
@@ -72,14 +73,14 @@ h1 .lv{color:#ff433d;font-size:12px;font-weight:800;vertical-align:super;margin-
 <div class="asof" id="asof">불러오는 중…</div>
 
 <div class="card" id="stock">
-  <h3>종목 조회 <span class="tag delay">키움 실시간</span></h3>
+  <h3>종목 조회 <span class="tag live">● 실시간</span></h3>
   <input id="stkq" class="stkq" placeholder="종목코드 또는 이름 (예: 005930, 삼성전자)" autocomplete="off">
   <div id="stkResults" class="stkres"></div>
   <div id="stkDetail"></div>
   <div id="stkTf" class="stktf" hidden>
-    <button data-tf="D" class="on">일</button><button data-tf="60">60분</button>
-    <button data-tf="30">30분</button><button data-tf="15">15분</button>
-    <button data-tf="5">5분</button><button data-tf="3">3분</button>
+    <button data-tf="3">3분</button><button data-tf="5">5분</button>
+    <button data-tf="15">15분</button><button data-tf="30">30분</button>
+    <button data-tf="60">60분</button><button data-tf="D" class="on">일</button>
   </div>
   <canvas id="stkChart" class="stkchart" hidden></canvas>
   <div id="stkChartLbl" class="stkcl" hidden></div>
@@ -225,7 +226,7 @@ loadCoin();setInterval(loadCoin,3000);
 // ---- 종목 조회 (키움, 허브 릴레이) ----
 const KRB=HUB?HUB.replace(/\/$/,""):"";
 const E=id=>document.getElementById(id);
-let stkCode=null, stkTf="D", stkTimer=null, searchTimer=null;
+let stkCode=null, stkTf="D", stkTimer=null, searchTimer=null, lastResults=[];
 async function krFetch(op,qs,tries){
   if(!KRB)return null; tries=tries||12;
   for(let i=0;i<tries;i++){
@@ -237,12 +238,16 @@ async function krFetch(op,qs,tries){
 }
 E("stkq").addEventListener("input",function(){
   clearTimeout(searchTimer); const q=this.value.trim();
-  if(q.length<1){E("stkResults").innerHTML="";return;}
+  if(q.length<1){E("stkResults").innerHTML="";lastResults=[];return;}
   searchTimer=setTimeout(async()=>{
     const rows=await krFetch("search","q="+encodeURIComponent(q),4);
+    lastResults=rows||[];
     if(!rows){E("stkResults").innerHTML='<div class="soonrow">검색 중…</div>';return;}
     E("stkResults").innerHTML=rows.map(r=>'<a onclick="pickStock(\''+r.code+'\',\''+(r.name||"").replace(/[\'"]/g,"")+'\')"><span>'+(r.name||"")+'</span><span class="c">'+r.code+'</span></a>').join("")||'<div class="soonrow">결과 없음</div>';
   },350);
+});
+E("stkq").addEventListener("keydown",function(e){
+  if(e.key==="Enter"&&lastResults.length){pickStock(lastResults[0].code,lastResults[0].name);this.blur();}
 });
 function pickStock(code,name){
   stkCode=code; E("stkResults").innerHTML=""; E("stkq").value=name+" ("+code+")";
@@ -310,7 +315,7 @@ function drawHull(cv,d){
 
 // ---- 시계 · 테마 ----
 function tick(){const d=new Date();document.getElementById("clk").textContent=
-  d.toLocaleTimeString("ko-KR",{hour12:false})+" "+["일","월","화","수","목","금","토"][d.getDay()];}
+  d.toLocaleTimeString("ko-KR",{hour12:false});}
 tick();setInterval(tick,1000);
 function apply(t){document.body.classList.toggle("light",t==="light");document.getElementById("tg").textContent=t==="light"?"☀️":"🌙";}
 function toggle(){const t=document.body.classList.contains("light")?"dark":"light";try{localStorage.setItem("brief_theme",t);}catch(e){}apply(t);}
