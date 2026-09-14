@@ -225,6 +225,7 @@ function render(d){
       const col=wk?"#ff433d":(openNow?"#00a868":"var(--sub)");
       let h='<div class="card injh"><h3>'+(en?"Korea Market Status":"국내 증시 현황")+'</h3>';
       h+='<div class="srow" style="font-weight:700;color:'+col+'">'+icon+' '+stx+'</div>';
+      h+='<div class="srow" style="font-size:11px;color:var(--soon)">'+(en?"Business hours 08:00 – 20:00 (KST)":"운영시간 08:00 – 20:00 (KST)")+'</div>';
       if(st.today_exp)h+='<div class="srow" style="font-weight:700;color:#e0a020">⚠ '+(en?(st.today_quad?"Quadruple witching today":"Options expiry today"):(st.today_quad?"오늘 네 마녀(동시만기)":"오늘 옵션 만기"))+'</div>';
       else if(st.next_exp)h+='<div class="srow" style="color:var(--sub)">'+(en?("Next expiry "+st.next_exp+(st.next_quad?" (quad witching)":" (options)")):("다음 만기 "+st.next_exp+(st.next_quad?" (네 마녀)":" (옵션)")))+'</div>';
       sSpecial=h+'</div>';
