@@ -2,6 +2,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0f1420">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="일일브리핑">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
 <title>일일브리핑 LIVE</title>
 <meta property="og:title" content="일일브리핑 LIVE — 코스피·미국·코인 실시간">
 <meta property="og:description" content="폰에서 종목·코인 실시간 시세 · 헐 이동평균선 · 지지/저항 · 청산맵 · 매일 브리핑. 무료.">
@@ -59,6 +67,10 @@ h1 .lv{color:#ff433d;font-size:12px;font-weight:800;vertical-align:super;margin-
 .cd{color:#e0a020;font-size:10px}
 .nhd{font-weight:800;color:var(--nm);font-size:13px;margin:8px 0 2px}
 .nrow{display:block;color:var(--nm);text-decoration:none;font-size:13px;padding:5px 2px;border-bottom:1px solid var(--bd);opacity:.9}
+#installBar{display:flex;align-items:center;gap:8px;background:#12233a;border:1px solid #2a5580;color:#cfe4ff;border-radius:10px;padding:8px 12px;margin:6px 0 10px;font-size:13px}
+body.light #installBar{background:#eaf3ff;border-color:#b9d5f5;color:#1a4b7a}
+#installBar button{margin-left:auto;background:#1b3a5a;border:1px solid #2a5580;color:#5db4ff;border-radius:8px;padding:5px 12px;font-weight:700;cursor:pointer;white-space:nowrap}
+#installBar .ix{color:#7a889c;cursor:pointer;padding:0 2px;font-size:15px}
 .injh .srow{padding:6px 2px;color:var(--nm);font-size:14px}
 .injh h3{color:var(--sub);font-size:13px;margin-bottom:4px}.injh .chdr{color:var(--soon);font-size:11px;font-weight:400}
 @media(max-width:520px){
@@ -100,6 +112,7 @@ h1 .lv{color:#ff433d;font-size:12px;font-weight:800;vertical-align:super;margin-
    <button class="tgl" id="tg" onclick="toggle()">🌙</button></div>
 </div>
 <div class="asof" id="asof">불러오는 중…</div>
+<div id="installBar" hidden><span id="installTxt">📲 홈 화면에 앱으로 추가하고 바로 여세요</span><button id="installBtn" onclick="doInstall()">설치</button><span class="ix" onclick="dismissInstall()">✕</span></div>
 
 <div class="card" id="stock">
   <h3>종목 조회 <span class="tag live" id="stkTag">● 실시간</span></h3>
@@ -169,6 +182,22 @@ try{var _vid=localStorage.getItem("brief_vid");if(!_vid){_vid=Date.now().toStrin
     else if(/naver|blog/i.test(_r))_src="blog";else if(/kakao|kko|daum/i.test(_r))_src="kt";
     else if(/telegram|t\.me/i.test(_r))_src="tg";else _src=_r?"ref":"direct";}
   if(HUB)fetch(HUB.replace(/\/$/,"")+"/hit?vid="+_vid+"&src="+encodeURIComponent(_src),{mode:"no-cors"}).catch(function(){});}catch(e){}  // 방문 카운트+경로
+// ---- PWA(홈 화면 앱) ----
+if("serviceWorker" in navigator){try{navigator.serviceWorker.register("sw.js").catch(function(){});}catch(e){}}
+var _deferPrompt=null;
+function _standalone(){try{return window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true;}catch(e){return false;}}
+function _installDismissed(){try{return localStorage.getItem("brief_install_x")==="1";}catch(e){return false;}}
+function dismissInstall(){try{localStorage.setItem("brief_install_x","1");}catch(e){}var b=document.getElementById("installBar");if(b)b.hidden=true;}
+function doInstall(){if(_deferPrompt){_deferPrompt.prompt();_deferPrompt.userChoice.then(function(){_deferPrompt=null;dismissInstall();});}}
+window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();_deferPrompt=e;
+  if(!_standalone()&&!_installDismissed()){var b=document.getElementById("installBar");if(b)b.hidden=false;}});
+window.addEventListener("appinstalled",function(){dismissInstall();});
+// iOS 사파리: beforeinstallprompt 없음 → 공유 버튼 안내
+try{var _ua=navigator.userAgent||"";var _iOS=/iPad|iPhone|iPod/.test(_ua)&&!window.MSStream;
+  var _safari=/Safari/.test(_ua)&&!/CriOS|FxiOS|EdgiOS/.test(_ua);
+  if(_iOS&&_safari&&!_standalone()&&!_installDismissed()){
+    setTimeout(function(){var b=document.getElementById("installBar"),t=document.getElementById("installTxt"),g=document.getElementById("installBtn");
+      if(b&&t){t.textContent="📲 공유 버튼 → ‘홈 화면에 추가’로 앱처럼 쓰세요";if(g)g.hidden=true;b.hidden=false;}},1200);}}catch(e){}
 // ---- 언어(한/영) ----
 let LANG="ko"; try{var _lp=(new URLSearchParams(location.search)).get("lang");
   LANG=(_lp==="en"||_lp==="ko")?_lp:(localStorage.getItem("brief_lang")||"ko");
