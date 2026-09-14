@@ -59,7 +59,7 @@ h1 .lv{color:#ff433d;font-size:12px;font-weight:800;vertical-align:super;margin-
 .stktab td.k{color:var(--sub);white-space:nowrap}
 .stktab td.v{text-align:right;font-weight:800;font-variant-numeric:tabular-nums;color:var(--nm)}
 .stkhd{font-size:17px;font-weight:800;color:var(--nm);margin-top:2px}
-.stkchart{width:100%;height:230px;margin-top:10px;display:block;border-radius:8px}
+.stkchart{width:100%;height:240px;margin-top:10px;display:block;border-radius:8px;touch-action:none;cursor:crosshair}
 .stkcl{font-size:11px;color:var(--sub);margin-top:3px;text-align:center}
 .stktf{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
 .stktf button{flex:1;min-width:42px;background:var(--bg);border:1px solid var(--bd);color:var(--sub);border-radius:7px;padding:5px 0;font-size:12px;cursor:pointer}
@@ -278,47 +278,107 @@ async function loadChart(){
   E("stkChartLbl").textContent="차트 불러오는 중…";
   const d=await krFetch("chart","code="+stkCode+"&tf="+stkTf,14);
   if(!d||!d.bars){E("stkChartLbl").textContent="차트 없음";return;}
-  drawHull(E("stkChart"),d);
-  E("stkChartLbl").textContent="헐 리본 HMA"+d.hl+"(상승초록·하락빨강) · SMA"+d.gate+"(회색) · "+(stkTf==="D"?"일봉":stkTf+"분봉")+" "+d.bars.length+"개";
+  setChart(d);
+  E("stkChartLbl").textContent="헐 리본 HMA"+d.hl+" · SMA"+d.gate+" · 빨강선=저항 초록선=지지 · 밀어서 과거 · 우클릭/길게=측정자";
 }
 document.querySelectorAll("#stkTf button").forEach(b=>b.onclick=()=>{
   stkTf=b.dataset.tf;
   document.querySelectorAll("#stkTf button").forEach(x=>x.classList.toggle("on",x===b));
   loadChart();
 });
-function drawHull(cv,d){
-  const bars=d.bars,hma=d.hma,sma=d.sma,N=bars.length; if(!N)return;
-  const dpr=window.devicePixelRatio||1, W=cv.clientWidth, H=cv.clientHeight;
-  cv.width=W*dpr; cv.height=H*dpr;
+// ---- 인터랙티브 헐 차트 (팬/줌·십자선·측정자·지지저항) ----
+let CH=null, VIEW={start:0,count:120}, CROSS=null, RULER=null, GEO=null;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function setChart(d){
+  CH=d; const N=d.bars.length;
+  VIEW.count=Math.min(120,N||1); VIEW.start=Math.max(0,N-VIEW.count);
+  CROSS=null; RULER=null; drawChart();
+}
+function drawChart(){
+  const cv=E("stkChart"); if(!CH||!CH.bars.length)return;
+  const bars=CH.bars,hma=CH.hma,sma=CH.sma,N=bars.length,W=cv.clientWidth,H=cv.clientHeight;
+  const dpr=window.devicePixelRatio||1; cv.width=W*dpr; cv.height=H*dpr;
   const ctx=cv.getContext("2d"); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,W,H);
-  const x0=6,x1=W-48,y0=8,y1=H-8;
+  let cnt=clamp(Math.round(VIEW.count),20,N), start=clamp(Math.round(VIEW.start),0,Math.max(0,N-cnt));
+  VIEW.count=cnt; VIEW.start=start; const end=start+cnt;
+  const x0=6,x1=W-54,y0=8,y1=H-16, cur=bars[N-1][4];
   let lo=Infinity,hi=-Infinity;
-  for(const b of bars){lo=Math.min(lo,b[3]);hi=Math.max(hi,b[2]);}
-  for(const a of [hma,sma])for(const v of a)if(v!=null){lo=Math.min(lo,v);hi=Math.max(hi,v);}
+  for(let i=start;i<end;i++){lo=Math.min(lo,bars[i][3]);hi=Math.max(hi,bars[i][2]);
+    for(const a of [hma,sma]){const v=a[i];if(v!=null){lo=Math.min(lo,v);hi=Math.max(hi,v);}}}
+  const wl=CH.walls||{};
+  for(const w of [wl.up,wl.dn])if(w&&Math.abs(w[0]/cur-1)<0.3){lo=Math.min(lo,w[0]);hi=Math.max(hi,w[0]);}
   if(!(hi>lo))hi=lo+1; const pd=(hi-lo)*0.06; lo-=pd; hi+=pd;
-  const X=i=>x0+(x1-x0)*(N<=1?0.5:i/(N-1)), Y=v=>y1-(y1-y0)*(v-lo)/(hi-lo);
-  const cw=Math.max(1,(x1-x0)/N*0.6);
-  for(let i=0;i<N;i++){const b=bars[i],up=b[4]>=b[1],col=up?"#00a868":"#ff433d",xc=X(i);
+  const X=i=>x0+(x1-x0)*(cnt<=1?0.5:(i-start)/(cnt-1)), Y=v=>y1-(y1-y0)*(v-lo)/(hi-lo);
+  GEO={x0,x1,y0,y1,start,cnt,lo,hi,N};
+  const cw=Math.max(1,(x1-x0)/cnt*0.62);
+  for(let i=start;i<end;i++){const b=bars[i],up=b[4]>=b[1],col=up?"#00a868":"#ff433d",xc=X(i);
     ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=1;
     ctx.beginPath();ctx.moveTo(xc,Y(b[2]));ctx.lineTo(xc,Y(b[3]));ctx.stroke();
     const yo=Y(b[1]),yc=Y(b[4]);ctx.fillRect(xc-cw/2,Math.min(yo,yc),cw,Math.max(1,Math.abs(yc-yo)));}
-  const line=(arr,color,w)=>{ctx.strokeStyle=color;ctx.lineWidth=w;ctx.beginPath();let st=false;
-    for(let i=0;i<N;i++){const v=arr[i];if(v==null){st=false;continue;}const xx=X(i),yy=Y(v);
-      if(!st){ctx.moveTo(xx,yy);st=true;}else ctx.lineTo(xx,yy);}ctx.stroke();};
-  line(sma,"#8a93a3",1.3);
-  // HMA 리본: 상승(HMA[i]>HMA[i-2])=초록, 하락=빨강 (데스크톱 헐탭과 동일)
-  ctx.lineWidth=2.6; ctx.lineCap="round";
-  for(let i=1;i<N;i++){const a=hma[i-1],b=hma[i];if(a==null||b==null)continue;
-    const ref=hma[i-2];const up=(ref!=null)?(b>ref):(b>=a);
-    ctx.strokeStyle=up?"#00c853":"#ff433d";
+  ctx.strokeStyle="#8a93a3";ctx.lineWidth=1.3;ctx.beginPath();let st=false;
+  for(let i=start;i<end;i++){const v=sma[i];if(v==null){st=false;continue;}const xx=X(i),yy=Y(v);if(!st){ctx.moveTo(xx,yy);st=true;}else ctx.lineTo(xx,yy);}ctx.stroke();
+  ctx.lineWidth=2.6;ctx.lineCap="round";
+  for(let i=Math.max(start,1);i<end;i++){const a=hma[i-1],b=hma[i];if(a==null||b==null)continue;
+    const ref=hma[i-2],up=(ref!=null)?(b>ref):(b>=a);ctx.strokeStyle=up?"#00c853":"#ff433d";
     ctx.beginPath();ctx.moveTo(X(i-1),Y(a));ctx.lineTo(X(i),Y(b));ctx.stroke();}
   ctx.lineCap="butt";
-  ctx.fillStyle=(getComputedStyle(document.body).getPropertyValue("--sub")||"#889").trim();
-  ctx.font="10px sans-serif";ctx.textAlign="left";
-  ctx.fillText(Math.round(hi).toLocaleString(),x1+3,y0+8);
+  const drawWall=(w,isUp)=>{if(!w)return;const y=Y(w[0]);if(y<y0||y>y1)return;
+    const col=isUp?"#ff6b6b":"#26c281";ctx.strokeStyle=col;ctx.lineWidth=1+2*(w[1]||0);
+    ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(x0,y);ctx.lineTo(x1,y);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle=col;ctx.font="9px sans-serif";ctx.textAlign="right";
+    const pc=(w[0]/cur-1)*100;
+    ctx.fillText((isUp?"저항 ":"지지 ")+Math.round(w[0]).toLocaleString()+" ("+(pc>=0?"+":"")+pc.toFixed(1)+"%)",x1-2,y-2);};
+  drawWall(wl.up,true); drawWall(wl.dn,false);
+  ctx.textAlign="left";ctx.font="10px sans-serif";
+  const subc=(getComputedStyle(document.body).getPropertyValue("--sub")||"#889").trim();
+  ctx.fillStyle=subc;ctx.fillText(Math.round(hi).toLocaleString(),x1+3,y0+8);
   ctx.fillText(Math.round(lo).toLocaleString(),x1+3,y1);
-  const lc=bars[N-1][4];ctx.fillStyle="#5db4ff";ctx.fillText(Math.round(lc).toLocaleString(),x1+3,Y(lc)+3);
+  ctx.fillStyle="#5db4ff";ctx.fillText(Math.round(cur).toLocaleString(),x1+3,clamp(Y(cur),y0+8,y1));
+  if(RULER!=null&&CROSS!=null){const i0=clamp(RULER,start,end-1),i1=clamp(CROSS.i,start,end-1);
+    const xa=X(i0),xb=X(i1);ctx.fillStyle="rgba(93,180,255,0.12)";ctx.fillRect(Math.min(xa,xb),y0,Math.abs(xb-xa),y1-y0);
+    const c0=bars[i0][4],c1=bars[i1][4],dp=c1-c0,pct=(c1/c0-1)*100,nb=Math.abs(i1-i0);
+    ctx.strokeStyle="#5db4ff";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(xa,Y(c0));ctx.lineTo(xb,Y(c1));ctx.stroke();
+    ctx.fillStyle="#5db4ff";ctx.font="10px sans-serif";ctx.textAlign="left";
+    ctx.fillText((pct>=0?"+":"")+pct.toFixed(2)+"% / "+(dp>=0?"+":"")+Math.round(dp).toLocaleString()+" / "+nb+"봉",Math.min(xa,xb)+4,y0+22);}
+  if(CROSS!=null){const ci=clamp(CROSS.i,start,end-1),xc=X(ci),b=bars[ci];
+    ctx.strokeStyle="rgba(140,150,170,0.75)";ctx.lineWidth=0.7;ctx.setLineDash([3,3]);
+    ctx.beginPath();ctx.moveTo(xc,y0);ctx.lineTo(xc,y1);ctx.stroke();
+    if(CROSS.py!=null){ctx.beginPath();ctx.moveTo(x0,CROSS.py);ctx.lineTo(x1,CROSS.py);ctx.stroke();}
+    ctx.setLineDash([]);
+    ctx.fillStyle="#0b1220";ctx.fillRect(xc-38,y1+1,76,13);ctx.fillStyle="#cfd6e0";ctx.font="9px sans-serif";ctx.textAlign="center";ctx.fillText(b[0],xc,y1+11);
+    if(CROSS.py!=null){const pv=lo+(y1-CROSS.py)/(y1-y0)*(hi-lo);
+      ctx.fillStyle="#0b1220";ctx.fillRect(x1+1,CROSS.py-7,53,14);ctx.fillStyle="#5db4ff";ctx.textAlign="left";ctx.fillText(Math.round(pv).toLocaleString(),x1+3,CROSS.py+3);}
+    ctx.fillStyle=subc;ctx.textAlign="left";ctx.font="10px sans-serif";
+    ctx.fillText("시"+Math.round(b[1]).toLocaleString()+" 고"+Math.round(b[2]).toLocaleString()+" 저"+Math.round(b[3]).toLocaleString()+" 종"+Math.round(b[4]).toLocaleString(),x0+2,y0+9);}
 }
+(function(){
+  const cv=E("stkChart"); if(!cv)return;
+  let down=false,sx=0,sStart=0,lpTimer=null,pinch=null;
+  const rel=(e)=>{const r=cv.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return{x:t.clientX-r.left,y:t.clientY-r.top};};
+  const idxAt=(px)=>GEO?clamp(Math.round(GEO.start+(px-GEO.x0)/(GEO.x1-GEO.x0)*(GEO.cnt-1)),0,GEO.N-1):0;
+  const barW=()=>GEO?(GEO.x1-GEO.x0)/GEO.cnt:1;
+  cv.addEventListener("mousemove",e=>{if(!CH)return;const p=rel(e);
+    if(down){VIEW.start=clamp(sStart-Math.round((p.x-sx)/barW()),0,CH.bars.length-VIEW.count);}
+    CROSS={i:idxAt(p.x),py:p.y};drawChart();});
+  cv.addEventListener("mousedown",e=>{if(e.button!==0)return;const p=rel(e);down=true;sx=p.x;sStart=VIEW.start;});
+  window.addEventListener("mouseup",()=>{down=false;});
+  cv.addEventListener("mouseleave",()=>{down=false;CROSS=null;drawChart();});
+  cv.addEventListener("wheel",e=>{if(!CH)return;e.preventDefault();const p=rel(e),N=CH.bars.length;
+    const f=e.deltaY>0?1.18:1/1.18,nc=clamp(Math.round(VIEW.count*f),20,N),ci=idxAt(p.x),frac=(ci-VIEW.start)/VIEW.count;
+    VIEW.start=clamp(Math.round(ci-frac*nc),0,N-nc);VIEW.count=nc;drawChart();},{passive:false});
+  cv.addEventListener("contextmenu",e=>{e.preventDefault();RULER=(RULER!=null)?null:(CROSS?CROSS.i:(GEO?GEO.start+GEO.cnt-1:0));drawChart();});
+  cv.addEventListener("touchstart",e=>{if(!CH)return;
+    if(e.touches.length===2){pinch={d:Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY),c:VIEW.count};if(lpTimer)clearTimeout(lpTimer);lpTimer=null;down=false;return;}
+    const p=rel(e);down=true;sx=p.x;sStart=VIEW.start;CROSS={i:idxAt(p.x),py:p.y};drawChart();
+    lpTimer=setTimeout(()=>{RULER=(RULER!=null)?null:idxAt(p.x);drawChart();},500);},{passive:false});
+  cv.addEventListener("touchmove",e=>{if(!CH)return;e.preventDefault();
+    if(e.touches.length===2&&pinch){const nd=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+      const N=CH.bars.length,nc=clamp(Math.round(pinch.c*pinch.d/Math.max(1,nd)),20,N),e0=VIEW.start+VIEW.count;VIEW.count=nc;VIEW.start=clamp(e0-nc,0,N-nc);drawChart();return;}
+    const p=rel(e);if(Math.abs(p.x-sx)>8&&lpTimer){clearTimeout(lpTimer);lpTimer=null;}
+    if(down){VIEW.start=clamp(sStart-Math.round((p.x-sx)/barW()),0,CH.bars.length-VIEW.count);}
+    CROSS={i:idxAt(p.x),py:p.y};drawChart();},{passive:false});
+  cv.addEventListener("touchend",()=>{down=false;pinch=null;if(lpTimer)clearTimeout(lpTimer);lpTimer=null;});
+})();
 
 // ---- 시계 · 테마 ----
 function tick(){const d=new Date();document.getElementById("clk").textContent=
