@@ -351,7 +351,8 @@ async function loadCoin(){
       const d=await fetch("https://api.binance.com/api/v3/ticker/24hr?symbol="+sym).then(r=>r.json());
       const p=parseFloat(d.priceChangePercent),cls=p>0?"up":(p<0?"dn":"fl"),arw=p>0?"▲":(p<0?"▼":"");
       const sp=(coinSpark[sym]||[]).concat([+d.lastPrice]);
-      out.push('<div class="row"><span class="nm">'+nm+'</span><span class="rt">'+spark(sp)+'<span class="val">$'+fmt(d.lastPrice)+'</span>'
+      const cnm=(LANG==="en"?sym.replace("USDT",""):nm);
+      out.push('<div class="row"><span class="nm">'+cnm+'</span><span class="rt">'+spark(sp)+'<span class="val">$'+fmt(d.lastPrice)+'</span>'
         +'<span class="pc '+cls+'">'+arw+Math.abs(p).toFixed(2)+'%</span></span></div>');}
     document.getElementById("coin").innerHTML=out.join("");
   }catch(e){document.getElementById("coin").innerHTML='<div class="soonrow">코인 불러오기 실패</div>';}
