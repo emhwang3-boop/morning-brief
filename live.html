@@ -114,7 +114,7 @@ body.light #installBar{background:#eaf3ff;border-color:#b9d5f5;color:#1a4b7a}
    <button class="tgl" id="tg" onclick="toggle()">🌙</button></div>
 </div>
 <div class="asof" id="asof">불러오는 중…</div>
-<div id="installBar" hidden><span id="installTxt">📲 홈 화면에 앱으로 추가하고 바로 여세요</span><button id="installBtn" onclick="doInstall()">설치</button><span class="ix" onclick="dismissInstall()">✕</span></div>
+<div id="installBar" hidden><span id="installTxt">📲 홈 화면에 앱으로 추가하고 바로 여세요</span><button id="installBtn" onclick="doInstall()">앱설치</button><span class="ix" onclick="dismissInstall()">✕</span></div>
 
 <div class="card" id="stock">
   <h3>종목 조회 <span class="tag live" id="stkTag">● 실시간</span></h3>
@@ -207,9 +207,9 @@ function doInstall(){
 function _il(){var en=false;try{en=(LANG==="en");}catch(e){}
   var t=document.getElementById("installTxt"),b=document.getElementById("installBtn");if(!t)return;
   if(b)b.hidden=false;
-  if(_deferPrompt){t.textContent=en?"📲 Add to your home screen and open instantly":"📲 홈 화면에 앱으로 추가하고 바로 여세요";if(b)b.textContent=en?"Install":"설치";return;}
+  if(_deferPrompt){t.textContent=en?"📲 Add to your home screen and open instantly":"📲 홈 화면에 앱으로 추가하고 바로 여세요";if(b)b.textContent=en?"Install app":"앱설치";return;}
   if(_inapp&&(_kakao||_android)){t.textContent=en?"📲 Install works in "+(_iOS?"Safari":"Chrome"):"📲 앱 설치는 "+(_iOS?"사파리":"크롬")+"에서 됩니다";if(b)b.textContent=en?"Open in "+(_iOS?"Safari":"Chrome"):(_iOS?"사파리로 열기":"크롬으로 열기");return;}
-  if(b)b.textContent=en?"Install":"설치";
+  if(b)b.textContent=en?"Install app":"앱설치";
   if(!_iosHint){t.textContent=en?"📲 Add to your home screen and open instantly":"📲 홈 화면에 앱으로 추가하고 바로 여세요";return;}
   if(_inapp)t.textContent=en?"📲 Menu (⋯) → “Open in "+(_iOS?"Safari":"browser")+"”, then add to home screen":"📲 메뉴(⋯) → ‘"+(_iOS?"Safari":"다른 브라우저")+"로 열기’ 후 홈 화면에 추가";
   else if(_iOS)t.textContent=en?"📲 Tap Share → “Add to Home Screen”":"📲 공유 버튼 → ‘홈 화면에 추가’";
