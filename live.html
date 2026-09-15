@@ -186,23 +186,40 @@ try{var _vid=localStorage.getItem("brief_vid");if(!_vid){_vid=Date.now().toStrin
   if(HUB)fetch(HUB.replace(/\/$/,"")+"/hit?vid="+_vid+"&src="+encodeURIComponent(_src),{mode:"no-cors"}).catch(function(){});}catch(e){}  // 방문 카운트+경로
 // ---- PWA(홈 화면 앱) ----
 if("serviceWorker" in navigator){try{navigator.serviceWorker.register("sw.js").catch(function(){});}catch(e){}}
+// 설치바는 앱으로 실행 중이 아니면 무조건 뜬다. 설치 신호(beforeinstallprompt)가 없는 곳(인앱브라우저·이미 설치·삼성 등)은 버튼이 안내/바깥 브라우저로 넘김
 var _deferPrompt=null,_iosHint=false;
+var _ua=navigator.userAgent||"";
+var _iOS=/iPad|iPhone|iPod/.test(_ua)||(/Macintosh/.test(_ua)&&navigator.maxTouchPoints>1);
+var _android=/Android/i.test(_ua);
+var _kakao=/KAKAOTALK/i.test(_ua);
+var _inapp=_kakao||/NAVER\(|Instagram|FBAN|FBAV|Line\/|DaumApps|everytimeApp|Telegram|; wv\)/i.test(_ua)||(_iOS&&!/Safari/.test(_ua));
+var _samsung=/SamsungBrowser/i.test(_ua);
 function _standalone(){try{return window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true;}catch(e){return false;}}
-function _installDismissed(){try{return localStorage.getItem("brief_install_x")==="1";}catch(e){return false;}}
-function dismissInstall(){try{localStorage.setItem("brief_install_x","1");}catch(e){}var b=document.getElementById("installBar");if(b)b.hidden=true;}
-function doInstall(){if(_deferPrompt){_deferPrompt.prompt();_deferPrompt.userChoice.then(function(){_deferPrompt=null;dismissInstall();});}}
-function _il(){var en=(typeof LANG!=="undefined"&&LANG==="en");
+function dismissInstall(){var b=document.getElementById("installBar");if(b)b.hidden=true;}  // 이번 화면에서만 닫힘
+function _openExternal(){var u=location.href;
+  if(_kakao){location.href="kakaotalk://web/openExternal?url="+encodeURIComponent(u);return true;}
+  if(_android){location.href="intent://"+location.host+location.pathname+location.search+"#Intent;scheme=https;package=com.android.chrome;end";return true;}
+  return false;}
+function doInstall(){
+  if(_deferPrompt){_deferPrompt.prompt();_deferPrompt.userChoice.then(function(){_deferPrompt=null;});return;}
+  if(_inapp&&_openExternal())return;
+  _iosHint=true;_il();}
+function _il(){var en=false;try{en=(LANG==="en");}catch(e){}
   var t=document.getElementById("installTxt"),b=document.getElementById("installBtn");if(!t)return;
-  if(_iosHint){t.textContent=en?"📲 Tap Share → “Add to Home Screen” to use as an app":"📲 공유 버튼 → ‘홈 화면에 추가’로 앱처럼 쓰세요";if(b)b.hidden=true;}
-  else{t.textContent=en?"📲 Add to your home screen and open instantly":"📲 홈 화면에 앱으로 추가하고 바로 여세요";if(b){b.hidden=false;b.textContent=en?"Install":"설치";}}}
-window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();_deferPrompt=e;
-  if(!_standalone()&&!_installDismissed()){_il();var b=document.getElementById("installBar");if(b)b.hidden=false;}});
+  if(b)b.hidden=false;
+  if(_deferPrompt){t.textContent=en?"📲 Add to your home screen and open instantly":"📲 홈 화면에 앱으로 추가하고 바로 여세요";if(b)b.textContent=en?"Install":"설치";return;}
+  if(_inapp&&(_kakao||_android)){t.textContent=en?"📲 Install works in "+(_iOS?"Safari":"Chrome"):"📲 앱 설치는 "+(_iOS?"사파리":"크롬")+"에서 됩니다";if(b)b.textContent=en?"Open in "+(_iOS?"Safari":"Chrome"):(_iOS?"사파리로 열기":"크롬으로 열기");return;}
+  if(b)b.textContent=en?"Install":"설치";
+  if(!_iosHint){t.textContent=en?"📲 Add to your home screen and open instantly":"📲 홈 화면에 앱으로 추가하고 바로 여세요";return;}
+  if(_inapp)t.textContent=en?"📲 Menu (⋯) → “Open in "+(_iOS?"Safari":"browser")+"”, then add to home screen":"📲 메뉴(⋯) → ‘"+(_iOS?"Safari":"다른 브라우저")+"로 열기’ 후 홈 화면에 추가";
+  else if(_iOS)t.textContent=en?"📲 Tap Share → “Add to Home Screen”":"📲 공유 버튼 → ‘홈 화면에 추가’";
+  else if(_samsung)t.textContent=en?"📲 Menu (≡) → “Add page to” → “Home screen”":"📲 메뉴(≡) → ‘현재 페이지 추가’ → ‘홈 화면’";
+  else if(_android)t.textContent=en?"📲 Menu (⋮) → “Add to Home screen” or “Install app”":"📲 메뉴(⋮) → ‘홈 화면에 추가’ 또는 ‘앱 설치’";
+  else t.textContent=en?"📲 Click the install icon at the right of the address bar":"📲 주소창 오른쪽 설치 아이콘을 누르세요";}
+window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();_deferPrompt=e;_iosHint=false;_il();});
 window.addEventListener("appinstalled",function(){dismissInstall();});
-// iOS 사파리: beforeinstallprompt 없음 → 공유 버튼 안내
-try{var _ua=navigator.userAgent||"";var _iOS=/iPad|iPhone|iPod/.test(_ua)&&!window.MSStream;
-  var _safari=/Safari/.test(_ua)&&!/CriOS|FxiOS|EdgiOS/.test(_ua);
-  if(_iOS&&_safari&&!_standalone()&&!_installDismissed()){
-    setTimeout(function(){_iosHint=true;_il();var b=document.getElementById("installBar");if(b)b.hidden=false;},1200);}}catch(e){}
+function _showInstall(){if(_standalone())return;_il();var b=document.getElementById("installBar");if(b)b.hidden=false;}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",_showInstall);else _showInstall();
 // ---- 언어(한/영) ----
 let LANG="ko"; try{var _lp=(new URLSearchParams(location.search)).get("lang");
   LANG=(_lp==="en"||_lp==="ko")?_lp:(localStorage.getItem("brief_lang")||"ko");
