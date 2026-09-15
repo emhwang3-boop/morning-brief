@@ -256,8 +256,10 @@ function render(d){
     for(const gr of d.groups){
       if(!gr.items.length)continue;
       let live=gr.rt;
-      if(gr.title==="국내")live=krLiveNow();   // 국내 지수: 평일 08~20시만
-      else if(gr.title==="미국 지수"||gr.title==="원자재"||gr.title==="환율·달러"||gr.title==="금리·채권")live=gr.rt&&usLiveNow();  // 미국·FX·금리 CFD: 주말 휴장
+      if(gr.title==="국내")live=krLiveNow();                              // 국내: 평일 08~20시
+      else if(gr.title==="미국 지수")live=gr.rt&&usIndexLive();            // 미국주식: 정규장 09:30~16:00 ET
+      else if(gr.title==="원자재"||gr.title==="금리·채권")live=gr.rt&&usFutLive();  // CME 선물: ~24h
+      else if(gr.title==="환율·달러")live=gr.rt&&usFxLive();               // FX: 24h
       const tag=live?'<span class="tag live">'+L("live")+'</span>':'<span class="tag delay">'+L("closed")+'</span>';
       sGroups+='<div class="card"><h3>'+tr(gr.title)+' '+tag+'</h3>'+gr.items.map(pcrow).join("")+'</div>';
     }
@@ -665,9 +667,20 @@ tick();setInterval(tick,1000);
 // 종목 실시간 태그 — 정규장(평일 09:00~15:30 KST)만 켠다. 그 외엔 지연.
 function krLiveNow(){const k=new Date(Date.now()+new Date().getTimezoneOffset()*60000+324e5);
   const m=k.getHours()*60+k.getMinutes();return k.getDay()>=1&&k.getDay()<=5&&m>=480&&m<1200;} // 평일 08:00~20:00
-function usLiveNow(){const k=new Date(Date.now()+new Date().getTimezoneOffset()*60000+324e5);
-  const d=k.getDay(),m=k.getHours()*60+k.getMinutes();  // 미국 CFD: 주말 휴장
-  if(d===0)return false; if(d===6&&m>=360)return false; if(d===1&&m<420)return false; return true;}
+// 미국 동부시간(서머타임 자동) → {요일, 분}
+function _etnow(){var p={};
+  new Intl.DateTimeFormat("en-US",{timeZone:"America/New_York",weekday:"short",hour:"2-digit",minute:"2-digit",hour12:false})
+    .formatToParts(new Date()).forEach(function(x){p[x.type]=x.value;});
+  var wd={Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6}[p.weekday],hh=parseInt(p.hour,10);if(hh>=24)hh-=24;
+  return {d:wd,m:hh*60+parseInt(p.minute,10)};}
+function usIndexLive(){var e=_etnow();return e.d>=1&&e.d<=5&&e.m>=570&&e.m<960;}   // 미국주식 정규장 09:30~16:00 ET
+function usFutLive(){var e=_etnow();                                                // CME 선물(원자재·국채) ~24h
+  if(e.d===6)return false; if(e.d===0&&e.m<1080)return false;                       // 토 휴장·일 18:00 ET 개장 전
+  if(e.d===5&&e.m>=1020)return false; if(e.m>=1020&&e.m<1080)return false;          // 금 17:00 마감·매일 17~18시 정산휴장
+  return true;}
+function usFxLive(){var e=_etnow();                                                 // FX 24h(일 17시~금 17시 ET)
+  if(e.d===6)return false; if(e.d===0&&e.m<1020)return false; if(e.d===5&&e.m>=1020)return false;
+  return true;}
 function updStkTag(){const live=krLiveNow();
   const el=E("stkTag");if(el){el.className="tag "+(live?"live":"delay");el.textContent=live?L("live"):L("delayed2");}}
 updStkTag();setInterval(updStkTag,20000);
