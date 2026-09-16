@@ -72,6 +72,19 @@ h1 .lv{color:#ff433d;font-size:12px;font-weight:800;vertical-align:super;margin-
 .cmut{color:var(--sub);font-size:11.5px}
 .ca{color:var(--nm);font-variant-numeric:tabular-nums}
 .ctag{font-weight:700;white-space:nowrap}
+/* 내 보유종목 (2026-09-16) */
+.mhrow2{display:flex;gap:6px;align-items:center;margin-top:6px;flex-wrap:wrap}
+.mhpick{font-weight:700;color:var(--nm);font-size:12.5px}
+.mhin{width:90px;padding:7px 8px;border:1px solid var(--bd);border-radius:8px;background:var(--cbg);color:var(--nm);font-size:13px}
+.mhbtn{padding:7px 12px;border:1px solid var(--bd);border-radius:8px;background:var(--cbg);color:var(--nm);font-weight:700;font-size:13px;cursor:pointer}
+.mhtab{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px}
+.mhtab th{color:var(--sub);font-weight:600;font-size:11px;text-align:right;padding:3px 2px;border-bottom:1px solid var(--bd)}
+.mhtab th:first-child{text-align:left}
+.mhtab td{padding:5px 2px;border-bottom:1px solid var(--bd);text-align:right;font-variant-numeric:tabular-nums;color:var(--nm)}
+.mhtab td:first-child{text-align:left;word-break:keep-all}
+.mhsum td{font-weight:700;border-top:2px solid var(--bd)}
+.mhx{color:var(--sub);cursor:pointer;font-weight:700;padding:0 2px}
+.mhempty{color:var(--sub);font-size:12px;padding:8px 2px}
 .nhd{font-weight:800;color:var(--nm);font-size:13px;margin:8px 0 2px}
 .nrow{display:block;color:var(--nm);text-decoration:none;font-size:13px;padding:5px 2px;border-bottom:1px solid var(--bd);opacity:.9}
 #installBar{display:flex;align-items:center;gap:8px;background:#12233a;border:1px solid #2a5580;color:#cfe4ff;border-radius:10px;padding:8px 12px;margin:6px 0 10px;font-size:13px}
@@ -122,6 +135,19 @@ body.light #installBar{background:#eaf3ff;border-color:#b9d5f5;color:#1a4b7a}
 </div>
 <div class="asof" id="asof">불러오는 중…</div>
 <div id="installBar" hidden><span id="installTxt">📲 홈 화면에 앱으로 추가하고 바로 여세요</span><button id="installBtn" onclick="doInstall()">앱설치</button><span class="ix" onclick="dismissInstall()">✕</span></div>
+
+<div class="card" id="myhold">
+  <h3>내 보유종목 <span class="tag live">● 실시간</span></h3>
+  <input id="mhq" class="stkq" placeholder="종목 검색 후 고르세요 (예: 005930, 삼성전자, AAPL)" autocomplete="off">
+  <div id="mhResults" class="stkres"></div>
+  <div class="mhrow2">
+    <span id="mhPick" class="mhpick"></span>
+    <input id="mhQty" class="mhin" type="number" inputmode="decimal" placeholder="수량">
+    <input id="mhBuy" class="mhin" type="number" inputmode="decimal" placeholder="매입가">
+    <button class="mhbtn" onclick="mhAdd()">추가</button>
+  </div>
+  <div id="mhBody"></div>
+</div>
 
 <div class="card" id="stock">
   <h3>종목 조회 <span class="tag live" id="stkTag">● 실시간</span></h3>
@@ -734,11 +760,128 @@ function usFxLive(){var e=_etnow();                                             
 function updStkTag(){const live=krLiveNow();
   const el=E("stkTag");if(el){el.className="tag "+(live?"live":"delay");el.textContent=live?L("live"):L("delayed2");}}
 updStkTag();setInterval(updStkTag,20000);
+// ── 내 보유종목 (사장님 2026-09-16) — 국내·미국 한 표 · 추가/지움 · 이 폰에만 저장 ──
+let MH=[], mhSel=null, mhPx={}, mhSeq=0, mhT=null;
+function mhLoad(){try{MH=JSON.parse(localStorage.getItem("brief_holds")||"[]")||[];}catch(e){MH=[];}}
+function mhSave(){try{localStorage.setItem("brief_holds",JSON.stringify(MH));}catch(e){}}
+function mhNum(v){v=parseFloat(String(v).replace(/,/g,""));return isFinite(v)?v:0;}
+function mhFmt(mk,v){return mk==="us"
+  ?("$"+(+v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}))
+  :(Math.round(v).toLocaleString()+(LANG==="en"?"":"원"));}
+function mhEsc(t){return String(t==null?"":t).replace(/[<>&"]/g,function(c){
+  return {"<":"&lt;",">":"&gt;","&":"&amp;","\"":"&quot;"}[c];});}
+function mhPickSel(mk,code,name){
+  mhSel={mk:mk,code:code,name:name};
+  E("mhResults").innerHTML="";E("mhq").value="";
+  E("mhPick").textContent=name+" ("+(mk==="us"?code.replace(/\.US$/,""):code)+")";
+  E("mhQty").focus();
+}
+function mhAdd(){
+  const en=LANG==="en";
+  if(!mhSel){E("mhPick").textContent=en?"Pick a stock first":"종목을 먼저 고르세요";return;}
+  const q=mhNum(E("mhQty").value), b=mhNum(E("mhBuy").value);
+  if(q<=0||b<=0){E("mhPick").textContent=en?"Enter qty and cost":"수량과 매입가를 넣으세요";return;}
+  const i=MH.findIndex(function(h){return h.code===mhSel.code&&h.mk===mhSel.mk;});
+  if(i>=0){const o=MH[i],tq=o.qty+q;o.buy=(o.buy*o.qty+b*q)/tq;o.qty=tq;}   // 같은 종목이면 평단으로 합친다
+  else MH.push({mk:mhSel.mk,code:mhSel.code,name:mhSel.name,qty:q,buy:b});
+  mhSave();mhSel=null;
+  E("mhPick").textContent="";E("mhQty").value="";E("mhBuy").value="";
+  mhRender();mhTick();
+}
+function mhDel(i){MH.splice(i,1);mhSave();mhRender();}
+function mhRender(){
+  const en=LANG==="en", box=E("mhBody"); if(!box)return;
+  if(!MH.length){box.innerHTML='<div class="mhempty">'+(en
+    ?"Pick a stock above, enter qty and average cost, then press Add. Saved on this phone only."
+    :"위에서 종목을 골라 수량·매입가를 넣고 [추가]를 누르세요. 이 폰에만 저장됩니다.")+'</div>';return;}
+  const cls=function(x){return x>0?"up":(x<0?"dn":"fl");},
+        arw=function(x){return x>0?"▲":(x<0?"▼":"");};
+  let h='<table class="mhtab"><tr><th>'+(en?"Stock":"종목")+'</th><th>'+(en?"Qty":"수량")
+   +'</th><th>'+(en?"Avg cost":"매입가")+'</th><th>'+(en?"Price":"현재가")
+   +'</th><th>'+(en?"Value":"평가금액")+'</th><th>'+(en?"P/L":"손익률")+'</th><th></th></tr>';
+  let vk=0,ck=0,vu=0,cu=0;
+  MH.forEach(function(x,i){
+    const px=mhPx[x.code], val=px?px*x.qty:0, pct=px?((px-x.buy)/x.buy*100):null;
+    if(px){ if(x.mk==="us"){vu+=val;cu+=x.buy*x.qty;} else {vk+=val;ck+=x.buy*x.qty;} }
+    h+='<tr><td>'+mhEsc(x.name)+' <span class="mkt'+(x.mk==="us"?" us":"")+'">'
+     +(x.mk==="us"?"US":"KR")+'</span></td>'
+     +'<td>'+x.qty.toLocaleString()+'</td><td>'+mhFmt(x.mk,x.buy)+'</td>'
+     +'<td>'+(px?mhFmt(x.mk,px):"-")+'</td><td>'+(px?mhFmt(x.mk,val):"-")+'</td>'
+     +'<td class="'+(pct==null?"fl":cls(pct))+'">'
+     +(pct==null?"-":(arw(pct)+Math.abs(pct).toFixed(2)+"%"))+'</td>'
+     +'<td><span class="mhx" onclick="mhDel('+i+')">✕</span></td></tr>';
+  });
+  const sum=function(v,c,mk){const p=c?((v-c)/c*100):0;
+    return '<tr class="mhsum"><td>'+(en?"Total":"합계")+' '+(mk==="us"?"US":"KR")
+      +'</td><td></td><td>'+mhFmt(mk,c)+'</td><td></td><td>'+mhFmt(mk,v)+'</td>'
+      +'<td class="'+cls(p)+'">'+arw(p)+Math.abs(p).toFixed(2)+'%</td><td></td></tr>';};
+  if(ck>0)h+=sum(vk,ck,"kr");
+  if(cu>0)h+=sum(vu,cu,"us");
+  let fx=0;
+  try{const gs=((window._lastD||{}).groups||[]);
+    for(const g of gs){for(const it of (g.items||[])){
+      if(/원\/달러|USD\/KRW/i.test(it.nm||"")){fx=mhNum(it.val);break;}}
+      if(fx)break;}
+  }catch(e){}
+  if(fx>0&&cu>0&&ck>0){const v=vk+vu*fx,c=ck+cu*fx,p=c?((v-c)/c*100):0;
+    h+='<tr class="mhsum"><td>'+(en?"Total (KRW)":"총합(원)")+'</td><td></td><td>'+mhFmt("kr",c)
+      +'</td><td></td><td>'+mhFmt("kr",v)+'</td><td class="'+cls(p)+'">'
+      +arw(p)+Math.abs(p).toFixed(2)+'%</td><td></td></tr>';}
+  box.innerHTML=h+'</table>';
+}
+async function mhTick(){
+  if(!MH.length)return;
+  // 국내는 집 PC 릴레이라 첫 응답이 2초쯤 걸린다 -> 대기를 넉넉히(8번) 주고,
+  // 종목마다 줄 서면 느리니 한꺼번에 보낸다.
+  await Promise.all(MH.slice().map(async function(x){
+    try{
+      if(x.mk==="us"){
+        const d=await usFetch("quote","codes="+encodeURIComponent(x.code));
+        const p=d&&d.data&&d.data[0]&&+d.data[0].p; if(p)mhPx[x.code]=p;
+      }else{
+        const d=await krFetch("stock","code="+x.code,8); if(d&&d.cur)mhPx[x.code]=+d.cur;
+      }
+    }catch(e){}
+  }));
+  mhRender();
+}
+E("mhq").addEventListener("input",function(){
+  clearTimeout(mhT); const q=this.value.trim();
+  if(q.length<1){E("mhResults").innerHTML="";return;}
+  const seq=++mhSeq;
+  mhT=setTimeout(function(){
+    E("mhResults").innerHTML='<div class="soonrow">'+(LANG==="en"?"Searching…":"검색 중…")+'</div>';
+    const latin=/[A-Za-z]/.test(q)&&!/[가-힣]/.test(q);
+    let kr=[],us=[];
+    const paint=function(){
+      const en=LANG==="en";
+      let h=kr.map(function(r){const dn=(((en&&r.en)?r.en:r.name)||r.code).replace(/['"]/g,"");
+        return '<a onclick="mhPickSel(&quot;kr&quot;,&quot;'+r.code+'&quot;,&quot;'+dn+'&quot;)">'
+          +'<span>'+mhEsc(dn)+' <span class="mkt">KR</span></span><span class="c">'+r.code+'</span></a>';}).join("");
+      h+=us.map(function(r){const dn=(r.name||r.tick).replace(/['"]/g,"");
+        return '<a onclick="mhPickSel(&quot;us&quot;,&quot;'+r.code+'&quot;,&quot;'+dn+'&quot;)">'
+          +'<span>'+mhEsc(dn)+' <span class="mkt us">US</span></span><span class="c">'+r.tick+'</span></a>';}).join("");
+      E("mhResults").innerHTML=h||'<div class="soonrow">'+(en?"No results":"결과 없음")+'</div>';};
+    if(latin)usFetch("search","q="+encodeURIComponent(q)).then(function(d){
+      if(seq!==mhSeq)return;us=(d&&d.data)||[];paint();});
+    krFetch("search","q="+encodeURIComponent(q),4).then(function(rows){
+      if(seq!==mhSeq)return;kr=rows||[];paint();});
+  },350);
+});
+mhLoad(); mhRender(); mhTick(); setInterval(mhTick,10000);
+
 function applyLang(){
   var b=E("lng");if(b)b.textContent=LANG==="en"?"한":"EN";
   var t=E("ttl");if(t)t.innerHTML=L("title")+'<span class="lv">● LIVE</span>';
   var gn=document.querySelector(".gnote");if(gn)gn.textContent=L("gnote");
   E("stkq").placeholder=L("stkPH");E("coinq").placeholder=L("coinPH");
+  var mh=document.querySelector("#myhold h3");
+  if(mh)mh.innerHTML=(LANG==="en"?"My Holdings":"내 보유종목")+' <span class="tag live">● 실시간</span>';
+  var mq=E("mhq");if(mq)mq.placeholder=LANG==="en"?"Search a stock (e.g. 005930, AAPL)":"종목 검색 후 고르세요 (예: 005930, 삼성전자, AAPL)";
+  var mqy=E("mhQty");if(mqy)mqy.placeholder=LANG==="en"?"Qty":"수량";
+  var mby=E("mhBuy");if(mby)mby.placeholder=LANG==="en"?"Avg cost":"매입가";
+  var mab=document.querySelector("#myhold .mhbtn");if(mab)mab.textContent=LANG==="en"?"Add":"추가";
+  try{mhRender();}catch(e){}
   var sh=document.querySelector("#stock h3");if(sh)sh.innerHTML=L("stockH")+' <span class="tag live" id="stkTag">● 실시간</span>';
   var ch=document.querySelector("#coin2 h3");if(ch)ch.innerHTML=L("coinH")+' <span class="tag live">'+L("binance")+'</span>';
   var cc=document.querySelector("#coin-card h3");if(cc)cc.innerHTML=L("coinCardH")+' <span class="tag live">'+L("binance")+'</span>';
