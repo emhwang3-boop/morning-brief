@@ -105,6 +105,9 @@ body.light .dpnote{background:#fff6e0;border-color:#e8c37a;color:#7a5200}
 .dpsm{padding:4px 10px;font-size:11.5px;border-radius:7px}
 .dplog{max-height:152px;overflow-y:auto;border:1px solid var(--bd);border-radius:9px;padding:0 6px}
 .dplog table{margin-top:0}
+.dpclose{margin-top:9px;border:1px solid var(--bd);border-radius:10px;padding:9px}
+.dprng{width:100%;margin:8px 0 2px;accent-color:#1c7ed6}
+.dppct{padding:5px 10px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--nm);font-size:12px;font-weight:700;cursor:pointer}
 .dphd{font-size:12px;color:var(--sub);font-weight:700;margin:2px 0 5px}
 /* 공유 (2026-09-16) */
 .shwrap{position:relative}
@@ -1116,9 +1119,8 @@ function dpCoin(act){
   const key="coin:"+coinSym, cur=dpPx[key]||0, p=DP.pos[key];
   if(cur<=0){ dpMsg("dpMsgC",en?"No price yet":"현재가를 아직 못 받았습니다"); return; }
   if(act==="X"){
-    const r=dpCloseKey(key);
-    dpMsg("dpMsgC", r==null?(en?"No position":"자리가 없습니다")
-      :((en?"Closed ":"청산 ")+(r>=0?"+":"")+r.toFixed(2)+" USDT"));
+    if(!p){ dpMsg("dpMsgC",en?"No position":"자리가 없습니다"); return; }
+    dpOpenClose(key); dpMsg("dpMsgC",en?"Pick how much to close":"위 표에서 얼마나 청산할지 고르세요");
     return;
   }
   const mg=dpNum(E("dpMg").value), lev=Math.max(1,Math.min(10,dpNum(E("dpLev").value)||2));
@@ -1144,23 +1146,67 @@ function dpCoin(act){
 
 
 // 코인 자리 청산 — 표에서도 부른다. 손익(USDT)을 돌려준다(자리 없으면 null)
-function dpCloseKey(key){
+function dpCloseKey(key,ratio){
   const p=DP.pos[key]; if(!p||p.mk!=="coin")return null;
+  const r=Math.max(0,Math.min(1,ratio==null?1:ratio)); if(r<=0)return null;
   const cur=dpPx[key]||p.entry;
-  const pnl=(p.side==="L"?1:-1)*(cur/p.entry-1)*p.lev*p.margin;
-  DP.usdt+=p.margin+pnl; delete DP.pos[key];
-  DP.log.unshift({t:dpNow(),kind:"coin",code:p.code,name:p.code,side:"X",qty:p.margin,px:cur,
-                  how:(LANG==="en"?"close":"청산"),pnl:pnl});
+  const part=p.margin*r;
+  const pnl=(p.side==="L"?1:-1)*(cur/p.entry-1)*p.lev*part;
+  DP.usdt+=part+pnl;
+  if(r>=0.999)delete DP.pos[key]; else { p.margin-=part; DP.pos[key]=p; }
+  DP.log.unshift({t:dpNow(),kind:"coin",code:p.code,name:p.code,side:"X",qty:part,px:cur,
+                  how:(LANG==="en"?"close ":"청산 ")+Math.round(r*100)+"%",pnl:pnl});
   DP.log=DP.log.slice(0,60); dpSave(); dpRender();
   return pnl;
+}
+// ── 청산 고르기 판 (막대 + 수량) ──
+let dpCloseCur=null;
+function dpOpenClose(key){
+  const p=DP.pos[key]; if(!p)return;
+  dpCloseCur=key;
+  const en=LANG==="en", box=E("dpClose"); if(!box)return;
+  const pct=[10,25,50,75,100].map(function(v){
+    return '<button class="dppct" onclick="dpClosePct('+v+')">'+v+'%</button>'; }).join("");
+  box.innerHTML='<div class="dpclose"><div class="dphd">'+dpEsc(p.code)+' '
+   +(en?"close — how much?":"청산 — 얼마나?")+' <span class="dplbl">'+(en?"margin ":"증거금 ")
+   +p.margin.toLocaleString()+' USDT</span></div>'
+   +'<input type="range" id="dpRng" class="dprng" min="0" max="100" step="1" value="100" list="dpTicks" oninput="dpCloseSync(1)">'
+   +'<datalist id="dpTicks"><option value="0"></option><option value="10"></option>'
+   +'<option value="25"></option><option value="50"></option><option value="75"></option>'
+   +'<option value="100"></option></datalist>'
+   +'<div class="dpbar">'+pct
+   +'<input id="dpAmt" class="dpin" type="number" inputmode="decimal" oninput="dpCloseSync(2)" value="'
+   +p.margin+'"><span class="dplbl">USDT</span>'
+   +'<button class="dpb flat" onclick="dpCloseGo()">'+(en?"CLOSE":"청산")+'</button>'
+   +'<button class="dpb" style="background:var(--bg);color:var(--nm)" onclick="dpCloseCancel()">'
+   +(en?"Cancel":"취소")+'</button></div>'
+   +'<div class="dpmsg" id="dpCloseMsg">'+(en?"100% = close all":"100% 면 전량 청산")+'</div></div>';
+}
+function dpCloseCancel(){ dpCloseCur=null; const b=E("dpClose"); if(b)b.innerHTML=""; }
+function dpClosePct(v){ const r=E("dpRng"); if(!r)return; r.value=v; dpCloseSync(1); }
+function dpCloseSync(from){
+  const p=DP.pos[dpCloseCur]; if(!p)return;
+  const rng=E("dpRng"), amt=E("dpAmt"); if(!rng||!amt)return;
+  if(from===1){ amt.value=(p.margin*(+rng.value)/100).toFixed(2); }
+  else { let v=dpNum(amt.value); if(v>p.margin)v=p.margin;
+         rng.value=Math.round(v/p.margin*100); }
+  const en=LANG==="en";
+  E("dpCloseMsg").textContent=(en?"Closing ":"청산 ")+rng.value+"% · "+(+amt.value).toFixed(2)+" USDT";
+}
+function dpCloseGo(){
+  const en=LANG==="en", key=dpCloseCur, p=DP.pos[key];
+  if(!p){ dpCloseCancel(); return; }
+  const amt=dpNum(E("dpAmt").value);
+  if(amt<=0){ E("dpCloseMsg").textContent=en?"Enter an amount":"수량을 넣으세요"; return; }
+  const r=Math.min(1,amt/p.margin);
+  const pnl=dpCloseKey(key,r);
+  dpCloseCancel();
+  dpMsg("dpMsgC",(en?"Closed ":"청산 ")+Math.round(r*100)+"% · "+(pnl>=0?"+":"")+pnl.toFixed(2)+" USDT");
 }
 // 보유 표에서 파는 길 — 주식은 수량을 묻고(기본 전량), 코인은 전량 청산
 function dpSellKey(key){
   const en=LANG==="en", p=DP.pos[key]; if(!p)return;
-  if(p.mk==="coin"){
-    if(!confirm((en?"Close ":"")+p.code+(en?"?":" 자리를 청산할까요?")))return;
-    dpCloseKey(key); return;
-  }
+  if(p.mk==="coin"){ dpOpenClose(key); return; }
   const ans=prompt(en?("Sell how many? (max "+p.qty+")"):(p.name+" — 몇 주 팔까요? (최대 "+p.qty+")"), p.qty);
   if(ans===null)return;
   const q=dpNum(ans); if(q<=0)return;
@@ -1203,7 +1249,7 @@ function dpHoldRender(){
        +'<td><button class="dpb sell dpsm" onclick="dpSellKey(\''+k+'\')">'+(en?"SELL":"매도")+'</button></td></tr>';
     }
   });
-  box.innerHTML=h+'</table>';
+  box.innerHTML=h+'</table><div id="dpClose"></div>';
 }
 function mhRender(){ try{ dpHoldRender(); }catch(e){} }   // 계좌가 준비되기 전에 불릴 수 있다
 
