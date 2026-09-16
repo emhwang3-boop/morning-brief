@@ -147,6 +147,7 @@ body.light #installBar{background:#eaf3ff;border-color:#b9d5f5;color:#1a4b7a}
 <div class="asof" id="asof">불러오는 중…</div>
 <div id="installBar" hidden><span id="installTxt">📲 홈 화면에 앱으로 추가하고 바로 여세요</span><button id="installBtn" onclick="doInstall()">앱설치</button><span class="ix" onclick="dismissInstall()">✕</span></div>
 
+<script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
 <div class="card" id="myhold">
   <h3>내 보유종목 <span class="tag live">● 실시간</span></h3>
   <input id="mhq" class="stkq" placeholder="종목 검색 후 고르세요 (예: 005930, 삼성전자, AAPL)" autocomplete="off">
@@ -943,24 +944,18 @@ function shCopyOld(){
 }
 function shKakao(){
   const en=LANG==="en";
-  // ① JavaScript 키가 있으면 카카오 SDK 로 바로 보낸다
-  if(KAKAO_JS_KEY){
-    const go=function(){
-      try{
-        if(!window.Kakao.isInitialized())window.Kakao.init(KAKAO_JS_KEY);
-        window.Kakao.Share.sendDefault({objectType:"feed",
-          content:{title:SH_TTL_KO,description:shTxt(),imageUrl:SH_URL.replace("live.html","cover.png"),
-                   link:{mobileWebUrl:SH_URL,webUrl:SH_URL}},
-          buttons:[{title:en?"Open":"열어보기",link:{mobileWebUrl:SH_URL,webUrl:SH_URL}}]});
-        shDone();
-      }catch(e){ shCopy(); }
-    };
-    if(window.Kakao&&window.Kakao.Share)return go();
-    const sc=document.createElement("script");
-    sc.src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js";
-    sc.onload=go; sc.onerror=function(){ shCopy(); };
-    document.head.appendChild(sc);
-    return;
+  // 🔴 SDK 는 **미리** 불러 둔다(위 script 태그). 누른 뒤에 불러오면 클릭 권한이 풀려
+  //    카카오 팝업창이 막히고 '복사'로 떨어진다(2026-09-16 실측).
+  if(KAKAO_JS_KEY&&window.Kakao&&window.Kakao.Share){
+    try{
+      if(!window.Kakao.isInitialized())window.Kakao.init(KAKAO_JS_KEY);
+      window.Kakao.Share.sendDefault({objectType:"feed",
+        content:{title:SH_TTL_KO,description:shTxt(),imageUrl:SH_URL.replace("live.html","cover.png"),
+                 link:{mobileWebUrl:SH_URL,webUrl:SH_URL}},
+        buttons:[{title:en?"Open":"열어보기",link:{mobileWebUrl:SH_URL,webUrl:SH_URL}}]});
+      shDone();
+      return;
+    }catch(e){ shMsg("카카오 공유 실패 — 링크를 복사합니다"); }
   }
   // ② 키가 없으면 — 폰은 기본 공유창(카톡 포함), PC 는 링크 복사
   if(navigator.share){
