@@ -92,6 +92,16 @@ h1 .lv .bi::before{content:'';position:absolute;left:50%;transform:translateX(-5
 .mhsum td{font-weight:700;border-top:2px solid var(--bd)}
 .mhx{color:var(--sub);cursor:pointer;font-weight:700;padding:0 2px}
 .mhempty{color:var(--sub);font-size:12px;padding:8px 2px}
+.stpanel{width:290px}
+.sthead{font-weight:800;font-size:13px;color:var(--nm);display:flex;align-items:center;margin-bottom:6px}
+.stx{margin-left:auto;background:transparent;border:0;color:var(--sub);font-size:14px;cursor:pointer}
+.strow{border-top:1px solid var(--bd);padding:7px 0}
+.sthd{font-size:11.5px;font-weight:700;color:var(--sub);margin-bottom:4px}
+.stin{width:100%;padding:7px 8px;margin-bottom:4px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--nm);font-size:12.5px}
+.stmsg{font-size:11px;color:var(--soon)}
+.stnote{font-size:11px;color:var(--sub);margin:7px 0 6px;line-height:1.45}
+.stbtns{display:flex;gap:6px}
+.stbtns .dpb{flex:1;padding:7px 0;font-size:12.5px}
 /* 심사용 모의 주문 */
 .dpnote{background:#3a2a10;border:1px solid #6b4d1a;color:#ffd98a;border-radius:10px;padding:7px 11px;margin:2px 0 8px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:8px}
 body.light .dpnote{background:#fff6e0;border-color:#e8c37a;color:#7a5200}
@@ -173,6 +183,8 @@ body.light #installBar{background:#eaf3ff;border-color:#b9d5f5;color:#1a4b7a}
   <div class="right"><span class="clock" id="clk">--:--:--</span>
    <span class="shwrap"><button class="tgl shbtn" id="shb" onclick="shToggle()" title="공유">공유</button>
    <div class="shpanel" id="shPanel" hidden></div></span>
+   <span class="shwrap"><button class="tgl" id="stb" onclick="stToggle()" title="설정">⚙</button>
+   <div class="shpanel stpanel" id="stPanel" hidden></div></span>
    <button class="tgl" id="lng" onclick="toggleLang()">EN</button>
    <button class="tgl" id="tg" onclick="toggle()">🌙</button></div>
 </div>
@@ -1042,6 +1054,79 @@ document.addEventListener("click",function(e){
   const p=E("shPanel"); if(!p||p.hidden)return;
   if(!p.contains(e.target)&&e.target.id!=="shb")p.hidden=true;
 });
+
+// ── 설정(톱니바퀴) — 증권사·거래소 고르기 + API 키 (사장님 2026-09-16) ──
+// 🔴 키는 **이 기기에만** 저장한다(localStorage). 어디로도 보내지 않는다.
+//    데모는 모의 주문이라 키를 실제로 쓰지 않는다.
+const ST_KEY = "app_conf_v1";
+const ST_KR = [["kiwoom", "키움증권"], ["korea_inv", "한국투자증권"], ["nh", "NH투자증권"],
+               ["mirae", "미래에셋증권"], ["samsung", "삼성증권"], ["kb", "KB증권"],
+               ["shinhan", "신한투자증권"], ["daishin", "대신증권"]];
+const ST_US = [["kiwoom", "키움증권"], ["korea_inv", "한국투자증권"], ["mirae", "미래에셋증권"],
+               ["samsung", "삼성증권"], ["ibkr", "Interactive Brokers"], ["schwab", "Charles Schwab"]];
+const ST_CO = [["binance", "바이낸스"], ["okx", "OKX"], ["upbit", "업비트"],
+               ["bithumb", "빗썸"], ["bybit", "Bybit"], ["coinbase", "Coinbase"]];
+// 키 칸이 셋인 곳(패스프레이즈까지)
+const ST_PASS = ["okx", "coinbase", "bitget", "kucoin"];
+let ST = null;
+
+function stLoad(){
+  try{ ST = JSON.parse(localStorage.getItem(ST_KEY) || "null"); }catch(e){ ST = null; }
+  if(!ST || typeof ST !== "object")
+    ST = {kr:{broker:"kiwoom",key:"",sec:""}, us:{broker:"kiwoom",key:"",sec:""},
+          co:{broker:"binance",key:"",sec:"",pass:""}};
+  ["kr","us","co"].forEach(function(k){ if(!ST[k])ST[k]={broker:"",key:"",sec:"",pass:""}; });
+}
+function stSave(){ try{ localStorage.setItem(ST_KEY, JSON.stringify(ST)); }catch(e){} }
+function stMask(v){ return v ? (v.slice(0,4) + "…" + v.slice(-3)) : ""; }
+
+function stToggle(){
+  const p = E("stPanel"); if(!p) return;
+  if(!p.hidden){ p.hidden = true; return; }
+  stRender(); p.hidden = false;
+}
+function stRow(sec, list, label){
+  const en = LANG === "en", c = ST[sec];
+  const opts = list.map(function(o){
+    return '<option value="' + o[0] + '"' + (c.broker === o[0] ? " selected" : "") + '>' + o[1] + '</option>';
+  }).join("");
+  let h = '<div class="strow"><div class="sthd">' + label + '</div>'
+   + '<select class="stin" onchange="stSet(\'' + sec + '\',\'broker\',this.value);stRender();">' + opts + '</select>'
+   + '<input class="stin" type="password" autocomplete="off" placeholder="API Key" value="' + (c.key || "") + '"'
+   + ' oninput="stSet(\'' + sec + '\',\'key\',this.value)">'
+   + '<input class="stin" type="password" autocomplete="off" placeholder="Secret Key" value="' + (c.sec || "") + '"'
+   + ' oninput="stSet(\'' + sec + '\',\'sec\',this.value)">';
+  if(ST_PASS.indexOf(c.broker) >= 0)
+    h += '<input class="stin" type="password" autocomplete="off" placeholder="Passphrase" value="' + (c.pass || "") + '"'
+      + ' oninput="stSet(\'' + sec + '\',\'pass\',this.value)">';
+  h += '<div class="stmsg">' + (c.key ? ((en ? "saved " : "저장됨 ") + stMask(c.key)) : (en ? "not set" : "아직 없음")) + '</div></div>';
+  return h;
+}
+function stSet(sec, k, v){ ST[sec][k] = v; stSave(); }
+function stRender(){
+  const en = LANG === "en", p = E("stPanel"); if(!p) return;
+  p.innerHTML = '<div class="sthead">' + (en ? "Settings" : "설정")
+   + '<button class="stx" onclick="stToggle()">✕</button></div>'
+   + stRow("kr", ST_KR, en ? "KR stocks · broker" : "국내주식 · 증권사")
+   + stRow("us", ST_US, en ? "US stocks · broker" : "해외주식 · 증권사")
+   + stRow("co", ST_CO, en ? "Crypto · exchange" : "코인 · 거래소")
+   + '<div class="stnote">' + (en
+     ? "Keys are kept on this device only and are never sent anywhere. This demo places no real orders."
+     : "키는 이 기기에만 저장되고 어디로도 보내지 않습니다. 이 앱은 모의 주문이라 키를 쓰지 않습니다.")
+   + '</div><div class="stbtns"><button class="dpb flat" onclick="stClear()">'
+   + (en ? "Clear keys" : "키 지우기") + '</button>'
+   + '<button class="dpb" style="background:#1c7ed6" onclick="stToggle()">' + (en ? "Done" : "닫기") + '</button></div>';
+}
+function stClear(){
+  if(!confirm(LANG === "en" ? "Clear all saved keys?" : "저장된 키를 모두 지울까요?")) return;
+  ["kr","us","co"].forEach(function(k){ ST[k].key = ""; ST[k].sec = ""; ST[k].pass = ""; });
+  stSave(); stRender();
+}
+document.addEventListener("click", function(e){
+  const p = E("stPanel"); if(!p || p.hidden) return;
+  if(!p.contains(e.target) && e.target.id !== "stb") p.hidden = true;
+});
+stLoad();
 
 // ── 심사용 모의 주문 (사장님 2026-09-16) — 🔴 시늉이다. 거래소로 **절대** 안 나간다 ──
 const DP_KEY="demo_acct_v1";
