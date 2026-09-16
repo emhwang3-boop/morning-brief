@@ -1,6 +1,6 @@
-/* 일일브리핑 LIVE 서비스워커 — 셸은 네트워크 우선(항상 최신), 아이콘 등 자산은 캐시 우선.
+/* 일일브리핑 LIVE 서비스워커 — 셸도 자산도 네트워크 우선(항상 최신), 끊기면 캐시.
    시세/허브/외부 API 는 캐시하지 않고 그대로 네트워크로 보낸다. */
-const C = "brief-shell-v3";
+const C = "brief-shell-v4";
 const ASSETS = ["./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png"];
 
 self.addEventListener("install", function (e) {
@@ -27,10 +27,11 @@ self.addEventListener("fetch", function (e) {
     );
     return;
   }
-  // 그 외 같은 오리진 자산: 캐시 우선
-  e.respondWith(caches.match(req).then(function (r) {
-    return r || fetch(req).then(function (res) {
+  // 그 외 같은 오리진 자산(manifest·아이콘 포함): 네트워크 우선 — 바뀐 아이콘이 바로 먹는다.
+  //   🔴 캐시 우선으로 두었더니 새 manifest·아이콘이 영영 안 내려왔다(2026-09-16).
+  e.respondWith(
+    fetch(req).then(function (res) {
       var cc = res.clone(); caches.open(C).then(function (c) { c.put(req, cc); }); return res;
-    });
-  }));
+    }).catch(function () { return caches.match(req); })
+  );
 });
