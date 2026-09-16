@@ -31,10 +31,10 @@ body{background:var(--bg);color:var(--tx);font:15px/1.45 -apple-system,"Malgun G
 h1{font-size:22px;font-weight:700;letter-spacing:-.5px}
 h1 .lv{color:#ff433d;font-weight:900;margin-left:6px;letter-spacing:.2px;font-size:.72em;vertical-align:baseline}
 h1 .lv .bi{position:relative;display:inline-block;padding:0 .02em}
-h1 .lv .bi::before{content:'';position:absolute;left:50%;transform:translateX(-50%);top:-.46em;width:.42em;height:.42em;border-radius:50%;background:#ff433d;animation:blink 1.6s infinite}
+h1 .lv .bi::before{content:'';position:absolute;left:50%;transform:translateX(-50%);top:-.06em;width:.40em;height:.40em;border-radius:50%;background:#ff433d;animation:blink 1.6s infinite}
 .brand{color:#ff433d;font-weight:900}
 .brand .bi{position:relative;display:inline-block}
-.brand .bi::before{content:'';position:absolute;left:50%;transform:translateX(-50%);top:-.46em;width:.42em;height:.42em;border-radius:50%;background:#ff433d}
+.brand .bi::before{content:'';position:absolute;left:50%;transform:translateX(-50%);top:-.06em;width:.40em;height:.40em;border-radius:50%;background:#ff433d}
 @keyframes blink{50%{opacity:.35}}
 .right{display:flex;align-items:center;gap:10px}
 .clock{font-size:13px;color:var(--sub);font-variant-numeric:tabular-nums}
@@ -169,7 +169,7 @@ body.light #installBar{background:#eaf3ff;border-color:#b9d5f5;color:#1a4b7a}
 .stktf button.on{background:#1b3a5a;color:#5db4ff;border-color:#2a5580}
 </style></head><body>
 <div class="top">
-  <h1 id="ttl">Daily Brief<span class="lv">L<span class="bi">ı</span>ve</span></h1>
+  <h1 id="ttl">Daily Brief<span class="lv">L<span class="bi">i</span>ve</span></h1>
   <div class="right"><span class="clock" id="clk">--:--:--</span>
    <span class="shwrap"><button class="tgl shbtn" id="shb" onclick="shToggle()" title="공유">공유</button>
    <div class="shpanel" id="shPanel" hidden></div></span>
@@ -1414,7 +1414,7 @@ setTimeout(function(){ dpRender(); dpTick(); }, 1200); setInterval(dpTick,10000)
 
 function applyLang(){
   var b=E("lng");if(b)b.textContent=LANG==="en"?"한":"EN";
-  var t=E("ttl");if(t)t.innerHTML=L("title")+'<span class="lv">L<span class="bi">ı</span>ve</span>';
+  var t=E("ttl");if(t)t.innerHTML=L("title")+'<span class="lv">L<span class="bi">i</span>ve</span>';
   var gn=document.querySelector(".gnote");if(gn)gn.textContent=L("gnote");
   E("stkq").placeholder=L("stkPH");E("coinq").placeholder=L("coinPH");
   var sb=E("shb");if(sb)sb.textContent=LANG==="en"?"Share":"공유";
