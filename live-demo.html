@@ -161,21 +161,13 @@ body.light #installBar{background:#eaf3ff;border-color:#b9d5f5;color:#1a4b7a}
    <button class="tgl" id="lng" onclick="toggleLang()">EN</button>
    <button class="tgl" id="tg" onclick="toggle()">🌙</button></div>
 </div>
-<div class="dpnote" id="dpNote">⚠ 모의(시늉) 주문 판 — 실제 주문은 나가지 않습니다 · 심사·시연용<button class="dpreset" onclick="dpReset()">초기화</button></div>
+<div class="dpnote" id="dpNote">⚠ 모의(시늭) 주문 판 — 실제 주문은 나가지 않습니다 · 심사·시연용<button class="dpreset" onclick="dpReset()">초기화</button></div>
 <div class="asof" id="asof">불러오는 중…</div>
 <div id="installBar" hidden><span id="installTxt">📲 홈 화면에 앱으로 추가하고 바로 여세요</span><button id="installBtn" onclick="doInstall()">앱설치</button><span class="ix" onclick="dismissInstall()">✕</span></div>
 
 <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
 <div class="card" id="myhold">
   <h3>내 보유종목 <span class="tag live">● 실시간</span></h3>
-  <input id="mhq" class="stkq" placeholder="종목 검색 후 고르세요 (예: 005930, 삼성전자, AAPL)" autocomplete="off">
-  <div id="mhResults" class="stkres"></div>
-  <div class="mhrow2">
-    <span id="mhPick" class="mhpick"></span>
-    <input id="mhQty" class="mhin" type="number" inputmode="decimal" placeholder="수량">
-    <input id="mhBuy" class="mhin" type="number" inputmode="decimal" placeholder="매입가">
-    <button class="mhbtn" onclick="mhAdd()">추가</button>
-  </div>
   <div id="mhBody"></div>
 </div>
 
@@ -1148,6 +1140,7 @@ function dpRender(){
     h+='</table>';
   }
   box.innerHTML=h;
+  dpSyncHold();
 }
 function dpReset(){
   if(!confirm(LANG==="en"?"Reset the demo account?":"모의 계좌를 처음으로 되돌릴까요?"))return;
@@ -1174,6 +1167,24 @@ async function dpTick(){
   }));
   dpRender();
 }
+
+// ── 데모: [내 보유종목] 카드는 **모의 매수로 산 것**을 보여준다(손으로 넣는 칸은 없앴다) ──
+function mhSave(){}                         // 데모 보유는 모의 계좌가 들고 있다
+function mhTick(){ return Promise.resolve(); }   // 값 받기는 dpTick 하나로
+function mhDel(i){
+  const x=MH[i]; if(!x)return;
+  delete DP.pos[x.mk+":"+x.code]; dpSave(); dpRender();
+}
+function dpSyncHold(){
+  try{
+    MH=Object.keys(DP.pos).filter(function(k){return k.indexOf("coin:")!==0;})
+      .map(function(k){ const p=DP.pos[k];
+        return {mk:p.mk,code:p.code,name:p.name,qty:p.qty,buy:p.avg}; });
+    Object.keys(DP.pos).forEach(function(k){ if(dpPx[k])mhPx[DP.pos[k].code]=dpPx[k]; });
+    mhRender();
+  }catch(e){}
+}
+
 dpLoad(); setTimeout(function(){ dpRender(); dpTick(); }, 1200); setInterval(dpTick,10000);
 
 function applyLang(){
