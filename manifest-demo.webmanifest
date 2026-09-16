@@ -1,6 +1,6 @@
 {
-  "name": "Demo Live",
-  "short_name": "Demo Live",
+  "name": "Daily Brief Live",
+  "short_name": "Daily Brief",
   "description": "심사·시연용 모의 주문 판 — 국내·미국 주식·코인 실시간",
   "lang": "ko",
   "start_url": "./live-demo.html?src=pwa",
