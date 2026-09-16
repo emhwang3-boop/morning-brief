@@ -327,7 +327,10 @@ function render(d){
       else if(gr.title==="미국 지수")live=gr.rt&&usIndexLive();            // 미국주식: 정규장 09:30~16:00 ET
       else if(gr.title==="원자재"||gr.title==="금리·채권")live=gr.rt&&usFutLive();  // CME 선물: ~24h
       else if(gr.title==="환율·달러")live=gr.rt&&usFxLive();               // FX: 24h
-      const tag=live?'<span class="tag live">'+L("live")+'</span>':'<span class="tag delay">'+L("closed")+'</span>';
+      let tagTxt=live?L("live"):L("closed");
+      // 아시아는 지연 자료다 — 장중이면 '지연(장중)', 닫혔을 때만 '장마감'
+      if(gr.title==="아시아"&&!live&&asiaLiveNow())tagTxt=L("delay");   // D 지연 으로 통일
+      const tag=live?'<span class="tag live">'+tagTxt+'</span>':'<span class="tag delay">'+tagTxt+'</span>';
       sGroups+='<div class="card"><h3>'+tr(gr.title)+' '+tag+'</h3>'+gr.items.map(pcrow).join("")+'</div>';
     }
     let sKrates="";
@@ -759,6 +762,12 @@ function tick(){const d=new Date(),p=n=>String(n).padStart(2,"0");
   document.getElementById("clk").textContent=p(d.getHours())+":"+p(d.getMinutes())+":"+p(d.getSeconds());}
 tick();setInterval(tick,1000);
 // 종목 실시간 태그 — 정규장(평일 09:00~15:30 KST)만 켠다. 그 외엔 지연.
+function asiaLiveNow(){       // 한국시각 평일 09:00~17:00 (니케이·상하이·항셍 합집합)
+  const k=new Date(Date.now()+new Date().getTimezoneOffset()*60000+324e5);
+  const d=k.getDay(); if(d===0||d===6)return false;
+  const m=k.getHours()*60+k.getMinutes();
+  return m>=540&&m<=1020;
+}
 function krLiveNow(){const k=new Date(Date.now()+new Date().getTimezoneOffset()*60000+324e5);
   const m=k.getHours()*60+k.getMinutes();return k.getDay()>=1&&k.getDay()<=5&&m>=480&&m<1200;} // 평일 08:00~20:00
 // 미국 동부시간(서머타임 자동) → {요일, 분}
