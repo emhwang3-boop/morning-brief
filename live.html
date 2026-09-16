@@ -147,7 +147,7 @@ body.light #installBar{background:#eaf3ff;border-color:#b9d5f5;color:#1a4b7a}
 .stktf button.on{background:#1b3a5a;color:#5db4ff;border-color:#2a5580}
 </style></head><body>
 <div class="top">
-  <h1 id="ttl">일일브리핑<span class="lv">L<span class="bi">i</span>ve</span></h1>
+  <h1 id="ttl">일일브리핑<span class="lv">L<span class="bi">ı</span>ve</span></h1>
   <div class="right"><span class="clock" id="clk">--:--:--</span>
    <span class="shwrap"><button class="tgl shbtn" id="shb" onclick="shToggle()" title="공유">공유</button>
    <div class="shpanel" id="shPanel" hidden></div></span>
@@ -1020,7 +1020,7 @@ document.addEventListener("click",function(e){
 
 function applyLang(){
   var b=E("lng");if(b)b.textContent=LANG==="en"?"한":"EN";
-  var t=E("ttl");if(t)t.innerHTML=L("title")+'<span class="lv">L<span class="bi">i</span>ve</span>';
+  var t=E("ttl");if(t)t.innerHTML=L("title")+'<span class="lv">L<span class="bi">ı</span>ve</span>';
   var gn=document.querySelector(".gnote");if(gn)gn.textContent=L("gnote");
   E("stkq").placeholder=L("stkPH");E("coinq").placeholder=L("coinPH");
   var sb=E("shb");if(sb)sb.textContent=LANG==="en"?"Share":"공유";
