@@ -899,15 +899,23 @@ const KAKAO_JS_KEY = "90a47ca48c2a967dd4d14b3b48de2e3b";
 function shTxt(){ return (LANG==="en"?SH_TXT_EN:SH_TXT_KO); }
 function shFull(){ return SH_TTL_KO+" — "+shTxt()+"\n"+SH_URL; }
 
+function shIsPhone(){
+  try{ return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent); }catch(e){ return false; }
+}
 function shToggle(){
   const p=E("shPanel"); if(!p)return;
   if(!p.hidden){ p.hidden=true; return; }
-  // 폰이면 기본 공유창을 먼저 — 카톡·문자·X 등 **깔린 앱이 전부** 나온다
-  if(navigator.share){
+  // 폰이면 기본 공유창 — 깔린 앱이 전부 나온다. PC 는 우리 패널(카카오 대화방 고르기용).
+  if(shIsPhone()&&navigator.share){
     navigator.share({title:SH_TTL_KO,text:shTxt(),url:SH_URL}).catch(function(){ shPanel(); });
     return;
   }
   shPanel();
+}
+function shNative(){
+  if(navigator.share){
+    navigator.share({title:SH_TTL_KO,text:shTxt(),url:SH_URL}).then(shDone).catch(function(){});
+  } else shCopy();
 }
 function shPanel(){
   const p=E("shPanel"); if(!p)return;
@@ -924,6 +932,7 @@ function shPanel(){
   h+=A("mailto:?subject="+encodeURIComponent(SH_TTL_KO)+"&body="+t+"%0A"+u,"✉ "+(en?"Email":"메일"));
   h+='<button onclick="shKakao()">🟡 '+(en?"KakaoTalk":"카카오톡")+'</button>';
   h+='<button onclick="shCopy()">🔗 '+(en?"Copy link":"링크 복사")+'</button>';
+  if(navigator.share)h+='<button onclick="shNative()">📲 '+(en?"Other apps":"다른 앱으로")+'</button>';
   h+='</div><div class="shmsg" id="shMsg"></div>';
   p.innerHTML=h; p.hidden=false;
 }
