@@ -555,7 +555,7 @@ async function loadStockUS(){
    +'<tr><td class="k">'+L("turnover")+'</td><td class="v">'+usMoney(tv)+'</td></tr>'
    +'</table>';
   stkChart.patchLast(price);
-  dpPx["us:"+stkCode]=+price; E("dpStock").innerHTML=dpStockBar();
+  dpPx["us:"+stkCode]=+price; dpShowStockBar();
 }
 async function loadChartUS(){
   if(!stkCode||stkMarket!=="us")return;
@@ -591,7 +591,7 @@ async function loadStock(){
    +'<tr><td class="k">'+L("strength")+'</td><td class="v '+(d.strength>=100?"up":(d.strength>0?"dn":"fl"))+'">'+(d.strength||0).toFixed(2)+'</td></tr>'
    +'</table>';
   stkChart.patchLast(d.cur);          // 차트 마지막 봉 종가를 현재가와 일치
-  dpPx["kr:"+stkCode]=+d.cur; E("dpStock").innerHTML=dpStockBar();
+  dpPx["kr:"+stkCode]=+d.cur; dpShowStockBar();
 }
 async function loadChart(){
   if(!stkCode)return;
@@ -751,7 +751,7 @@ async function loadCoinDetail(){if(!coinSym)return;
      +'<tr><td class="k">'+L("tv24")+'</td><td class="v">$'+Math.round(+d.quoteVolume).toLocaleString()+'</td></tr>'
      +'</table>';
     coinChart.patchLast(+d.lastPrice);   // 차트 마지막 봉 종가를 현재가와 일치
-    dpPx["coin:"+coinSym]=+d.lastPrice; E("dpCoin").innerHTML=dpCoinBar();
+    dpPx["coin:"+coinSym]=+d.lastPrice; dpShowCoinBar();
   }catch(e){}
 }
 document.querySelectorAll("#coinTf button").forEach(b=>b.onclick=()=>{coinTf=b.dataset.tf;
@@ -1040,6 +1040,16 @@ function dpCoinBar(){
    +'<button class="dpb sell" onclick="dpCoin(\'S\')">'+(en?"SHORT":"숏")+'</button>'
    +'<button class="dpb flat" onclick="dpCoin(\'X\')">'+(en?"CLOSE":"청산")+'</button>'
    +'</div><div class="dpmsg" id="dpMsgC"></div>';
+}
+
+// 🔴 입력칸은 **종목이 바뀔 때만** 새로 그린다. 시세 갱신마다 다시 그리면 치던 수량이 날아간다.
+let dpBarKey="", dpBarCoin="";
+function dpShowStockBar(){
+  const key=(stkMarket==="us"?"us:":"kr:")+stkCode;
+  if(dpBarKey!==key||!E("dpQty")){ E("dpStock").innerHTML=dpStockBar(); dpBarKey=key; }
+}
+function dpShowCoinBar(){
+  if(dpBarCoin!==coinSym||!E("dpMg")){ E("dpCoin").innerHTML=dpCoinBar(); dpBarCoin=coinSym; }
 }
 function dpMsg(id,t){ const e=E(id); if(e)e.textContent=t; }
 
