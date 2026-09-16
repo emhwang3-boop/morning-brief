@@ -1004,10 +1004,13 @@ document.addEventListener("click",function(e){
 
 // ── 심사용 모의 주문 (사장님 2026-09-16) — 🔴 시늉이다. 거래소로 **절대** 안 나간다 ──
 const DP_KEY="demo_acct_v1";
-const DP_INIT={cash:10000000, usd:10000, pos:{}, log:[]};
+const DP_INIT={krw:10000000, usd:10000, usdt:10000, pos:{}, log:[]};
 let DP=null, dpPx={}, dpBusyS=false, dpBusyC=false;   // 주식·코인 주문은 서로 막지 않는다
 function dpLoad(){ try{ DP=JSON.parse(localStorage.getItem(DP_KEY)||"null"); }catch(e){ DP=null; }
-  if(!DP||typeof DP!=="object")DP=JSON.parse(JSON.stringify(DP_INIT)); }
+  if(!DP||typeof DP!=="object")DP=JSON.parse(JSON.stringify(DP_INIT));
+  if(DP.krw==null){ DP.krw=(DP.cash!=null?DP.cash:10000000); delete DP.cash; }   // 옛 저장본
+  if(DP.usdt==null)DP.usdt=10000;
+  if(DP.usd==null)DP.usd=10000; }
 function dpSave(){ try{ localStorage.setItem(DP_KEY,JSON.stringify(DP)); }catch(e){} }
 function dpNum(v){ v=parseFloat(String(v).replace(/,/g,"")); return isFinite(v)?v:0; }
 function dpNow(){ const d=new Date(),p=n=>String(n).padStart(2,"0");
@@ -1057,11 +1060,11 @@ function dpOrder(side){
     if(side==="B"){
       const cost=px*qty;
       p.avg=(p.avg*p.qty+cost)/(p.qty+qty); p.qty+=qty;
-      if(mk==="kr")DP.cash-=cost; else DP.usd-=cost;
+      if(mk==="kr")DP.krw-=cost; else DP.usd-=cost;
     }else{
       if(p.qty<qty){ dpBusyS=false; dpMsg("dpMsg",en?"Not enough holdings":"보유 수량이 모자랍니다"); return; }
       p.qty-=qty;
-      if(mk==="kr")DP.cash+=px*qty; else DP.usd+=px*qty;
+      if(mk==="kr")DP.krw+=px*qty; else DP.usd+=px*qty;
     }
     DP.pos[key]=p; if(p.qty<=0)delete DP.pos[key];
     DP.log.unshift({t:dpNow(),kind:mk,code:stkCode,name:p.name,side:side,qty:qty,px:px,
@@ -1079,7 +1082,7 @@ function dpCoin(act){
   if(act==="X"){
     if(!p){ dpMsg("dpMsgC",en?"No position":"자리가 없습니다"); return; }
     const pnl=(p.side==="L"?1:-1)*(cur/p.entry-1)*p.lev*p.margin;
-    DP.usd+=p.margin+pnl; delete DP.pos[key];
+    DP.usdt+=p.margin+pnl; delete DP.pos[key];
     DP.log.unshift({t:dpNow(),kind:"coin",code:coinSym,name:coinSym,side:"X",qty:p.margin,px:cur,
                     how:(en?"close":"청산"),pnl:pnl});
     DP.log=DP.log.slice(0,60); dpSave(); dpRender();
@@ -1087,10 +1090,11 @@ function dpCoin(act){
   }
   const mg=dpNum(E("dpMg").value), lev=Math.max(1,Math.min(10,dpNum(E("dpLev").value)||2));
   if(mg<=0){ dpMsg("dpMsgC",en?"Enter margin":"증거금을 넣으세요"); return; }
+  if(mg>DP.usdt){ dpMsg("dpMsgC",en?"Not enough USDT":"바이낸스 USDT가 모자랍니다"); return; }
   if(p){ dpMsg("dpMsgC",en?"Close the position first":"먼저 청산하세요"); return; }
   dpBusyC=true; dpMsg("dpMsgC",en?"Sending…":"주문 내는 중…");
   setTimeout(function(){
-    DP.usd-=mg;
+    DP.usdt-=mg;
     DP.pos[key]={mk:"coin",code:coinSym,name:coinSym,side:act,entry:cur,margin:mg,lev:lev,
                  liq:act==="L"?cur*(1-1/lev*0.99):cur*(1+1/lev*0.99)};
     DP.log.unshift({t:dpNow(),kind:"coin",code:coinSym,name:coinSym,side:act,qty:mg,px:cur,
@@ -1104,7 +1108,11 @@ function dpCoin(act){
 function dpRender(){
   const en=LANG==="en", box=E("dpBody"); if(!box)return;
   const cls=x=>x>0?"up":(x<0?"dn":"fl"), arw=x=>x>0?"▲":(x<0?"▼":"");
-  let h='<div class="dphd">'+(en?"Cash":"예수금")+' '+dpMoney("kr",DP.cash)+' · '+dpMoney("us",DP.usd)+'</div>';
+  let h='<table class="mhtab dpacct">'
+    +'<tr><td>'+(en?"Kiwoom · KR stocks":"키움증권 국내주식")+'</td><td>'+Math.round(DP.krw).toLocaleString()+(en?" KRW":"원")+'</td></tr>'
+    +'<tr><td>'+(en?"Kiwoom · US stocks":"키움증권 미국주식")+'</td><td>$'+DP.usd.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+'</td></tr>'
+    +'<tr><td>'+(en?"Binance · crypto":"바이낸스 코인")+'</td><td>'+DP.usdt.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+' USDT</td></tr>'
+    +'</table>';
   const keys=Object.keys(DP.pos);
   if(!keys.length)h+='<div class="mhempty">'+(en?"No positions yet. Search a stock or coin below and press BUY / LONG."
       :"아직 자리가 없습니다. 아래에서 종목이나 코인을 골라 [매수]·[롱]을 눌러보세요.")+'</div>';
@@ -1185,7 +1193,8 @@ function dpSyncHold(){
   }catch(e){}
 }
 
-dpLoad(); setTimeout(function(){ dpRender(); dpTick(); }, 1200); setInterval(dpTick,10000);
+dpLoad(); try{ dpRender(); }catch(e){}            // 카드가 처음부터 차 있게
+setTimeout(function(){ dpRender(); dpTick(); }, 1200); setInterval(dpTick,10000);
 
 function applyLang(){
   var b=E("lng");if(b)b.textContent=LANG==="en"?"한":"EN";
