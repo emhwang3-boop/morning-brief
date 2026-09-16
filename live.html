@@ -89,6 +89,10 @@ h1 .lv{color:#ff433d;font-size:12px;font-weight:800;vertical-align:super;margin-
 .mhempty{color:var(--sub);font-size:12px;padding:8px 2px}
 /* 공유 (2026-09-16) */
 .shwrap{position:relative}
+.shbtn{border-radius:12px;font-weight:800;font-size:13.5px;padding:6px 13px;letter-spacing:.5px;box-shadow:0 3px 8px rgba(0,0,0,.30), 0 1px 0 rgba(255,255,255,.10) inset}
+.shbtn:hover{filter:brightness(1.08)}
+.shbtn:active{transform:translateY(1px);box-shadow:0 1px 3px rgba(0,0,0,.30)}
+body.light .shbtn{box-shadow:0 3px 8px rgba(0,0,0,.14), 0 1px 0 rgba(255,255,255,.7) inset}
 .shpanel{position:absolute;right:0;top:34px;z-index:40;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px;width:250px;box-shadow:0 8px 28px rgba(0,0,0,.28)}
 .shgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
 .shgrid a,.shgrid button{display:flex;align-items:center;gap:6px;padding:8px 9px;border:1px solid var(--bd);border-radius:9px;background:var(--bg);color:var(--nm);font-size:12.5px;font-weight:600;text-decoration:none;cursor:pointer;text-align:left}
@@ -139,7 +143,7 @@ body.light #installBar{background:#eaf3ff;border-color:#b9d5f5;color:#1a4b7a}
 <div class="top">
   <h1 id="ttl">일일브리핑<span class="lv">● LIVE</span></h1>
   <div class="right"><span class="clock" id="clk">--:--:--</span>
-   <span class="shwrap"><button class="tgl" id="shb" onclick="shToggle()" title="공유">📤</button>
+   <span class="shwrap"><button class="tgl shbtn" id="shb" onclick="shToggle()" title="공유">공유</button>
    <div class="shpanel" id="shPanel" hidden></div></span>
    <button class="tgl" id="lng" onclick="toggleLang()">EN</button>
    <button class="tgl" id="tg" onclick="toggle()">🌙</button></div>
@@ -978,6 +982,7 @@ function applyLang(){
   var t=E("ttl");if(t)t.innerHTML=L("title")+'<span class="lv">● LIVE</span>';
   var gn=document.querySelector(".gnote");if(gn)gn.textContent=L("gnote");
   E("stkq").placeholder=L("stkPH");E("coinq").placeholder=L("coinPH");
+  var sb=E("shb");if(sb)sb.textContent=LANG==="en"?"Share":"공유";
   var mh=document.querySelector("#myhold h3");
   if(mh)mh.innerHTML=(LANG==="en"?"My Holdings":"내 보유종목")+' <span class="tag live">● 실시간</span>';
   var mq=E("mhq");if(mq)mq.placeholder=LANG==="en"?"Search a stock (e.g. 005930, AAPL)":"종목 검색 후 고르세요 (예: 005930, 삼성전자, AAPL)";
