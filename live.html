@@ -954,7 +954,7 @@ function shKakao(){
     try{
       if(!window.Kakao.isInitialized())window.Kakao.init(KAKAO_JS_KEY);
       // 🔴 카카오 창은 몇 초 걸린다 — 안내를 먼저 띄운다("안 되는 줄 알고 나간다", 사장님 2026-09-16)
-      shMsg(en?"Opening KakaoTalk… (a moment)":"카카오톡 공유창을 여는 중… 잠시만요");
+      shMsg(en?"Connecting… please wait":"연결중… 잠시 대기해주세요");
       setTimeout(function(){ shMsg(""); }, 6000);
       window.Kakao.Share.sendDefault({objectType:"feed",
         content:{title:SH_TTL_KO,description:shTxt(),imageUrl:SH_URL.replace("live.html","cover.png"),
