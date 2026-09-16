@@ -87,6 +87,13 @@ h1 .lv{color:#ff433d;font-size:12px;font-weight:800;vertical-align:super;margin-
 .mhsum td{font-weight:700;border-top:2px solid var(--bd)}
 .mhx{color:var(--sub);cursor:pointer;font-weight:700;padding:0 2px}
 .mhempty{color:var(--sub);font-size:12px;padding:8px 2px}
+/* 공유 (2026-09-16) */
+.shwrap{position:relative}
+.shpanel{position:absolute;right:0;top:34px;z-index:40;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px;width:250px;box-shadow:0 8px 28px rgba(0,0,0,.28)}
+.shgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.shgrid a,.shgrid button{display:flex;align-items:center;gap:6px;padding:8px 9px;border:1px solid var(--bd);border-radius:9px;background:var(--bg);color:var(--nm);font-size:12.5px;font-weight:600;text-decoration:none;cursor:pointer;text-align:left}
+.shhd{font-size:11.5px;color:var(--sub);margin:0 2px 7px}
+.shmsg{font-size:11.5px;color:var(--soon);margin-top:7px;min-height:14px}
 .nhd{font-weight:800;color:var(--nm);font-size:13px;margin:8px 0 2px}
 .nrow{display:block;color:var(--nm);text-decoration:none;font-size:13px;padding:5px 2px;border-bottom:1px solid var(--bd);opacity:.9}
 #installBar{display:flex;align-items:center;gap:8px;background:#12233a;border:1px solid #2a5580;color:#cfe4ff;border-radius:10px;padding:8px 12px;margin:6px 0 10px;font-size:13px}
@@ -132,6 +139,8 @@ body.light #installBar{background:#eaf3ff;border-color:#b9d5f5;color:#1a4b7a}
 <div class="top">
   <h1 id="ttl">일일브리핑<span class="lv">● LIVE</span></h1>
   <div class="right"><span class="clock" id="clk">--:--:--</span>
+   <span class="shwrap"><button class="tgl" id="shb" onclick="shToggle()" title="공유">📤</button>
+   <div class="shpanel" id="shPanel" hidden></div></span>
    <button class="tgl" id="lng" onclick="toggleLang()">EN</button>
    <button class="tgl" id="tg" onclick="toggle()">🌙</button></div>
 </div>
@@ -872,6 +881,98 @@ E("mhq").addEventListener("input",function(){
   },350);
 });
 mhLoad(); mhRender(); mhTick(); setInterval(mhTick,10000);
+
+// ── 공유 (사장님 2026-09-16) — 폰은 기본 공유창(깔린 앱 전부), 그 밖은 SNS 단추 ──
+const SH_URL = "https://emhwang3-boop.github.io/morning-brief/live.html";
+const SH_TTL_KO = "일일브리핑 LIVE";
+const SH_TXT_KO = "코스피·코스닥·미국·코인 실시간 시세와 차트, 매일 아침 브리핑 — 무료";
+const SH_TXT_EN = "KOSPI, KOSDAQ, US, crypto — live quotes, charts and a daily brief. Free.";
+// 카카오톡 단추(웹)는 카카오 JavaScript 키가 있어야 켜진다. 사장님이 키를 주시면 여기에 넣는다.
+// (카카오 개발자센터 > 내 애플리케이션 > 앱 키 > JavaScript 키 + 플랫폼>Web 에 도메인 등록)
+const KAKAO_JS_KEY = "";
+
+function shTxt(){ return (LANG==="en"?SH_TXT_EN:SH_TXT_KO); }
+function shFull(){ return SH_TTL_KO+" — "+shTxt()+"\n"+SH_URL; }
+
+function shToggle(){
+  const p=E("shPanel"); if(!p)return;
+  if(!p.hidden){ p.hidden=true; return; }
+  // 폰이면 기본 공유창을 먼저 — 카톡·문자·X 등 **깔린 앱이 전부** 나온다
+  if(navigator.share){
+    navigator.share({title:SH_TTL_KO,text:shTxt(),url:SH_URL}).catch(function(){ shPanel(); });
+    return;
+  }
+  shPanel();
+}
+function shPanel(){
+  const p=E("shPanel"); if(!p)return;
+  const en=LANG==="en", u=encodeURIComponent(SH_URL), t=encodeURIComponent(SH_TTL_KO+" — "+shTxt());
+  const A=function(href,label){ return '<a href="'+href+'" target="_blank" rel="noopener" onclick="shDone()">'+label+'</a>'; };
+  let h='<div class="shhd">'+(en?"Share this app":"이 앱 공유하기")+'</div><div class="shgrid">';
+  h+=A("https://twitter.com/intent/tweet?text="+t+"&url="+u,"𝕏 X");
+  h+=A("sms:?&body="+t+"%20"+u,"💬 "+(en?"Message":"문자"));
+  h+=A("https://t.me/share/url?url="+u+"&text="+t,"✈ "+(en?"Telegram":"텔레그램"));
+  h+=A("https://social-plugins.line.me/lineit/share?url="+u,"💚 LINE");
+  h+=A("https://www.facebook.com/sharer/sharer.php?u="+u,"📘 "+(en?"Facebook":"페이스북"));
+  h+=A("https://band.us/plugin/share?body="+t+"%0A"+u+"&route="+u,"🎵 "+(en?"BAND":"밴드"));
+  h+=A("https://api.whatsapp.com/send?text="+t+"%20"+u,"🟢 WhatsApp");
+  h+=A("mailto:?subject="+encodeURIComponent(SH_TTL_KO)+"&body="+t+"%0A"+u,"✉ "+(en?"Email":"메일"));
+  h+='<button onclick="shKakao()">🟡 '+(en?"KakaoTalk":"카카오톡")+'</button>';
+  h+='<button onclick="shCopy()">🔗 '+(en?"Copy link":"링크 복사")+'</button>';
+  h+='</div><div class="shmsg" id="shMsg"></div>';
+  p.innerHTML=h; p.hidden=false;
+}
+function shDone(){ const p=E("shPanel"); if(p)setTimeout(function(){p.hidden=true;},200); }
+function shMsg(m){ const e=E("shMsg"); if(e)e.textContent=m; }
+function shCopy(){
+  const en=LANG==="en";
+  const done=function(){ shMsg(en?"Link copied":"링크를 복사했습니다"); };
+  try{
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(SH_URL).then(done).catch(shCopyOld);
+    } else shCopyOld();
+  }catch(e){ shCopyOld(); }
+}
+function shCopyOld(){
+  try{
+    const ta=document.createElement("textarea"); ta.value=SH_URL;
+    ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta);
+    ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
+    shMsg(LANG==="en"?"Link copied":"링크를 복사했습니다");
+  }catch(e){ shMsg(SH_URL); }
+}
+function shKakao(){
+  const en=LANG==="en";
+  // ① JavaScript 키가 있으면 카카오 SDK 로 바로 보낸다
+  if(KAKAO_JS_KEY){
+    const go=function(){
+      try{
+        if(!window.Kakao.isInitialized())window.Kakao.init(KAKAO_JS_KEY);
+        window.Kakao.Share.sendDefault({objectType:"feed",
+          content:{title:SH_TTL_KO,description:shTxt(),imageUrl:SH_URL.replace("live.html","cover.png"),
+                   link:{mobileWebUrl:SH_URL,webUrl:SH_URL}},
+          buttons:[{title:en?"Open":"열어보기",link:{mobileWebUrl:SH_URL,webUrl:SH_URL}}]});
+        shDone();
+      }catch(e){ shCopy(); }
+    };
+    if(window.Kakao&&window.Kakao.Share)return go();
+    const sc=document.createElement("script");
+    sc.src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js";
+    sc.onload=go; sc.onerror=function(){ shCopy(); };
+    document.head.appendChild(sc);
+    return;
+  }
+  // ② 키가 없으면 — 폰은 기본 공유창(카톡 포함), PC 는 링크 복사
+  if(navigator.share){
+    navigator.share({title:SH_TTL_KO,text:shTxt(),url:SH_URL}).then(shDone).catch(function(){});
+    return;
+  }
+  shCopy(); shMsg(LANG==="en"?"Link copied — paste into KakaoTalk":"링크를 복사했습니다 — 카카오톡에 붙여넣기");
+}
+document.addEventListener("click",function(e){
+  const p=E("shPanel"); if(!p||p.hidden)return;
+  if(!p.contains(e.target)&&e.target.id!=="shb")p.hidden=true;
+});
 
 function applyLang(){
   var b=E("lng");if(b)b.textContent=LANG==="en"?"한":"EN";
