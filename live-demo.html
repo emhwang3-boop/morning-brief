@@ -1155,7 +1155,8 @@ function dpCloseKey(key,ratio){
   DP.usdt+=part+pnl;
   if(r>=0.999)delete DP.pos[key]; else { p.margin-=part; DP.pos[key]=p; }
   DP.log.unshift({t:dpNow(),kind:"coin",code:p.code,name:p.code,side:"X",qty:part,px:cur,
-                  how:(LANG==="en"?"close ":"청산 ")+Math.round(r*100)+"%",pnl:pnl});
+                  how:(LANG==="en"?((p.side==="L"?"long":"short")+" close "):
+                       ((p.side==="L"?"롱":"숏")+" 청산 "))+Math.round(r*100)+"%",pnl:pnl});
   DP.log=DP.log.slice(0,60); dpSave(); dpRender();
   return pnl;
 }
@@ -1266,11 +1267,13 @@ function dpRender(){
     DP.log.slice(0,40).forEach(function(l){
       const nm={B:(en?"BUY":"매수"),S:(en?"SELL":"매도"),L:(en?"LONG":"롱"),X:(en?"CLOSE":"청산")}[l.side]||l.side;
       const col=(l.side==="B"||l.side==="L")?"up":((l.side==="S")?"dn":"fl");
-      h+='<tr><td style="white-space:nowrap">'+l.t+'</td><td>'+dpEsc(l.name)+'</td>'
-       +'<td class="'+col+'" style="white-space:nowrap">'+nm+'</td>'
+      h+='<tr><td style="white-space:nowrap">'+l.t+'</td>'
+       +'<td style="text-align:left">'+dpEsc(l.name)+'</td>'
+       +'<td class="'+col+'" style="white-space:nowrap;text-align:center">'+nm+'</td>'
        +'<td>'+l.qty.toLocaleString()+'</td><td style="white-space:nowrap">'
        +(l.kind==="kr"?dpMoney("kr",l.px):("$"+l.px.toLocaleString()))+'</td>'
-       +'<td style="white-space:nowrap">'+l.how+(l.pnl!=null?(" · "+(l.pnl>=0?"+":"")+l.pnl.toFixed(2)):"")+'</td></tr>';
+       +'<td style="white-space:nowrap">'+l.how
+       +(l.pnl!=null?(" · "+(l.pnl>=0?"+":"")+l.pnl.toFixed(2)+" USDT"):"")+'</td></tr>';
     });
     h+='</table></div>';
   }
