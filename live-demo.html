@@ -2,7 +2,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="manifest" href="manifest-demo.webmanifest">
 <meta name="theme-color" content="#0f1420">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -10,12 +10,12 @@
 <meta name="apple-mobile-web-app-title" content="일일브리핑">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
-<title>[모의] 일일브리핑 LIVE</title>
+<title>Demo Live</title>
 <meta property="og:title" content="일일브리핑 LIVE — 코스피·미국·코인 실시간">
 <meta property="og:description" content="폰에서 종목·코인 실시간 시세 · 헐 이동평균선 · 지지/저항 · 청산맵 · 매일 브리핑. 무료.">
 <meta property="og:image" content="https://emhwang3-boop.github.io/morning-brief/cover.png">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://emhwang3-boop.github.io/morning-brief/live.html">
+<meta property="og:url" content="https://emhwang3-boop.github.io/morning-brief/live-demo.html">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Daily Brief LIVE — KOSPI·US·Crypto real-time">
 <meta name="twitter:image" content="https://emhwang3-boop.github.io/morning-brief/cover.png">
@@ -154,7 +154,7 @@ body.light #installBar{background:#eaf3ff;border-color:#b9d5f5;color:#1a4b7a}
 .stktf button.on{background:#1b3a5a;color:#5db4ff;border-color:#2a5580}
 </style></head><body>
 <div class="top">
-  <h1 id="ttl">일일브리핑<span class="lv">● LIVE</span></h1>
+  <h1 id="ttl">Demo Live<span class="lv">● LIVE</span></h1>
   <div class="right"><span class="clock" id="clk">--:--:--</span>
    <span class="shwrap"><button class="tgl shbtn" id="shb" onclick="shToggle()" title="공유">공유</button>
    <div class="shpanel" id="shPanel" hidden></div></span>
@@ -298,7 +298,7 @@ const NM={"국내":"KR Indices","미국 지수":"US Indices","미국 야간선�
  "미국 10Y−13주":"US 10Y−13W","한국 10Y−3Y":"KR 10Y−3Y",
  "한국":"Korea","미국":"US","중국":"China","일본":"Japan","유로존":"Eurozone","독일":"Germany","영국":"UK","유럽":"Europe"};
 function tr(k){return LANG==="en"?(NM[k]||k):k;}
-const T={title:{ko:"일일브리핑",en:"Daily Brief"},stockH:{ko:"종목 조회",en:"Stock Search"},coinH:{ko:"코인 조회",en:"Coin Search"},
+const T={title:{ko:"Demo Live",en:"Demo Live"},stockH:{ko:"종목 조회",en:"Stock Search"},coinH:{ko:"코인 조회",en:"Coin Search"},
  krateH:{ko:"한국 금리",en:"Korea Rates"},spreadH:{ko:"장단기 금리차이",en:"Yield Spread"},spreadN:{ko:"음수=역전",en:"neg=inverted"},
  changesH:{ko:"주요 자산 전일대비",en:"Key Assets"},calH:{ko:"경제지표 일정 (오늘)",en:"Economic Calendar (Today)"},newsH:{ko:"헤드라인 뉴스",en:"Headlines (KR)"},coinCardH:{ko:"암호화폐",en:"Crypto"},
  live:{ko:"● 실시간",en:"● LIVE"},delay:{ko:"D 지연",en:"D delayed"},closed:{ko:"장마감",en:"Closed"},delayed2:{ko:"지연(장마감)",en:"Delayed (Closed)"},
@@ -904,8 +904,8 @@ async function mhTick(){
 mhLoad(); mhRender(); mhTick(); setInterval(mhTick,10000);
 
 // ── 공유 (사장님 2026-09-16) — 폰은 기본 공유창(깔린 앱 전부), 그 밖은 SNS 단추 ──
-const SH_URL = "https://emhwang3-boop.github.io/morning-brief/live.html";
-const SH_TTL_KO = "일일브리핑 LIVE";
+const SH_URL = "https://emhwang3-boop.github.io/morning-brief/live-demo.html";
+const SH_TTL_KO = "Demo Live";
 const SH_TXT_KO = "코스피·코스닥·미국·코인 실시간 시세와 차트, 매일 아침 브리핑 — 무료";
 const SH_TXT_EN = "KOSPI, KOSDAQ, US, crypto — live quotes, charts and a daily brief. Free.";
 // 카카오톡 단추(웹)는 카카오 JavaScript 키가 있어야 켜진다. 사장님이 키를 주시면 여기에 넣는다.
