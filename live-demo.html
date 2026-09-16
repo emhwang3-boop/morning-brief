@@ -290,6 +290,16 @@ function _il(){var en=false;try{en=(LANG==="en");}catch(e){}
   else t.textContent=en?"📲 Click the install icon at the right of the address bar":"📲 주소창 오른쪽 설치 아이콘을 누르세요";}
 window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();_deferPrompt=e;_iosHint=false;_il();});
 window.addEventListener("appinstalled",function(){dismissInstall();});
+// 🔴 카톡 안에서 열렸으면 바깥 브라우저로 자동으로 넘긴다 — 설치가 거기서만 된다(2026-09-16)
+try{
+  if(_kakao&&!_standalone()){
+    var _j=false; try{_j=sessionStorage.getItem("brief_jump")==="1";}catch(e){}
+    if(!_j){
+      try{sessionStorage.setItem("brief_jump","1");}catch(e){}
+      setTimeout(function(){ try{_openExternal();}catch(e){} },400);
+    }
+  }
+}catch(e){}
 function _showInstall(){if(_standalone())return;_il();var b=document.getElementById("installBar");if(b)b.hidden=false;}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",_showInstall);else _showInstall();
 // ---- 언어(한/영) ----
