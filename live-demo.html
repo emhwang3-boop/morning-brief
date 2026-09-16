@@ -103,6 +103,8 @@ body.light .dpnote{background:#fff6e0;border-color:#e8c37a;color:#7a5200}
 .dpseg.on{background:#1c7ed6;border-color:#1971c2;color:#fff}
 .dpsel{width:92px;font-weight:700}
 .dpsm{padding:4px 10px;font-size:11.5px;border-radius:7px}
+.dplog{max-height:152px;overflow-y:auto;border:1px solid var(--bd);border-radius:9px;padding:0 6px}
+.dplog table{margin-top:0}
 .dphd{font-size:12px;color:var(--sub);font-weight:700;margin:2px 0 5px}
 /* 공유 (2026-09-16) */
 .shwrap{position:relative}
@@ -1214,8 +1216,8 @@ function dpRender(){
    +'<tr><td>'+(en?"Binance · crypto":"바이낸스 코인")+'</td><td>'+DP.usdt.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+' USDT</td></tr>'
    +'</table>';
   if(DP.log.length){
-    h+='<div class="dphd" style="margin-top:10px">'+(en?"Order log (demo)":"주문 내역 (모의)")+'</div><table class="mhtab">';
-    DP.log.slice(0,8).forEach(function(l){
+    h+='<div class="dphd" style="margin-top:10px">'+(en?"Order log (demo)":"주문 내역 (모의)")+'</div><div class="dplog"><table class="mhtab">';
+    DP.log.slice(0,40).forEach(function(l){
       const nm={B:(en?"BUY":"매수"),S:(en?"SELL":"매도"),L:(en?"LONG":"롱"),X:(en?"CLOSE":"청산")}[l.side]||l.side;
       const col=(l.side==="B"||l.side==="L")?"up":((l.side==="S")?"dn":"fl");
       h+='<tr><td style="white-space:nowrap">'+l.t+'</td><td>'+dpEsc(l.name)+'</td>'
@@ -1224,7 +1226,7 @@ function dpRender(){
        +(l.kind==="kr"?dpMoney("kr",l.px):("$"+l.px.toLocaleString()))+'</td>'
        +'<td style="white-space:nowrap">'+l.how+(l.pnl!=null?(" · "+(l.pnl>=0?"+":"")+l.pnl.toFixed(2)):"")+'</td></tr>';
     });
-    h+='</table>';
+    h+='</table></div>';
   }
   box.innerHTML=h;
   dpSyncHold();
