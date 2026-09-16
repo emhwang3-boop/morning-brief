@@ -949,12 +949,15 @@ function shKakao(){
   if(KAKAO_JS_KEY&&window.Kakao&&window.Kakao.Share){
     try{
       if(!window.Kakao.isInitialized())window.Kakao.init(KAKAO_JS_KEY);
+      // 🔴 카카오 창은 몇 초 걸린다 — 안내를 먼저 띄운다("안 되는 줄 알고 나간다", 사장님 2026-09-16)
+      shMsg(en?"Opening KakaoTalk… (a moment)":"카카오톡 공유창을 여는 중… 잠시만요");
+      setTimeout(function(){ shMsg(""); }, 6000);
       window.Kakao.Share.sendDefault({objectType:"feed",
         content:{title:SH_TTL_KO,description:shTxt(),imageUrl:SH_URL.replace("live.html","cover.png"),
                  link:{mobileWebUrl:SH_URL,webUrl:SH_URL}},
         buttons:[{title:en?"Open":"열어보기",link:{mobileWebUrl:SH_URL,webUrl:SH_URL}}]});
-      shDone();
-      return;
+      return;                       // 패널은 열어 둔다 — 안내 문구가 보여야 한다
+
     }catch(e){ shMsg("카카오 공유 실패 — 링크를 복사합니다"); }
   }
   // ② 키가 없으면 — 폰은 기본 공유창(카톡 포함), PC 는 링크 복사
