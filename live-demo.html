@@ -1171,7 +1171,7 @@ function dpSellKey(key){
                   how:(en?"market":"시장가")});
   DP.log=DP.log.slice(0,60); dpSave(); dpRender();
 }
-// [내 보유종목] 카드 — 주식과 코인을 한 표에. ✕ 대신 매도·청산.
+// [내 보유종목] 카드 — 주식과 코인을 한 표에. 지움(✕) 대신 매도·청산.
 function dpHoldRender(){
   const en=LANG==="en", box=E("mhBody"); if(!box)return;
   const keys=Object.keys(DP.pos);
@@ -1203,48 +1203,26 @@ function dpHoldRender(){
   });
   box.innerHTML=h+'</table>';
 }
-function mhRender(){ try{ dpHoldRender(); }catch(e){} }   // 계좌가 준비되기 전에 불릴 수 있다      // 데모에선 보유 카드를 이 표가 그린다
+function mhRender(){ try{ dpHoldRender(); }catch(e){} }   // 계좌가 준비되기 전에 불릴 수 있다
 
-// ── 표 ──
+// 모의 계좌 카드 — 계좌 셋 + 주문 내역만
 function dpRender(){
   const en=LANG==="en", box=E("dpBody"); if(!box)return;
-  const cls=x=>x>0?"up":(x<0?"dn":"fl"), arw=x=>x>0?"▲":(x<0?"▼":"");
   let h='<table class="mhtab dpacct">'
-    +'<tr><td>'+(en?"Kiwoom · KR stocks":"키움증권 국내주식")+'</td><td>'+Math.round(DP.krw).toLocaleString()+(en?" KRW":"원")+'</td></tr>'
-    +'<tr><td>'+(en?"Kiwoom · US stocks":"키움증권 미국주식")+'</td><td>$'+DP.usd.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+'</td></tr>'
-    +'<tr><td>'+(en?"Binance · crypto":"바이낸스 코인")+'</td><td>'+DP.usdt.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+' USDT</td></tr>'
-    +'</table>';
-  const keys=Object.keys(DP.pos);
-  if(!keys.length)h+='<div class="mhempty">'+(en?"No positions yet. Search a stock or coin below and press BUY / LONG."
-      :"아직 자리가 없습니다. 아래에서 종목이나 코인을 골라 [매수]·[롱]을 눌러보세요.")+'</div>';
-  else{
-    h+='<table class="mhtab"><tr><th>'+(en?"Item":"종목")+'</th><th>'+(en?"Side":"방향")+'</th><th>'+(en?"Qty/Margin":"수량·증거금")
-      +'</th><th>'+(en?"Entry":"진입가")+'</th><th>'+(en?"Now":"현재가")+'</th><th>'+(en?"P/L":"손익")+'</th></tr>';
-    keys.forEach(function(k){
-      const p=DP.pos[k], cur=dpPx[k]||0;
-      if(p.mk==="coin"){
-        const pnl=cur?((p.side==="L"?1:-1)*(cur/p.entry-1)*p.lev*p.margin):0;
-        const pct=cur?((p.side==="L"?1:-1)*(cur/p.entry-1)*p.lev*100):0;
-        h+='<tr><td>'+dpEsc(p.code)+'</td><td class="'+(p.side==="L"?"up":"dn")+'">'+(p.side==="L"?(en?"LONG":"롱"):(en?"SHORT":"숏"))+' '+p.lev+'x</td>'
-         +'<td>'+p.margin.toLocaleString()+' USDT</td><td>$'+p.entry.toLocaleString()+'</td><td>'+(cur?("$"+cur.toLocaleString()):"-")+'</td>'
-         +'<td class="'+cls(pnl)+'">'+arw(pnl)+Math.abs(pct).toFixed(2)+'% ('+(pnl>=0?"+":"")+pnl.toFixed(2)+')</td></tr>';
-      }else{
-        const pct=cur?((cur-p.avg)/p.avg*100):0;
-        h+='<tr><td>'+dpEsc(p.name)+' <span class="mkt'+(p.mk==="us"?" us":"")+'">'+(p.mk==="us"?"US":"KR")+'</span></td>'
-         +'<td class="up">'+(en?"LONG":"보유")+'</td><td>'+p.qty.toLocaleString()+'</td><td>'+dpMoney(p.mk,p.avg)+'</td>'
-         +'<td>'+(cur?dpMoney(p.mk,cur):"-")+'</td><td class="'+cls(pct)+'">'+(cur?(arw(pct)+Math.abs(pct).toFixed(2)+"%"):"-")+'</td></tr>';
-      }
-    });
-    h+='</table>';
-  }
+   +'<tr><td>'+(en?"Kiwoom · KR stocks":"키움증권 국내주식")+'</td><td>'+Math.round(DP.krw).toLocaleString()+(en?" KRW":"원")+'</td></tr>'
+   +'<tr><td>'+(en?"Kiwoom · US stocks":"키움증권 미국주식")+'</td><td>$'+DP.usd.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+'</td></tr>'
+   +'<tr><td>'+(en?"Binance · crypto":"바이낸스 코인")+'</td><td>'+DP.usdt.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+' USDT</td></tr>'
+   +'</table>';
   if(DP.log.length){
     h+='<div class="dphd" style="margin-top:10px">'+(en?"Order log (demo)":"주문 내역 (모의)")+'</div><table class="mhtab">';
     DP.log.slice(0,8).forEach(function(l){
       const nm={B:(en?"BUY":"매수"),S:(en?"SELL":"매도"),L:(en?"LONG":"롱"),X:(en?"CLOSE":"청산")}[l.side]||l.side;
       const col=(l.side==="B"||l.side==="L")?"up":((l.side==="S")?"dn":"fl");
-      h+='<tr><td>'+l.t+'</td><td>'+dpEsc(l.name)+'</td><td class="'+col+'">'+nm+'</td>'
-       +'<td>'+l.qty.toLocaleString()+'</td><td>'+(l.kind==="kr"?dpMoney("kr",l.px):("$"+l.px.toLocaleString()))+'</td>'
-       +'<td>'+l.how+(l.pnl!=null?(" · "+(l.pnl>=0?"+":"")+l.pnl.toFixed(2)):"")+'</td></tr>';
+      h+='<tr><td style="white-space:nowrap">'+l.t+'</td><td>'+dpEsc(l.name)+'</td>'
+       +'<td class="'+col+'" style="white-space:nowrap">'+nm+'</td>'
+       +'<td>'+l.qty.toLocaleString()+'</td><td style="white-space:nowrap">'
+       +(l.kind==="kr"?dpMoney("kr",l.px):("$"+l.px.toLocaleString()))+'</td>'
+       +'<td style="white-space:nowrap">'+l.how+(l.pnl!=null?(" · "+(l.pnl>=0?"+":"")+l.pnl.toFixed(2)):"")+'</td></tr>';
     });
     h+='</table>';
   }
