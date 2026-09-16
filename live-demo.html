@@ -161,7 +161,7 @@ body.light #installBar{background:#eaf3ff;border-color:#b9d5f5;color:#1a4b7a}
    <button class="tgl" id="lng" onclick="toggleLang()">EN</button>
    <button class="tgl" id="tg" onclick="toggle()">🌙</button></div>
 </div>
-<div class="dpnote" id="dpNote">⚠ 모의(시늭) 주문 판 — 실제 주문은 나가지 않습니다 · 심사·시연용<button class="dpreset" onclick="dpReset()">초기화</button></div>
+<div class="dpnote" id="dpNote">⚠ 모의(시늉) 주문 판 — 실제 주문은 나가지 않습니다 · 심사·시연용<button class="dpreset" onclick="dpReset()">초기화</button></div>
 <div class="asof" id="asof">불러오는 중…</div>
 <div id="installBar" hidden><span id="installTxt">📲 홈 화면에 앱으로 추가하고 바로 여세요</span><button id="installBtn" onclick="doInstall()">앱설치</button><span class="ix" onclick="dismissInstall()">✕</span></div>
 
@@ -878,7 +878,7 @@ async function mhTick(){
   }));
   mhRender();
 }
-E("mhq").addEventListener("input",function(){
+(E("mhq")||{addEventListener:function(){}}).addEventListener("input",function(){
   clearTimeout(mhT); const q=this.value.trim();
   if(q.length<1){E("mhResults").innerHTML="";return;}
   const seq=++mhSeq;
