@@ -1281,6 +1281,8 @@ function dpSellGo(){
 // [내 보유종목] 카드 — 주식과 코인을 한 표에. 지움(✕) 대신 매도·청산.
 function dpHoldRender(){
   const en=LANG==="en", box=E("mhBody"); if(!box)return;
+  // 🔴 매도·청산 판이 열려 있으면 표를 다시 그리지 않는다 — 그리면 판이 사라진다(10초 갱신)
+  if(dpCloseCur||dpSellCur)return;
   const keys=Object.keys(DP.pos);
   if(!keys.length){ box.innerHTML='<div class="mhempty">'+(en
     ?"Buy a stock or coin below and it shows up here."
