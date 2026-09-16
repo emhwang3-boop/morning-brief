@@ -71,7 +71,9 @@ h1 .lv{color:#ff433d;font-size:12px;font-weight:800;vertical-align:super;margin-
 .chdr{color:var(--sub);font-weight:600;font-size:11px}
 .cmut{color:var(--sub);font-size:11.5px}
 .ca{color:var(--nm);font-variant-numeric:tabular-nums}
-.ctag{font-weight:700;white-space:nowrap}
+.ctag{font-weight:700;white-space:nowrap;margin-left:auto;text-align:right}
+.cline{display:flex;align-items:baseline;gap:6px;width:100%}
+.cline .ca{min-width:0}
 /* 내 보유종목 (2026-09-16) */
 .mhrow2{display:flex;gap:6px;align-items:center;margin-top:6px;flex-wrap:wrap}
 .mhpick{font-weight:700;color:var(--nm);font-size:12.5px}
@@ -365,8 +367,9 @@ function render(d){
           const g=TAG[r.tag]||TAG.flat,ex=[];
           if(r.fc)ex.push(W.f+r.fc); if(r.pv)ex.push(W.p+r.pv);
           return '<div class="crow">'+FL(r.fl)+'<span class="cc">'+tr(r.nm)+'</span><span class="ci">'+r.title
-            +'<br><span class="ca">'+W.a+'<b>'+r.act+'</b></span>'+(ex.length?' <span class="cmut">('+ex.join(" · ")+')</span>':'')
-            +' <span class="ctag" style="color:'+g[1]+'">'+g[2]+' '+g[0]+'</span></span></div>';}).join("")
+            +'<span class="cline"><span class="ca">'+W.a+'<b>'+r.act+'</b>'
+            +(ex.length?' <span class="cmut">('+ex.join(" · ")+')</span>':'')+'</span>'
+            +'<span class="ctag" style="color:'+g[1]+'">'+g[2]+' '+g[0]+'</span></span></span></div>';}).join("")
         :'<div class="cmut" style="padding:3px 0">'+(en?"No releases":"발표 없음")+'</div>';
       h+='<div class="calh" style="margin-top:10px">'+(en?"Today":"오늘 예정")+' ('+cal.td+')</div>';
       h+=(cal.t&&cal.t.length)?cal.t.map(r=>{
