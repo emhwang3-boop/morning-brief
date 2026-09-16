@@ -1114,8 +1114,8 @@ function dpRender(){
   const cls=x=>x>0?"up":(x<0?"dn":"fl"), arw=x=>x>0?"▲":(x<0?"▼":"");
   let h='<div class="dphd">'+(en?"Cash":"예수금")+' '+dpMoney("kr",DP.cash)+' · '+dpMoney("us",DP.usd)+'</div>';
   const keys=Object.keys(DP.pos);
-  if(!keys.length)h+='<div class="mhempty">'+(en?"No positions yet. Search a stock or coin above and press BUY / LONG."
-      :"아직 자리가 없습니다. 위에서 종목이나 코인을 골라 [매수]·[롱]을 눌러보세요.")+'</div>';
+  if(!keys.length)h+='<div class="mhempty">'+(en?"No positions yet. Search a stock or coin below and press BUY / LONG."
+      :"아직 자리가 없습니다. 아래에서 종목이나 코인을 골라 [매수]·[롱]을 눌러보세요.")+'</div>';
   else{
     h+='<table class="mhtab"><tr><th>'+(en?"Item":"종목")+'</th><th>'+(en?"Side":"방향")+'</th><th>'+(en?"Qty/Margin":"수량·증거금")
       +'</th><th>'+(en?"Entry":"진입가")+'</th><th>'+(en?"Now":"현재가")+'</th><th>'+(en?"P/L":"손익")+'</th></tr>';
