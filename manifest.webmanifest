@@ -1,60 +1,61 @@
 {
-  "name": "일일브리핑 LIVE",
-  "short_name": "일일브리핑",
-  "description": "코스피·코스닥·미국·코인 실시간 · 헐 이동평균선 · 지지/저항 · 청산맵 · 매일 브리핑",
-  "lang": "ko",
-  "start_url": "./live.html?src=pwa",
-  "scope": "./",
-  "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#0f1420",
-  "theme_color": "#0f1420",
-  "categories": [
-    "finance",
-    "news"
-  ],
-  "icons": [
+ "name": "일일브리핑 LIVE",
+ "short_name": "일일브리핑",
+ "description": "코스피·코스닥·미국·코인 실시간 · 헐 이동평균선 · 지지/저항 · 청산맵 · 매일 브리핑",
+ "lang": "ko",
+ "start_url": "./live.html?src=pwa",
+ "scope": "./live.html",
+ "display": "standalone",
+ "orientation": "portrait",
+ "background_color": "#0f1420",
+ "theme_color": "#0f1420",
+ "categories": [
+  "finance",
+  "news"
+ ],
+ "icons": [
+  {
+   "src": "icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png"
+  },
+  {
+   "src": "icon-maskable-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "maskable"
+  }
+ ],
+ "shortcuts": [
+  {
+   "name": "카톡으로 공유",
+   "short_name": "카톡 공유",
+   "description": "이 앱 링크를 카카오톡으로 보냅니다",
+   "url": "./live.html?share=kakao",
+   "icons": [
     {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    },
-    {
-      "src": "icon-maskable-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
+     "src": "icon-192.png",
+     "sizes": "192x192"
     }
-  ],
-  "shortcuts": [
+   ]
+  },
+  {
+   "name": "공유하기",
+   "short_name": "공유",
+   "description": "X·문자·메일 등으로 링크 보내기",
+   "url": "./live.html?share=1",
+   "icons": [
     {
-      "name": "카톡으로 공유",
-      "short_name": "카톡 공유",
-      "description": "이 앱 링크를 카카오톡으로 보냅니다",
-      "url": "./live.html?share=kakao",
-      "icons": [
-        {
-          "src": "icon-192.png",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "공유하기",
-      "short_name": "공유",
-      "description": "X·문자·메일 등으로 링크 보내기",
-      "url": "./live.html?share=1",
-      "icons": [
-        {
-          "src": "icon-192.png",
-          "sizes": "192x192"
-        }
-      ]
+     "src": "icon-192.png",
+     "sizes": "192x192"
     }
-  ]
+   ]
+  }
+ ],
+ "id": "/morning-brief/live.html"
 }
