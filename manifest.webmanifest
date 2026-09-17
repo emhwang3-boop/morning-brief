@@ -4,7 +4,7 @@
  "description": "코스피·코스닥·미국·코인 실시간 · 헐 이동평균선 · 지지/저항 · 청산맵 · 매일 브리핑",
  "lang": "ko",
  "start_url": "./live.html?src=pwa",
- "scope": "./live.html",
+ "scope": "./",
  "display": "standalone",
  "orientation": "portrait",
  "background_color": "#0f1420",
