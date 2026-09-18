@@ -1157,7 +1157,7 @@ function cardFull(id){
 let _ordKey="";
 function orderCards(){
   try{
-    const ids=["myhold","stock","coin2"];
+    const ids=["stock","coin2"];   // 🔴 myhold 는 빼둔다 — 실계좌 단추가 그 안에 있다
     const key=ids.map(cardFull).join(",");
     if(key===_ordKey)return;                          // 바뀔 때만 움직인다
     _ordKey=key;
