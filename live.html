@@ -621,7 +621,16 @@ E("stkq").addEventListener("keydown",function(e){
   if(lastResults.length){const r=lastResults[0];pickStock(r.code,(LANG==="en"&&r.en)?r.en:r.name);this.blur();}
   else if(usResults.length){const r=usResults[0];pickStockUS(r.code,r.name);this.blur();}
 });
+// 고른 것을 기억한다 — 다음에 와도 그것이 뜬다(기본값이 덮지 않게)
+function rememberPick(kind,a,b,c){
+  try{ localStorage.setItem("brief_last_"+kind, JSON.stringify([a,b,c||""])); }catch(e){}
+}
+function lastPick(kind){
+  try{ const v=JSON.parse(localStorage.getItem("brief_last_"+kind)||"null");
+       return (v && v.length>=2) ? v : null; }catch(e){ return null; }
+}
 function pickStock(code,name){
+  rememberPick("kr",code,name);
   stkCode=code; stkMarket="kr"; E("stkResults").innerHTML=""; E("stkq").value=name+" ("+code+")";
   E("stkTf").hidden=false; E("stkChart").hidden=false; E("stkChartLbl").hidden=false;
   E("stkDetail").innerHTML='<div class="soonrow">'+L("loading")+'</div>';
@@ -629,6 +638,7 @@ function pickStock(code,name){
   clearInterval(stkTimer); stkTimer=setInterval(loadStock,3000);
 }
 function pickStockUS(code,name){
+  rememberPick("us",code,name);
   stkCode=code; stkMarket="us"; usDaily=null; E("stkResults").innerHTML=""; E("stkq").value=name+" ("+code.replace(/\.US$/,"")+")";
   E("stkTf").hidden=false; E("stkChart").hidden=false; E("stkChartLbl").hidden=false;
   E("stkDetail").innerHTML='<div class="soonrow">'+L("loading")+'</div>';
@@ -838,7 +848,8 @@ E("coinq").addEventListener("input",function(){clearTimeout(coinSearchTimer);con
   },300);
 });
 E("coinq").addEventListener("keydown",function(e){if(e.key==="Enter"&&coinLast.length){pickCoin(coinLast[0].sym,coinLast[0].name);this.blur();}});
-function pickCoin(sym,name){coinSym=sym;E("coinResults").innerHTML="";E("coinq").value=name+" ("+sym+")";
+function pickCoin(sym,name){
+  try{ rememberPick("co",sym,name); }catch(e){}coinSym=sym;E("coinResults").innerHTML="";E("coinq").value=name+" ("+sym+")";
   E("coinTf").hidden=false;E("coinChart").hidden=false;E("coinChartLbl").hidden=false;
   E("coinDetail").innerHTML='<div class="soonrow">'+L("loading")+'</div>';
   loadCoinDetail();loadCoin2Chart();clearInterval(coinTimer);coinTimer=setInterval(loadCoinDetail,3000);}
@@ -1088,6 +1099,31 @@ function orderCards(){
   }catch(e){}
 }
 orderCards(); setInterval(orderCards,1500);
+
+// ── 첫 화면 기본값 (사장님 2026-09-18) ────────────────────────────
+// 🔴 처음 온 사람도 열자마자 시세와 그래프를 본다. 빈 칸을 보여주면 떠난다.
+//    이미 고른 것이 있으면 그것을 살린다 — 기본값이 고객의 선택을 덮지 않는다.
+const DEF_KR = ["000660", "SK하이닉스"];
+const DEF_CO = ["BTCUSDT", "BTC"];
+function firstView(){
+  try{
+    if(!stkCode){
+      const L=lastPick("kr"), U=lastPick("us");
+      if(U) pickStockUS(U[0],U[1]);
+      else if(L) pickStock(L[0],L[1]);
+      else pickStock(DEF_KR[0],DEF_KR[1]);
+    }
+  }catch(e){}
+  try{
+    if(!coinSym){
+      const C=lastPick("co");
+      // 🔴 pickCoin 은 데모에서 세 번째 인자(현물/선물)를 받는다. 본앱은 무시한다.
+      if(C) pickCoin(C[0],C[1],C[2]||"F");
+      else pickCoin(DEF_CO[0],DEF_CO[1],"F");
+    }
+  }catch(e){}
+}
+setTimeout(firstView,700);
 
 // ── 공유 (사장님 2026-09-16) — 폰은 기본 공유창(깔린 앱 전부), 그 밖은 SNS 단추 ──
 const SH_URL = "https://emhwang3-boop.github.io/morning-brief/live.html";
