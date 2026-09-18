@@ -505,6 +505,7 @@ async function loadCoinKlines(){
 loadCoinKlines();setInterval(loadCoinKlines,300000);
 // ── 김치프리미엄 (사장님 2026-09-18) ──
 // 업비트 원화가 ÷ (바이낸스 달러가 × 원/달러) − 1.
+// 🔴 김프는 **코인마다 다르다**. 여기서 재는 것은 BTC 하나다 — 이름에 (BTC) 를 박는다.
 // 🔴 환율은 이미 받아 둔 자료에서 뽑는다 — 못 찾으면 지어내지 않고 '-' 로 둔다.
 function fxKrw(){
   try{
@@ -524,18 +525,18 @@ async function loadKimp(usdBtc){
   try{
     const fx=fxKrw();
     if(!(fx>0)||!(usdBtc>0))return '<div class="row"><span class="nm">'
-      +(en?"Kimchi premium":"김치프리미엄")+'</span><span class="rt"><span class="pc fl">-</span></span></div>';
+      +(en?"Kimchi premium (BTC)":"김치프리미엄 (BTC)")+'</span><span class="rt"><span class="pc fl">-</span></span></div>';
     const u=await fetch("https://api.upbit.com/v1/ticker?markets=KRW-BTC").then(r=>r.json());
     const krw=+(((u||[])[0]||{}).trade_price||0);
     if(!(krw>0))throw new Error("업비트 값 없음");
     const prem=(krw/(usdBtc*fx)-1)*100;
     const cls=prem>0?"up":(prem<0?"dn":"fl"),arw=prem>0?"▲":(prem<0?"▼":"");
-    return '<div class="row"><span class="nm">'+(en?"Kimchi premium":"김치프리미엄")
+    return '<div class="row"><span class="nm">'+(en?"Kimchi premium (BTC)":"김치프리미엄 (BTC)")
       +' <span class="mkt">'+(en?"Upbit":"업비트")+'</span></span><span class="rt">'
       +'<span class="val">'+fmt(krw)+(en?" KRW":"원")+'</span>'
       +'<span class="pc '+cls+'">'+arw+Math.abs(prem).toFixed(2)+'%</span></span></div>';
   }catch(e){
-    return '<div class="row"><span class="nm">'+(en?"Kimchi premium":"김치프리미엄")
+    return '<div class="row"><span class="nm">'+(en?"Kimchi premium (BTC)":"김치프리미엄 (BTC)")
       +'</span><span class="rt"><span class="pc fl">-</span></span></div>';
   }
 }
