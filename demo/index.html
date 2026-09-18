@@ -1031,7 +1031,8 @@ function makeChart(cid,opt){
       for(let i=end-1;i>=start;i--){if(Bl[i]==null)continue;ctx.lineTo(X(i),Y(Bl[i]));}if(st){ctx.closePath();ctx.fill();}}
     if(act.indexOf("vp")>=0){if(calc("vp").hasVol){const bins=26,vol=new Array(bins).fill(0),st=(hi-lo)/bins;
         for(let i=start;i<end;i++){const b=bars[i];vol[clamp(Math.floor(((b[2]+b[3]+b[4])/3-lo)/st),0,bins-1)]+=(+b[5]||0);}
-        const mx=Math.max.apply(null,vol)||1;for(let k=0;k<bins;k++){ctx.fillStyle="rgba(151,117,250,.26)";
+        const mx=Math.max.apply(null,vol)||1;for(let k=0;k<bins;k++){ctx.fillStyle="rgba(255,214,90,.40)";  // 매물대 — 연노랑(사장님 2026-09-18)
+          
           ctx.fillRect(x0,Y(lo+st*(k+1))+1,(x1-x0)*0.36*vol[k]/mx,Math.max(1,Y(lo+st*k)-Y(lo+st*(k+1))-2));}}else noVol((y0+yP)/2);}
     if(act.indexOf("wy")>=0){const w=calc("wy").wy;if(w&&w.s0<end){const xa=X(Math.max(w.s0,start)),xb=X(end-1);
         ctx.fillStyle=w.acc?"rgba(38,194,129,.08)":"rgba(255,107,107,.08)";ctx.fillRect(xa,Y(w.res),xb-xa,Y(w.sup)-Y(w.res));
