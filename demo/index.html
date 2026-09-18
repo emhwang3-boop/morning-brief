@@ -207,6 +207,11 @@ body.light #installBar{background:#eaf3ff;border-color:#b9d5f5;color:#1a4b7a}
 .stkres a:last-child{border-bottom:none}.stkres a .c{color:var(--sub);font-variant-numeric:tabular-nums}
 .mkt{font-size:9px;font-weight:800;color:var(--soon);border:1px solid var(--bd);border-radius:4px;padding:0 3px;vertical-align:middle}
 .mkt.us{color:#5db4ff;border-color:#2a5580}
+.bdot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--bd);
+ margin-right:4px;vertical-align:middle;flex:0 0 auto}
+.bdot.on{background:#00a868}
+.bdot.dl{background:#e0a020}
+.bleg{font-size:10px;font-weight:400;color:var(--sub);margin-left:6px;white-space:nowrap}
 .mkt.sp{color:#51cf66;border-color:#2b8a3e}
 .mkt.fu{color:#b197fc;border-color:#5f3dc4}
 .stktab{width:100%;border-collapse:collapse;margin-top:9px;font-size:13.5px}
@@ -396,6 +401,22 @@ function L(k){const t=T[k];return t?(t[LANG]||t.ko):k;}
 const TEMPW={ko:["차가움","서늘","미지근","따뜻","뜨거움"],en:["Cold","Cool","Neutral","Warm","Hot"]};
 const TFW={"3":{ko:"3분",en:"3m"},"5":{ko:"5분",en:"5m"},"15":{ko:"15분",en:"15m"},"30":{ko:"30분",en:"30m"},"60":{ko:"60분",en:"60m"},"D":{ko:"일",en:"1D"}};
 function toggleLang(){LANG=LANG==="en"?"ko":"en";try{localStorage.setItem("brief_lang",LANG);}catch(e){}applyLang();}
+// 묶음이 지금 실시간인가 — 카드 머리와 주요자산 막대가 **같은 자를 쓴다**
+function grpLive(gr){
+  if(!gr)return false;
+  const t=gr.title;
+  if(t==="국내")return krLiveNow();                       // 국내: 평일 08~20시
+  if(t==="미국 지수")return !!gr.rt&&usIndexLive();        // 미국주식: 정규장 09:30~16:00 ET
+  if(t==="원자재"||t==="금리·채권")return !!gr.rt&&usFutLive();   // CME 선물: ~24h
+  if(t==="환율·달러")return !!gr.rt&&usFxLive();           // FX: 24h
+  return !!gr.rt;
+}
+// 지연 자료인가 — 아시아는 늘 지연이라 장중이면 '지연', 닫혔으면 '장마감'
+function grpDelay(gr){
+  if(!gr)return false;
+  if(gr.title==="아시아")return asiaLiveNow();
+  return false;
+}
 function render(d){
   window._lastD=d;
   {
@@ -414,11 +435,7 @@ function render(d){
     let sGroups="";
     for(const gr of d.groups){
       if(!gr.items.length)continue;
-      let live=gr.rt;
-      if(gr.title==="국내")live=krLiveNow();                              // 국내: 평일 08~20시
-      else if(gr.title==="미국 지수")live=gr.rt&&usIndexLive();            // 미국주식: 정규장 09:30~16:00 ET
-      else if(gr.title==="원자재"||gr.title==="금리·채권")live=gr.rt&&usFutLive();  // CME 선물: ~24h
-      else if(gr.title==="환율·달러")live=gr.rt&&usFxLive();               // FX: 24h
+      let live=grpLive(gr);
       let tagTxt=live?L("live"):L("closed");
       // 아시아는 지연 자료다 — 장중이면 '지연(장중)', 닫혔을 때만 '장마감'
       if(gr.title==="아시아"&&!live&&asiaLiveNow())tagTxt=L("delay");   // D 지연 으로 통일
@@ -441,11 +458,23 @@ function render(d){
     let sChanges="";
     if(d.changes&&d.changes.length){
       const mx=Math.max.apply(null,d.changes.map(c=>Math.abs(c.pct)).concat([1]));
-      sChanges='<div class="card"><h3>'+L("changesH")+'</h3>'+d.changes.map(c=>{
+      // 🔴 이 카드는 여러 시장을 한데 모은 것이라 열린 것과 닫힌 것이 섞인다.
+      //    어느 묶음에서 온 줄인지 찾아 줄마다 표시한다.
+      const gOf={};
+      for(const g of d.groups){for(const it of (g.items||[])){if(!(it.nm in gOf))gOf[it.nm]=g;}}
+      sChanges='<div class="card"><h3>'+L("changesH")
+        +' <span class="bleg"><span class="bdot on"></span>'+(LANG==="en"?"live":"실시간")
+        +' <span class="bdot dl"></span>'+(LANG==="en"?"delayed":"지연")
+        +' <span class="bdot"></span>'+(LANG==="en"?"closed":"장마감")+'</span></h3>'
+        +d.changes.map(c=>{
+        const _g=gOf[c.nm], _lv=grpLive(_g), _dl=!_lv&&grpDelay(_g);
+        const dot='<span class="bdot'+(_lv?" on":(_dl?" dl":""))+'" title="'
+          +(_lv?(LANG==="en"?"live":"실시간"):(_dl?(LANG==="en"?"delayed":"지연")
+            :(LANG==="en"?"closed":"장마감")))+'"></span>';
         const up=c.pct>=0,half=Math.abs(c.pct)/mx*50,col=up?"#00a868":"#ff433d";
         const bar=up?'<span style="position:absolute;left:50%;top:0;height:11px;width:'+half+'%;background:'+col+';border-radius:0 3px 3px 0"></span>'
                     :'<span style="position:absolute;right:50%;top:0;height:11px;width:'+half+'%;background:'+col+';border-radius:3px 0 0 3px"></span>';
-        return '<div class="brow"><span class="bn">'+tr(c.nm)+'</span><span class="bbar">'+bar+'</span>'
+        return '<div class="brow"><span class="bn">'+dot+tr(c.nm)+'</span><span class="bbar">'+bar+'</span>'
           +'<span class="bp" style="color:'+col+'">'+(up?"+":"")+c.pct.toFixed(2)+'%</span></div>';}).join("")+'</div>';
     }
     let sSpecial="";
@@ -531,6 +560,7 @@ else{loadData();setInterval(loadData,60000);}                  // 로컬/깃허�
 const COINS=[["비트코인","BTCUSDT"],["이더리움","ETHUSDT"],["리플","XRPUSDT"],["솔라나","SOLUSDT"]];
 function fmt(n){n=+n;return n>=1000?n.toLocaleString(undefined,{maximumFractionDigits:0}):n.toLocaleString(undefined,{maximumFractionDigits:n>=1?2:4});}
 const coinSpark={};   // 심볼→최근 종가 배열(선그래프용, 5분마다 갱신)
+const _last24={};     // 심볼→방금 받은 현재가 (김프 셈에 쓴다)
 async function loadCoinKlines(){
   for(const [nm,sym] of COINS){
     try{const k=await fetch("https://api.binance.com/api/v3/klines?symbol="+sym+"&interval=1h&limit=30").then(r=>r.json());
@@ -538,15 +568,56 @@ async function loadCoinKlines(){
   }
 }
 loadCoinKlines();setInterval(loadCoinKlines,300000);
+// ── 김치프리미엄 (사장님 2026-09-18) ──
+// 업비트 원화가 ÷ (바이낸스 달러가 × 원/달러) − 1.
+// 🔴 환율은 이미 받아 둔 자료에서 뽑는다 — 못 찾으면 지어내지 않고 '-' 로 둔다.
+function fxKrw(){
+  try{
+    for(const g of ((window._lastD||{}).groups||[])){
+      for(const it of (g.items||[])){
+        if(/원\/달러|USD\/KRW/i.test(it.nm||"")){
+          const v=parseFloat(String(it.val).replace(/,/g,""));
+          if(isFinite(v)&&v>0)return v;
+        }
+      }
+    }
+  }catch(e){}
+  return 0;
+}
+async function loadKimp(usdBtc){
+  const en=LANG==="en";
+  try{
+    const fx=fxKrw();
+    if(!(fx>0)||!(usdBtc>0))return '<div class="row"><span class="nm">'
+      +(en?"Kimchi premium":"김치프리미엄")+'</span><span class="rt"><span class="pc fl">-</span></span></div>';
+    const u=await fetch("https://api.upbit.com/v1/ticker?markets=KRW-BTC").then(r=>r.json());
+    const krw=+(((u||[])[0]||{}).trade_price||0);
+    if(!(krw>0))throw new Error("업비트 값 없음");
+    const prem=(krw/(usdBtc*fx)-1)*100;
+    const cls=prem>0?"up":(prem<0?"dn":"fl"),arw=prem>0?"▲":(prem<0?"▼":"");
+    return '<div class="row"><span class="nm">'+(en?"Kimchi premium":"김치프리미엄")
+      +' <span class="mkt">'+(en?"Upbit":"업비트")+'</span></span><span class="rt">'
+      +'<span class="val">'+fmt(krw)+(en?" KRW":"원")+'</span>'
+      +'<span class="pc '+cls+'">'+arw+Math.abs(prem).toFixed(2)+'%</span></span></div>';
+  }catch(e){
+    return '<div class="row"><span class="nm">'+(en?"Kimchi premium":"김치프리미엄")
+      +'</span><span class="rt"><span class="pc fl">-</span></span></div>';
+  }
+}
 async function loadCoin(){
   try{const out=[];
     for(const [nm,sym] of COINS){
       const d=await fetch("https://api.binance.com/api/v3/ticker/24hr?symbol="+sym).then(r=>r.json());
       const p=parseFloat(d.priceChangePercent),cls=p>0?"up":(p<0?"dn":"fl"),arw=p>0?"▲":(p<0?"▼":"");
+      _last24[sym]=+d.lastPrice;
       const sp=(coinSpark[sym]||[]).concat([+d.lastPrice]);
       const cnm=(LANG==="en"?sym.replace("USDT",""):nm);
       out.push('<div class="row"><span class="nm">'+cnm+'</span><span class="rt">'+spark(sp)+'<span class="val">$'+fmt(d.lastPrice)+'</span>'
         +'<span class="pc '+cls+'">'+arw+Math.abs(p).toFixed(2)+'%</span></span></div>');}
+    // 🔴 BTC 달러가를 김프 셈에 그대로 쓴다 — 같은 순간 값이라야 어긋나지 않는다
+    let _btc=0;
+    try{ _btc=parseFloat(String(_last24["BTCUSDT"]||0)); }catch(e){}
+    out.push(await loadKimp(_btc));
     document.getElementById("coin").innerHTML=out.join("");
   }catch(e){document.getElementById("coin").innerHTML='<div class="soonrow">코인 불러오기 실패</div>';}
 }
