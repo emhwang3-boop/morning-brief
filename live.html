@@ -476,8 +476,9 @@ function render(d){
           '<a class="nrow" href="'+it.u+'" target="_blank" rel="noopener">'+it.t+'</a>').join("")).join("")+'</div>';
     }
     // 코인은 #coin-card(3초 갱신) 독립 슬롯 → #cards 는 장단기까지, #news 는 그 아래
-    document.getElementById("cards").innerHTML=sSpecial+sCalendar+sChanges+sGroups+sKrates+sSpreads;
-    document.getElementById("news").innerHTML=sNews;
+    // 경제지표 일정은 뉴스 바로 앞으로 (사장님 2026-09-18)
+    document.getElementById("cards").innerHTML=sSpecial+sChanges+sGroups+sKrates+sSpreads;
+    document.getElementById("news").innerHTML=sCalendar+sNews;
   }
 }
 async function loadData(){
