@@ -1442,6 +1442,47 @@ async function rlPerpClose(inst, ratio) {
   else b.reduceOnly = true;
   return rlOkxPost("/api/v5/trade/order", b);
 }
+// ── 주식 실주문 (키움) ──────────────────────────────────────────
+// 규격은 본앱에서 그대로 가져왔다 — 국내 kt10000/kt10001 · 해외 ust20000/ust20001
+function rlUsPx(p) {                     // 미국 주문단가: $1 이상 2자리 · 미만 4자리
+  const v = Math.abs(+p || 0);
+  return v >= 1 ? v.toFixed(2) : v.toFixed(4);
+}
+async function rlStockOrder(mk, side, code, qty, limitPx) {
+  if (mk === "us" && ST.us && ST.us.broker === "korea_inv")
+    throw new Error("한국투자는 브라우저에서 주문이 막힙니다(CORS)");
+  const tok = await rlToken();
+  let path, aid, body;
+  if (mk === "kr") {
+    path = "/api/dostk/ordr";
+    aid = (side === "B") ? "kt10000" : "kt10001";
+    body = {dmst_stex_tp: "KRX", stk_cd: String(code),
+            ord_qty: String(Math.floor(qty)),
+            ord_uv: limitPx > 0 ? String(Math.round(limitPx)) : "",
+            trde_tp: limitPx > 0 ? "0" : "3"};      // 3=시장가 · 0=지정가
+  } else {
+    path = "/api/us/ordr";
+    aid = (side === "B") ? "ust20000" : "ust20001";
+    body = {stex_tp: "ND", stk_cd: String(code),
+            ord_qty: String(Math.floor(qty)),
+            trde_tp: limitPx > 0 ? "00" : "03",     // 03=시장가 · 00=지정가
+            ord_uv: limitPx > 0 ? rlUsPx(limitPx) : ""};
+    if (side === "S") body.stop_pric = "";
+  }
+  const j = await rlKiwoom(tok, path, aid, body);
+  // 🔴 키움은 거부도 200 으로 준다 — return_code 를 봐야 한다
+  if (j && String(j.return_code) !== "0")
+    throw new Error(String(j.return_code) + " " + (j.return_msg || ""));
+  return j;
+}
+// 주식 실주문을 낼 수 있는 상태인가
+function rlCanLiveStock(mk) {
+  if (!rlLiveOn()) return false;
+  if (!(ST.kr && ST.kr.key && ST.kr.sec)) return false;   // 토큰은 국내 키로 받는다
+  if (mk === "us" && ST.us && ST.us.broker === "korea_inv") return false;
+  return true;
+}
+
 // 실주문 스위치 — 이 폰에만 저장된다. 기본은 꺼짐.
 function rlLiveOn() {
   try { return localStorage.getItem("demo_live_v1") === "1"; } catch (e) { return false; }
@@ -1760,12 +1801,13 @@ function dpLiveTgl(on){
 // 맨 위 띠 — 실주문이면 빨갛게, 아니면 모의 안내 그대로
 function dpNoteSync(){
   const n=E("dpNote"); if(!n)return;
-  const on=dpLive(), en=LANG==="en";
+  // 🔴 띠는 **스위치**를 따른다 — 코인 키가 없어도 주식은 나갈 수 있다
+  const on=(typeof rlLiveOn==="function")&&rlLiveOn(), en=LANG==="en";
   n.classList.toggle("liveon",on);
   const t=E("dpNoteTxt");
   if(t)t.textContent = on
-    ? (en?"REAL ORDERS — coin orders go to OKX with real money"
-        :"⚠ 실주문 — 코인 주문이 OKX 로 실제로 나갑니다")
+    ? (en?"REAL ORDERS — stock (Kiwoom) and coin (OKX) orders go out with real money"
+        :"⚠ 실주문 — 주식(키움)·코인(OKX) 주문이 실제로 나갑니다")
     : (en?"Demo orders — nothing is sent to the exchange"
         :"⚠ 모의(시늉) 주문 판 — 실제 주문은 나가지 않습니다 · 심사·시연용");
 }
@@ -1781,6 +1823,26 @@ function dpOrder(side){
   if(qty<=0){ dpMsg("dpMsg",en?"Enter quantity":"수량을 넣으세요"); return; }
   if(cur<=0){ dpMsg("dpMsg",en?"No price yet":"현재가를 아직 못 받았습니다"); return; }
   const px=ask>0?ask:cur;
+  // 🔴 실주문 — 키움으로 진짜 나간다. 장부는 안 건드린다(실계좌 갱신이 가져온다).
+  if(typeof rlCanLiveStock==="function" && rlCanLiveStock(mk)){
+    const oc=(mk==="us")?String(stkCode).replace(/\.US$/,""):stkCode;
+    if(!dpAsk((en?"REAL ":"실주문 · ")+(side==="B"?(en?"BUY ":"매수 "):(en?"SELL ":"매도 "))+oc
+              +"  "+qty+(en?" shares":"주")
+              +(ask>0?(" @ "+ask):(en?" (market)":" (시장가)"))))return;
+    dpBusyS=true; dpMsg("dpMsg",en?"Sending to Kiwoom…":"키움으로 보내는 중…");
+    rlStockOrder(mk,side,oc,qty,ask>0?ask:0).then(function(){
+      DP.log.unshift({t:dpNow(),kind:mk,code:oc,name:(E("stkq").value||oc),side:side,
+                      qty:qty,px:px,
+                      how:(ask>0?(en?"limit":"지정가"):(en?"market":"시장가"))
+                          +(en?" · REAL":" · 실주문")});
+      DP.log=DP.log.slice(0,60); dpSave(); dpBusyS=false;
+      dpMsg("dpMsg",en?"Sent to Kiwoom":"키움으로 나갔습니다");
+      try{ rlLoad(true); }catch(e){}
+    }).catch(function(e){
+      dpBusyS=false; dpMsg("dpMsg",(en?"Rejected: ":"거부됨: ")+(e&&e.message||e));
+    });
+    return;
+  }
   dpBusyS=true; dpMsg("dpMsg",(en?"Sending… ":"주문 내는 중… ")+(ask>0?(en?"limit":"지정가"):(en?"market":"시장가")));
   setTimeout(function(){                       // 주문 → 체결까지의 흐름을 보이게 한다
     const p=DP.pos[key]||{mk:mk,code:stkCode,name:(E("stkq").value||stkCode),qty:0,avg:0};
@@ -2117,6 +2179,25 @@ function dpSellGo(){
                       how:how+(en?" · REAL":" · 실주문"),pnl:pnl});
       DP.log=DP.log.slice(0,60); dpSave();
       E("dpSellMsg").textContent=en?"Sent to OKX":"OKX 로 나갔습니다";
+      try{ rlLoad(true); }catch(e){}
+      setTimeout(dpSellCancel,1200);
+    }).catch(function(e){
+      E("dpSellMsg").textContent=(en?"Rejected: ":"거부됨: ")+(e&&e.message||e);
+    });
+    return;
+  }
+  if(p._real&&(p.mk==="kr"||p.mk==="us")
+     &&typeof rlCanLiveStock==="function"&&rlCanLiveStock(p.mk)){
+    // 🔴 실주문 — 들고 있는 주식을 진짜로 판다
+    const oc=(p.mk==="us")?String(p.code).replace(/\.US$/,""):p.code;
+    if(!dpAsk((en?"REAL SELL ":"실주문 · 매도 ")+oc+"  "+q+(en?" shares":"주")
+              +(isLim?(" @ "+lim):(en?" (market)":" (시장가)"))))return;
+    E("dpSellMsg").textContent=en?"Sending to Kiwoom…":"키움으로 보내는 중…";
+    rlStockOrder(p.mk,"S",oc,q,isLim?lim:0).then(function(){
+      DP.log.unshift({t:dpNow(),kind:p.mk,code:oc,name:p.name,side:"S",qty:q,px:px,
+                      how:how+(en?" · REAL":" · 실주문"),pnl:pnl});
+      DP.log=DP.log.slice(0,60); dpSave();
+      E("dpSellMsg").textContent=en?"Sent to Kiwoom":"키움으로 나갔습니다";
       try{ rlLoad(true); }catch(e){}
       setTimeout(dpSellCancel,1200);
     }).catch(function(e){
