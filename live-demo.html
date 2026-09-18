@@ -1404,8 +1404,8 @@ function stRender(){
    + '<input class="stin" autocomplete="off" placeholder="https://내PC이름.사설망.ts.net" value="'
    + stEsc(ST.relay || "") + '" oninput="ST.relay=this.value.trim();stSave()">'
    + '<div class="stmsg">' + (en
-     ? "If set, Kiwoom and Korea Investment go through your PC (needed for Kiwoom on mobile data)."
-     : "넣으면 키움·한국투자가 내 컴퓨터를 거칩니다. 키움을 LTE로 쓰거나 한국투자를 쓸 때 넣습니다.") + '</div></div>'
+     ? "If set, Kiwoom, Korea Investment and OKX account calls go through your PC (needed for IP-restricted keys on mobile data)."
+     : "넣으면 키움·한국투자·OKX 계좌가 내 컴퓨터를 거칩니다. 허용 IP가 걸린 키를 LTE로 쓸 때 넣습니다.") + '</div></div>'
    + '<div class="stnote">' + (en
      ? "Keys are kept on this device only and are never sent anywhere. This demo places no real orders."
      : "키는 이 기기에만 저장되고 어디로도 보내지 않습니다. 이 앱은 모의 주문이라 키를 쓰지 않습니다.")
@@ -1436,10 +1436,18 @@ stLoad();
 let RL = {kr: [], us: [], co: [], cash: null, sum: null,
           tok: "", tokAt: 0, auto: 0, at: 0, busy: false, msg: ""};
 
-// 🔴 중계기 (사장님 2026-09-18) — 설정의 중계기 칸에 주소가 있으면 키움·한국투자는 그 PC 를 거친다.
+// 🔴 중계기 (사장님 2026-09-18) — 설정의 중계기 칸에 주소가 있으면 키움·한국투자·OKX(계좌)는 그 PC 를 거친다.
 //    키움은 허용 IP 라 LTE 에서 직접 안 됨(실측) · 한국투자는 CORS 차단. PC 쪽은 C:\kiwoom_work\_relay.py
 //    주소 뒤에 /kiwoom/ · /kis/ 를 붙이면 중계기가 진짜 주소로 넘긴다. 키는 중계기에 저장되지 않는다.
-const rlRelay = () => (ST && ST.relay ? String(ST.relay).trim().replace(/\/+$/, "") : "");
+// 🔴 사장님 폰에서 앞의 https:// 가 빠져 깃허브로 요청이 갔다(HTML 을 받아 JSON 오류, 09-18) — 붙여 준다
+function rlRelay() {
+  let v = (typeof ST !== "undefined" && ST && ST.relay) ? String(ST.relay).trim() : "";
+  if (!v) return "";
+  v = v.replace(/^https?(:\/*|\/+)/i, "");       // https:// · http:// · https// 를 걷어내고
+  return "https://" + v.replace(/\/+$/, "");       // https 로 다시 붙인다(https 페이지는 http 를 못 부른다)
+}
+// OKX 도 키에 허용 IP 가 걸려 있어 LTE 에서 막혔다(09-18 실측) — 개인 요청만 중계기로. 공개 시세는 직접.
+const okxHost = () => rlRelay() ? rlRelay() + "/okx" : "https://www.okx.com";
 const rlHost = () => rlRelay() ? rlRelay() + "/kiwoom" : "https://api.kiwoom.com";
 function rlNum(v) {                     // "000000000111777" · "0.0000" → 숫자
   if (v === undefined || v === null) return 0;
@@ -1567,7 +1575,7 @@ async function rlOkx(path) {
   if (!c || !c.key || !c.sec || !c.pass) throw new Error("설정에 OKX 키가 없습니다");
   const ts = new Date().toISOString().slice(0, 23) + "Z";
   const sg = await rlSign(c.sec.trim(), ts + "GET" + path);
-  const r = await fetch("https://www.okx.com" + path, {headers: {
+  const r = await fetch(okxHost() + path, {headers: {
     "OK-ACCESS-KEY": c.key.trim(), "OK-ACCESS-SIGN": sg,
     "OK-ACCESS-TIMESTAMP": ts, "OK-ACCESS-PASSPHRASE": c.pass.trim()}});
   const j = await r.json();
@@ -1584,7 +1592,7 @@ async function rlOkxPost(path, body) {
   const ts = new Date().toISOString().slice(0, 23) + "Z";
   const txt = JSON.stringify(body || {});
   const sg = await rlSign(c.sec.trim(), ts + "POST" + path + txt);
-  const r = await fetch("https://www.okx.com" + path, {
+  const r = await fetch(okxHost() + path, {
     method: "POST",
     headers: {"OK-ACCESS-KEY": c.key.trim(), "OK-ACCESS-SIGN": sg,
               "OK-ACCESS-TIMESTAMP": ts, "OK-ACCESS-PASSPHRASE": c.pass.trim(),
