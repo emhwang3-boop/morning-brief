@@ -1372,6 +1372,30 @@ async function rlParseCoin(j) {
   return out;
 }
 
+// 🔴 코인 **현물**은 positions 에 없다 — 거래계좌 잔고가 곧 현물 보유다 (2026-09-18 실측).
+//    OKX 가 평단(accAvgPx)까지 주므로 수익률도 낼 수 있다.
+//    자금(Funding) 계좌는 따로다(/api/v5/asset/balances) — 실측 때 비어 있었다.
+function rlParseSpot(det) {
+  const out = [];
+  for (let i = 0; i < (det || []).length; i++) {
+    const d = det[i];
+    const ccy = String(d.ccy || "");
+    if (!ccy || ccy === "USDT") continue;          // USDT 는 예수금이지 보유가 아니다
+    const qty = rlNum(d.cashBal) || rlNum(d.availBal);
+    const evl = rlNum(d.eqUsd);
+    if (!(qty > 0) || evl < 1) continue;           // 먼지는 버린다
+    const avg = rlNum(d.accAvgPx);
+    const cur = qty ? (evl / qty) : 0;
+    const pl = avg ? (cur - avg) * qty : 0;
+    out.push({mk: "coin", spot: true, ccy: "USDT",
+              code: ccy + "-USDT", name: ccy,
+              qty: qty, ctr: qty, cv: 1, lev: 1, side: "L",
+              avg: avg, cur: cur, evl: evl, pl: pl,
+              rt: (avg && qty) ? (pl / (avg * qty) * 100) : 0});
+  }
+  return out;
+}
+
 // ── 한 번에 불러오기 ──
 async function rlLoad(auto) {
   if (RL.busy) return;
@@ -1463,6 +1487,8 @@ async function rlLoad(auto) {
         const u = det.filter(d => d.ccy === "USDT")[0];
         if (!u) throw new Error("USDT 칸이 없습니다(통화 " + det.length + "개)");
         out.cash.usdt = rlNum(u.availBal || u.cashBal);
+        // 🔴 같은 응답에서 현물 보유도 뽑는다 — 부르는 횟수는 안 는다
+        out.co = out.co.concat(rlParseSpot(det));
       } catch (e) { out.err.push("코인예수금 " + e.message); }
     }
   } finally {
@@ -1710,6 +1736,12 @@ function dpPosOf(key){
   const rows=(typeof rlRows==="function")?rlRows():[];
   const p=rows[+k.slice(5)]; if(!p) return null;
   const px=(typeof rlPxKey==="function")?rlPxKey(p):"";
+  // 🔴 실계좌 코인 현물은 청산이 아니라 **매도**다 — 주식과 같은 수량 판으로 보낸다.
+  //    OKX 는 선물(positions)과 현물(계좌 잔고)을 보는 자리가 다르고, 파는 법도 다르다.
+  if (p.mk==="coin" && p.spot)
+    return {mk:"coinS",code:String(p.code).split("-").slice(0,2).join(""),
+            name:p.name||p.code,qty:p.qty,avg:p.avg,
+            _real:true,_pxkey:px,_cur:p.cur};
   return (p.mk==="coin")
     ? {mk:"coin",code:p.code,name:p.code,side:p.side,lev:p.lev||1,
        margin:p.evl,entry:p.avg,_real:true,_pxkey:px,_cur:p.cur}
@@ -1919,26 +1951,32 @@ function dpHoldRender(){
     //    코인도 명목가치를 적는다(OKX 의 Size 와 같은 값). 증거금은 머리글대로 수량 아래.
     const evl=(p.mk==="coin")?(Math.abs(p.qty)*cur):(p.evl+dx);
     const pl=p.pl+dx;
-    const base=(p.mk==="coin")?p.evl:(p.avg*p.qty);   // 손익률 바닥은 증거금 — OKX 와 같게
+    // 손익률 바닥 — 선물은 증거금(OKX 와 같게), 현물은 산 돈(평단×수량)
+    const base=(p.mk==="coin"&&!p.spot)?p.evl:(p.avg*p.qty);
     const rt=base?(pl/base*100):p.rt;
     const unit=(p.mk==="coin")?"계약":"주";
     // 코인은 계약 수 옆에 코인 수, 그 아래에 증거금 — 0.13 계약(0.0013 BTC) / 49.55 USDT
     const sym=(p.mk==="coin")?String(p.code).split("-")[0]:"";
-    const qtx=(p.mk==="coin")
+    const qtx=(p.mk==="coin"&&p.spot)
+      ? ((+p.qty.toFixed(8))+" "+sym+"<br><span class=\"dplbl\">-</span>")   // 현물엔 증거금이 없다
+      : (p.mk==="coin")
       ? ("<span title=\""+p.ctr.toLocaleString()+" "+unit+"\">"
          +(+p.qty.toFixed(8))+" "+sym+"</span><br>"+mny(p.evl))
       : (p.qty.toLocaleString()+" "+unit);
-    // 실계좌 코인은 OKX 무기한선물이다 — 현물과 헷갈리지 않게 '선물'을 앞에 둔다
+    // 🔴 OKX 는 선물과 현물을 보는 자리가 다르다 — 선물은 positions, 현물은 계좌 잔고.
+    //    한 표에 같이 올리므로 배지로 갈라 적는다.
     const tag=(p.mk==="kr")?"KR":(p.mk==="us")?"US"
+      :p.spot?(en?"SPOT":"현물")
       :((en?"PERP ":"선물 ")+(p.side==="L"?(en?"LONG":"롱"):(en?"SHORT":"숏"))+" "+p.lev+"x");
-    h+='<tr><td>'+dpEsc(p.name||p.code)+' <span class="mkt">'+tag+'</span>'
+    const tagc=(p.mk==="coin")?(p.spot?" sp":" fu"):"";
+    h+='<tr><td>'+dpEsc(p.name||p.code)+' <span class="mkt'+tagc+'">'+tag+'</span>'
      +'<span class="rlb">'+(en?"REAL":"실계좌")+'</span></td>'
      +'<td>'+qtx+'</td><td>'+mny(p.avg)+'</td><td>'+mny(cur)+'</td>'
      +'<td>'+mny(evl)+'</td>'
      +'<td class="'+cls(pl)+'">'+(pl>=0?"+":"-")+mny(Math.abs(pl))
      +'<br>'+arw(pl)+Math.abs(rt).toFixed(2)+'%</td>'
-     +'<td><button class="dpb '+(p.mk==="coin"?"flat":"sell")+' dpsm" onclick="dpSellKey(\'real:'
-     +ri+'\')">'+(p.mk==="coin"?(en?"CLOSE":"청산"):(en?"SELL":"매도"))+'</button></td></tr>';
+     +'<td><button class="dpb '+((p.mk==="coin"&&!p.spot)?"flat":"sell")+' dpsm" onclick="dpSellKey(\'real:'
+     +ri+'\')">'+((p.mk==="coin"&&!p.spot)?(en?"CLOSE":"청산"):(en?"SELL":"매도"))+'</button></td></tr>';
   });
   keys.forEach(function(k){
     const p=DP.pos[k], cur=dpPx[k]||0;
