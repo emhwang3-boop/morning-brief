@@ -350,6 +350,8 @@ function grpLive(gr){
   if(t==="미국 지수")return !!gr.rt&&usIndexLive();        // 미국주식: 정규장 09:30~16:00 ET
   if(t==="원자재"||t==="금리·채권")return !!gr.rt&&usFutLive();   // CME 선물: ~24h
   if(t==="환율·달러")return !!gr.rt&&usFxLive();           // FX: 24h
+  // 🔴 아시아는 Infoway 실시간이 된 뒤(09-18)로 장 시간 검사 없이 늘 '실시간'이었다 — 닫혔으면 장마감
+  if(t==="아시아")return !!gr.rt&&asiaLiveNow();
   return !!gr.rt;
 }
 // 지연 자료인가 — 아시아는 늘 지연이라 장중이면 '지연', 닫혔으면 '장마감'
@@ -374,6 +376,10 @@ function render(d){
     document.getElementById("gauges").innerHTML=g;
     // 카드 조각들(순서: 특이일 → 캘린더 → 주요자산막대 → 지수그룹 → 한국금리 → 장단기 → [코인] → 뉴스)
     let sGroups="";
+    // 선그래프가 무엇인지 지표 시작점에 한 줄 (사장님 2026-09-18) — 서버가 일봉 30개(closes[-30:])를 보낸다
+    if(d.groups.some(g=>g.items&&g.items.length))
+      sGroups+='<div class="gnote">'+(LANG==="en"?"Line charts — last 30 trading days (daily)"
+        :"선그래프 — 최근 30거래일(일봉) 기준")+'</div>';
     for(const gr of d.groups){
       if(!gr.items.length)continue;
       let live=grpLive(gr);
@@ -890,11 +896,11 @@ function tick(){const d=new Date(),p=n=>String(n).padStart(2,"0");
   document.getElementById("clk").textContent=p(d.getHours())+":"+p(d.getMinutes())+":"+p(d.getSeconds());}
 tick();setInterval(tick,1000);
 // 종목 실시간 태그 — 정규장(평일 09:00~15:30 KST)만 켠다. 그 외엔 지연.
-function asiaLiveNow(){       // 한국시각 평일 09:00~17:00 (니케이·상하이·항셍 합집합)
+function asiaLiveNow(){       // 한국시각 평일 09:00~19:00 (니케이·호주 개장 ~ 인도 니프티·센섹스 마감 15:30 IST)
   const k=new Date(Date.now()+new Date().getTimezoneOffset()*60000+324e5);
   const d=k.getDay(); if(d===0||d===6)return false;
   const m=k.getHours()*60+k.getMinutes();
-  return m>=540&&m<=1020;
+  return m>=540&&m<1140;
 }
 function krLiveNow(){const k=new Date(Date.now()+new Date().getTimezoneOffset()*60000+324e5);
   const m=k.getHours()*60+k.getMinutes();return k.getDay()>=1&&k.getDay()<=5&&m>=480&&m<1200;} // 평일 08:00~20:00
