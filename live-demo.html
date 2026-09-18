@@ -1399,13 +1399,13 @@ function stRender(){
    + stRow("co", ST_CO, en ? "Crypto · exchange" : "코인 · 거래소")
    // 🔴 중계기 주소 (사장님 2026-09-18) — 브라우저 접속을 막는 증권사(예: 한국투자)를 쓸 때만.
    //    이용자 본인 PC 가 중계기다. https 여야 한다(https 페이지는 http 주소를 못 부른다).
-   //    지금은 칸만 있다 — 이 주소로 요청을 보내는 길은 아직 없다.
+   //    주소가 있으면 real.js 의 rlHost/kisHost 가 키움·한국투자 요청을 이리로 보낸다(2026-09-18).
    + '<div class="strow"><div class="sthd">' + (en ? "Relay (your own PC)" : "중계기 (내 컴퓨터)") + '</div>'
    + '<input class="stin" autocomplete="off" placeholder="https://내PC이름.사설망.ts.net" value="'
    + stEsc(ST.relay || "") + '" oninput="ST.relay=this.value.trim();stSave()">'
    + '<div class="stmsg">' + (en
-     ? "Only for brokers that block browser access (e.g. Korea Investment)."
-     : "브라우저 접속을 막는 증권사(예: 한국투자)를 쓸 때만 넣습니다.") + '</div></div>'
+     ? "If set, Kiwoom and Korea Investment go through your PC (needed for Kiwoom on mobile data)."
+     : "넣으면 키움·한국투자가 내 컴퓨터를 거칩니다. 키움을 LTE로 쓰거나 한국투자를 쓸 때 넣습니다.") + '</div></div>'
    + '<div class="stnote">' + (en
      ? "Keys are kept on this device only and are never sent anywhere. This demo places no real orders."
      : "키는 이 기기에만 저장되고 어디로도 보내지 않습니다. 이 앱은 모의 주문이라 키를 쓰지 않습니다.")
@@ -1436,7 +1436,11 @@ stLoad();
 let RL = {kr: [], us: [], co: [], cash: null, sum: null,
           tok: "", tokAt: 0, auto: 0, at: 0, busy: false, msg: ""};
 
-const rlHost = () => "https://api.kiwoom.com";
+// 🔴 중계기 (사장님 2026-09-18) — 설정의 중계기 칸에 주소가 있으면 키움·한국투자는 그 PC 를 거친다.
+//    키움은 허용 IP 라 LTE 에서 직접 안 됨(실측) · 한국투자는 CORS 차단. PC 쪽은 C:\kiwoom_work\_relay.py
+//    주소 뒤에 /kiwoom/ · /kis/ 를 붙이면 중계기가 진짜 주소로 넘긴다. 키는 중계기에 저장되지 않는다.
+const rlRelay = () => (ST && ST.relay ? String(ST.relay).trim().replace(/\/+$/, "") : "");
+const rlHost = () => rlRelay() ? rlRelay() + "/kiwoom" : "https://api.kiwoom.com";
 function rlNum(v) {                     // "000000000111777" · "0.0000" → 숫자
   if (v === undefined || v === null) return 0;
   const n = parseFloat(String(v).replace(/,/g, ""));
@@ -1513,7 +1517,7 @@ function rlParseUS(j) {
 //    한국투자는 아직 모른다 — 파이썬으로는 됐고 브라우저로는 안 재봤다.
 //    막히면 "Failed to fetch" 가 그대로 뜬다. 그게 답이다.
 // 🔴 조회만 한다. 주문 TR 은 없다.
-const kisHost = () => "https://openapi.koreainvestment.com:9443";
+const kisHost = () => rlRelay() ? rlRelay() + "/kis" : "https://openapi.koreainvestment.com:9443";
 
 async function kisToken(c) {
   const r = await fetch(kisHost() + "/oauth2/tokenP", {
