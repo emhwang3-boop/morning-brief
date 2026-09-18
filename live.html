@@ -47,7 +47,9 @@ body.light .mk img.lt{display:block}
 .right{display:flex;align-items:center;gap:10px}
 .clock{font-size:13px;color:var(--sub);font-variant-numeric:tabular-nums}
 .tgl{background:var(--card);border:1px solid var(--bd);color:var(--tx);border-radius:8px;padding:5px 9px;font-size:15px;cursor:pointer}
-.asof{font-size:11.5px;color:var(--soon);margin-bottom:8px}
+.asof{font-size:11.5px;color:var(--soon);margin-bottom:2px}
+/* 운영시간 — 안내일 뿐이라 더 흐리게 (사장님 2026-09-18) */
+.ophrs{font-size:10.5px;color:var(--soon);opacity:.62;margin-bottom:8px}
 .gauges{display:flex;gap:10px;margin-bottom:4px}
 .gnote{font-size:11px;color:#8a93a3;text-align:center;margin-bottom:12px}
 .stat{flex:1;min-width:0;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px 8px;text-align:center}
@@ -126,6 +128,7 @@ body.light #installBar{background:#eaf3ff;border-color:#b9d5f5;color:#1a4b7a}
  .mk img{height:20px}
  .clock{font-size:10px}.tgl{padding:4px 6px;font-size:11.5px}.right{gap:6px}
  .asof{font-size:10px}
+ .ophrs{font-size:9.5px}
  .gauges{gap:6px}.stat{padding:9px 4px}.stat .n{font-size:18px}.stat .l{font-size:9.5px}
  .gnote{font-size:9.5px}
  .nm{font-size:13px}.val{font-size:13px}.pc{font-size:11px;min-width:42px}.rt{gap:5px}
@@ -171,6 +174,7 @@ body.light #installBar{background:#eaf3ff;border-color:#b9d5f5;color:#1a4b7a}
    <button class="tgl" id="tg" onclick="toggle()">🌙</button></div>
 </div>
 <div class="asof" id="asof">불러오는 중…</div>
+<div class="ophrs" id="ophrs">실시간 운영 05:00 ~ 익일 02:00 (KST) · 그 밖의 시간은 마지막 값</div>
 <div id="installBar" hidden><span id="installTxt">📲 홈 화면에 앱으로 추가하고 바로 여세요</span><button id="installBtn" onclick="doInstall()">앱설치</button><span class="ix" onclick="dismissInstall()">✕</span></div>
 
 <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
@@ -331,6 +335,8 @@ const T={title:{ko:"일일브리핑",en:"Daily Brief"},stockH:{ko:"종목 조회
  chartLoading:{ko:"차트 불러오는 중…",en:"Loading chart…"},chartNone:{ko:"차트 없음",en:"No chart"},
  stkPH:{ko:"국내·미국 (예: 005930, 삼성, AAPL, Tesla)",en:"KR·US (e.g. 005930, AAPL, Tesla)"},
  coinPH:{ko:"코인 심볼 (예: BTC, ETH, SOL)",en:"Coin symbol (e.g. BTC, ETH, SOL)"},
+ ophrs:{ko:"실시간 운영 05:00 ~ 익일 02:00 (KST) · 그 밖의 시간은 마지막 값",
+  en:"Live 05:00–02:00 KST · outside these hours, last values shown"},
  asof:{ko:" 기준",en:""},binance:{ko:"● 바이낸스",en:"● Binance"},snap:{ko:" · 스냅샷",en:" · snapshot"}};
 function L(k){const t=T[k];return t?(t[LANG]||t.ko):k;}
 const TEMPW={ko:["차가움","서늘","미지근","따뜻","뜨거움"],en:["Cold","Cool","Neutral","Warm","Hot"]};
@@ -1168,6 +1174,7 @@ function applyLang(){
   try{mhRender();}catch(e){}
   var sh=document.querySelector("#stock h3");if(sh)sh.innerHTML=L("stockH")+' <span class="tag live" id="stkTag">● 실시간</span>';
   var ch=document.querySelector("#coin2 h3");if(ch)ch.innerHTML=L("coinH")+' <span class="tag live">'+L("binance")+'</span>';
+  var oh=document.getElementById("ophrs"); if(oh)oh.textContent=L("ophrs");
   var cc=document.querySelector("#coin-card h3");if(cc)cc.innerHTML=L("coinCardH")+' <span class="tag live">'+L("binance")+'</span>';
   document.querySelectorAll("#stkTf button,#coinTf button").forEach(function(x){var w=TFW[x.dataset.tf];if(w)x.textContent=w[LANG];});
   try{if(typeof _il==="function"){var ib=document.getElementById("installBar");if(ib&&!ib.hidden)_il();}}catch(e){}
