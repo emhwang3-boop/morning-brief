@@ -466,14 +466,17 @@ function render(d){
       const mx=Math.max.apply(null,d.changes.map(c=>Math.abs(c.pct)).concat([1]));
       // 🔴 이 카드는 여러 시장을 한데 모은 것이라 열린 것과 닫힌 것이 섞인다.
       //    어느 묶음에서 온 줄인지 찾아 줄마다 표시한다.
-      const gOf={};
-      for(const g of d.groups){for(const it of (g.items||[])){if(!(it.nm in gOf))gOf[it.nm]=g;}}
+      const gOf={}, dOf={};
+      for(const g of d.groups){for(const it of (g.items||[])){
+        if(!(it.nm in gOf)){ gOf[it.nm]=g; dOf[it.nm]=!!it.d; }}}
       sChanges='<div class="card"><h3>'+L("changesH")
         +' <span class="bleg"><span class="bdot on"></span>'+(LANG==="en"?"live":"실시간")
         +' <span class="bdot dl"></span>'+(LANG==="en"?"delayed":"지연")
         +' <span class="bdot"></span>'+(LANG==="en"?"closed":"장마감")+'</span></h3>'
         +d.changes.map(c=>{
-        const _g=gOf[c.nm], _lv=grpLive(_g), _dl=!_lv&&grpDelay(_g);
+        // 🔴 줄 자체가 지연값(d)이면 묶음이 실시간이어도 지연으로 적는다
+        const _g=gOf[c.nm], _di=!!dOf[c.nm];
+        const _lv=!_di&&grpLive(_g), _dl=!_lv&&(_di||grpDelay(_g));
         const dot='<span class="bdot'+(_lv?" on":(_dl?" dl":""))+'" title="'
           +(_lv?(LANG==="en"?"live":"실시간"):(_dl?(LANG==="en"?"delayed":"지연")
             :(LANG==="en"?"closed":"장마감")))+'"></span>';
