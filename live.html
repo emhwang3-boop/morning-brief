@@ -961,7 +961,7 @@ function mhRender(){
         arw=function(x){return x>0?"▲":(x<0?"▼":"");};
   let h='<table class="mhtab"><tr><th>'+(en?"Stock":"종목")+'</th><th>'+(en?"Qty":"수량")
    +'</th><th>'+(en?"Avg cost":"매입가")+'</th><th>'+(en?"Price":"현재가")
-   +'</th><th>'+(en?"Value":"평가금액")+'</th><th>'+(en?"P/L":"손익률")+'</th><th></th></tr>';
+   +'</th><th>'+(en?"P/L %<br>P/L":"손익률<br>손익금")+'</th><th></th></tr>';
   let vk=0,ck=0,vu=0,cu=0,vc=0,cc=0;
   MH.forEach(function(x,i){
     const px=mhPx[x.code], val=px?px*x.qty:0;
@@ -977,16 +977,18 @@ function mhRender(){
     const tc=(x.mk==="us")?" us":(x.mk==="coinS")?" sp":(x.mk==="coinF")?" fu":"";
     h+='<tr><td>'+mhEsc(x.name)+' <span class="mkt'+tc+'">'+tg+'</span></td>'
      +'<td>'+x.qty.toLocaleString()+'</td><td>'+mhFmt(x.mk,x.buy)+'</td>'
-     +'<td>'+(px?mhFmt(x.mk,px):"-")+'</td><td>'+(px?mhFmt(x.mk,val):"-")+'</td>'
+     +'<td>'+(px?mhFmt(x.mk,px):"-")+'</td>'
      +'<td class="'+(pct==null?"fl":cls(pct))+'">'
-     +(pct==null?"-":(arw(pct)+Math.abs(pct).toFixed(2)+"%"))+'</td>'
+     +(pct==null?"-":(arw(pct)+Math.abs(pct).toFixed(2)+"%"
+       +"<br>"+((px-x.buy)>=0?"+":"-")+mhFmt(x.mk,Math.abs((px-x.buy)*x.qty))))+'</td>'
      +'<td><span class="mhx" onclick="mhDel('+i+')">✕</span></td></tr>';
   });
   const sum=function(v,c,mk){const p=c?((v-c)/c*100):0;
     const _nm=(mk==="us")?"US":(mk==="coinS"||mk==="coinF")?(en?"COIN":"코인"):"KR";
     return '<tr class="mhsum"><td>'+(en?"Total":"합계")+' '+_nm
-      +'</td><td></td><td>'+mhFmt(mk,c)+'</td><td></td><td>'+mhFmt(mk,v)+'</td>'
-      +'<td class="'+cls(p)+'">'+arw(p)+Math.abs(p).toFixed(2)+'%</td><td></td></tr>';};
+      +'</td><td></td><td>'+mhFmt(mk,c)+'</td><td></td>'
+      +'<td class="'+cls(p)+'">'+arw(p)+Math.abs(p).toFixed(2)+'%'
+      +'<br>'+((v-c)>=0?"+":"-")+mhFmt(mk,Math.abs(v-c))+'</td><td></td></tr>';};
   if(ck>0)h+=sum(vk,ck,"kr");
   if(cu>0)h+=sum(vu,cu,"us");
   if(cc>0)h+=sum(vc,cc,"coinS");
@@ -998,8 +1000,9 @@ function mhRender(){
   }catch(e){}
   if(fx>0&&cu>0&&ck>0){const v=vk+vu*fx,c=ck+cu*fx,p=c?((v-c)/c*100):0;
     h+='<tr class="mhsum"><td>'+(en?"Total (KRW)":"총합(원)")+'</td><td></td><td>'+mhFmt("kr",c)
-      +'</td><td></td><td>'+mhFmt("kr",v)+'</td><td class="'+cls(p)+'">'
-      +arw(p)+Math.abs(p).toFixed(2)+'%</td><td></td></tr>';}
+      +'</td><td></td><td class="'+cls(p)+'">'
+      +arw(p)+Math.abs(p).toFixed(2)+'%'
+      +'<br>'+((v-c)>=0?"+":"-")+mhFmt("kr",Math.abs(v-c))+'</td><td></td></tr>';}
   // 🔴 코인 금액은 USDT 다 — 칸이 좁아 $ 로 적고 여기서 밝힌다(데모앱과 같은 규칙)
   const _hasCoin=MH.some(function(x){return mhIsCoin(x.mk);});
   const _note=_hasCoin?('<div class="mhnote">'+(en
