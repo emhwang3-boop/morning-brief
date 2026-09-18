@@ -143,6 +143,8 @@ body.light #installBar{background:#eaf3ff;border-color:#b9d5f5;color:#1a4b7a}
 .stkres a:last-child{border-bottom:none}.stkres a .c{color:var(--sub);font-variant-numeric:tabular-nums}
 .mkt{font-size:9px;font-weight:800;color:var(--soon);border:1px solid var(--bd);border-radius:4px;padding:0 3px;vertical-align:middle}
 .mkt.us{color:#5db4ff;border-color:#2a5580}
+.mkt.sp{color:#51cf66;border-color:#2b8a3e}
+.mkt.fu{color:#b197fc;border-color:#5f3dc4}
 .stktab{width:100%;border-collapse:collapse;margin-top:9px;font-size:13.5px}
 .stktab td{padding:6px 4px;border-bottom:1px solid var(--bd)}
 .stktab tr:last-child td{border-bottom:none}
@@ -173,8 +175,9 @@ body.light #installBar{background:#eaf3ff;border-color:#b9d5f5;color:#1a4b7a}
   <div id="mhResults" class="stkres"></div>
   <div class="mhrow2">
     <span id="mhPick" class="mhpick"></span>
-    <input id="mhQty" class="mhin" type="number" inputmode="decimal" placeholder="수량">
-    <input id="mhBuy" class="mhin" type="number" inputmode="decimal" placeholder="매입가">
+    <input id="mhQty" class="mhin" type="number" step="any" inputmode="decimal" placeholder="수량">
+    <input id="mhBuy" class="mhin" type="number" step="any" inputmode="decimal" placeholder="매입가">
+    <input id="mhLev" class="mhin" type="number" step="1" min="1" inputmode="decimal" placeholder="레버(배)" hidden>
     <button class="mhbtn" onclick="mhAdd()">추가</button>
   </div>
   <div id="mhBody"></div>
@@ -816,15 +819,19 @@ let MH=[], mhSel=null, mhPx={}, mhSeq=0, mhT=null;
 function mhLoad(){try{MH=JSON.parse(localStorage.getItem("brief_holds")||"[]")||[];}catch(e){MH=[];}}
 function mhSave(){try{localStorage.setItem("brief_holds",JSON.stringify(MH));}catch(e){}}
 function mhNum(v){v=parseFloat(String(v).replace(/,/g,""));return isFinite(v)?v:0;}
-function mhFmt(mk,v){return mk==="us"
+function mhFmt(mk,v){return (mk==="us"||mk==="coinS"||mk==="coinF")
   ?("$"+(+v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}))
   :(Math.round(v).toLocaleString()+(LANG==="en"?"":"원"));}
 function mhEsc(t){return String(t==null?"":t).replace(/[<>&"]/g,function(c){
   return {"<":"&lt;",">":"&gt;","&":"&amp;","\"":"&quot;"}[c];});}
+function mhIsCoin(mk){return mk==="coinS"||mk==="coinF";}
 function mhPickSel(mk,code,name){
   mhSel={mk:mk,code:code,name:name};
   E("mhResults").innerHTML="";E("mhq").value="";
-  E("mhPick").textContent=name+" ("+(mk==="us"?code.replace(/\.US$/,""):code)+")";
+  // 🔴 코인 선물만 레버 칸을 보인다 — 주식·현물엔 없는 값이다
+  const lv=E("mhLev"); if(lv){lv.hidden=(mk!=="coinF"); if(mk!=="coinF")lv.value="";}
+  const tail=mk==="coinS"?(LANG==="en"?" SPOT":" 현물"):mk==="coinF"?(LANG==="en"?" PERP":" 선물"):"";
+  E("mhPick").textContent=name+" ("+(mk==="us"?code.replace(/\.US$/,""):code)+")"+tail;
   E("mhQty").focus();
 }
 function mhAdd(){
@@ -832,11 +839,15 @@ function mhAdd(){
   if(!mhSel){E("mhPick").textContent=en?"Pick a stock first":"종목을 먼저 고르세요";return;}
   const q=mhNum(E("mhQty").value), b=mhNum(E("mhBuy").value);
   if(q<=0||b<=0){E("mhPick").textContent=en?"Enter qty and cost":"수량과 매입가를 넣으세요";return;}
+  const lv=Math.max(1,Math.round(mhNum(E("mhLev")&&E("mhLev").value))||1);
   const i=MH.findIndex(function(h){return h.code===mhSel.code&&h.mk===mhSel.mk;});
-  if(i>=0){const o=MH[i],tq=o.qty+q;o.buy=(o.buy*o.qty+b*q)/tq;o.qty=tq;}   // 같은 종목이면 평단으로 합친다
-  else MH.push({mk:mhSel.mk,code:mhSel.code,name:mhSel.name,qty:q,buy:b});
+  if(i>=0){const o=MH[i],tq=o.qty+q;o.buy=(o.buy*o.qty+b*q)/tq;o.qty=tq;
+           if(mhSel.mk==="coinF")o.lev=lv;}   // 같은 종목이면 평단으로 합친다
+  else MH.push({mk:mhSel.mk,code:mhSel.code,name:mhSel.name,qty:q,buy:b,
+                lev:(mhSel.mk==="coinF"?lv:1)});
   mhSave();mhSel=null;
   E("mhPick").textContent="";E("mhQty").value="";E("mhBuy").value="";
+  if(E("mhLev")){E("mhLev").value="";E("mhLev").hidden=true;}
   mhRender();mhTick();
 }
 function mhDel(i){MH.splice(i,1);mhSave();mhRender();}
@@ -850,12 +861,20 @@ function mhRender(){
   let h='<table class="mhtab"><tr><th>'+(en?"Stock":"종목")+'</th><th>'+(en?"Qty":"수량")
    +'</th><th>'+(en?"Avg cost":"매입가")+'</th><th>'+(en?"Price":"현재가")
    +'</th><th>'+(en?"Value":"평가금액")+'</th><th>'+(en?"P/L":"손익률")+'</th><th></th></tr>';
-  let vk=0,ck=0,vu=0,cu=0;
+  let vk=0,ck=0,vu=0,cu=0,vc=0,cc=0;
   MH.forEach(function(x,i){
-    const px=mhPx[x.code], val=px?px*x.qty:0, pct=px?((px-x.buy)/x.buy*100):null;
-    if(px){ if(x.mk==="us"){vu+=val;cu+=x.buy*x.qty;} else {vk+=val;ck+=x.buy*x.qty;} }
-    h+='<tr><td>'+mhEsc(x.name)+' <span class="mkt'+(x.mk==="us"?" us":"")+'">'
-     +(x.mk==="us"?"US":"KR")+'</span></td>'
+    const px=mhPx[x.code], val=px?px*x.qty:0;
+    // 🔴 선물은 레버를 곱해야 손익률이 맞다. 현물·주식은 1배다.
+    const lv=(x.mk==="coinF")?Math.max(1,+x.lev||1):1;
+    const pct=px?((px-x.buy)/x.buy*100*lv):null;
+    if(px){ if(x.mk==="us"){vu+=val;cu+=x.buy*x.qty;}
+            else if(mhIsCoin(x.mk)){vc+=val;cc+=x.buy*x.qty;}
+            else {vk+=val;ck+=x.buy*x.qty;} }
+    const en2=(LANG==="en");
+    const tg=(x.mk==="us")?"US":(x.mk==="coinS")?(en2?"SPOT":"현물")
+            :(x.mk==="coinF")?((en2?"PERP ":"선물 ")+lv+"x"):"KR";
+    const tc=(x.mk==="us")?" us":(x.mk==="coinS")?" sp":(x.mk==="coinF")?" fu":"";
+    h+='<tr><td>'+mhEsc(x.name)+' <span class="mkt'+tc+'">'+tg+'</span></td>'
      +'<td>'+x.qty.toLocaleString()+'</td><td>'+mhFmt(x.mk,x.buy)+'</td>'
      +'<td>'+(px?mhFmt(x.mk,px):"-")+'</td><td>'+(px?mhFmt(x.mk,val):"-")+'</td>'
      +'<td class="'+(pct==null?"fl":cls(pct))+'">'
@@ -863,11 +882,13 @@ function mhRender(){
      +'<td><span class="mhx" onclick="mhDel('+i+')">✕</span></td></tr>';
   });
   const sum=function(v,c,mk){const p=c?((v-c)/c*100):0;
-    return '<tr class="mhsum"><td>'+(en?"Total":"합계")+' '+(mk==="us"?"US":"KR")
+    const _nm=(mk==="us")?"US":(mk==="coinS"||mk==="coinF")?(en?"COIN":"코인"):"KR";
+    return '<tr class="mhsum"><td>'+(en?"Total":"합계")+' '+_nm
       +'</td><td></td><td>'+mhFmt(mk,c)+'</td><td></td><td>'+mhFmt(mk,v)+'</td>'
       +'<td class="'+cls(p)+'">'+arw(p)+Math.abs(p).toFixed(2)+'%</td><td></td></tr>';};
   if(ck>0)h+=sum(vk,ck,"kr");
   if(cu>0)h+=sum(vu,cu,"us");
+  if(cc>0)h+=sum(vc,cc,"coinS");
   let fx=0;
   try{const gs=((window._lastD||{}).groups||[]);
     for(const g of gs){for(const it of (g.items||[])){
@@ -878,7 +899,12 @@ function mhRender(){
     h+='<tr class="mhsum"><td>'+(en?"Total (KRW)":"총합(원)")+'</td><td></td><td>'+mhFmt("kr",c)
       +'</td><td></td><td>'+mhFmt("kr",v)+'</td><td class="'+cls(p)+'">'
       +arw(p)+Math.abs(p).toFixed(2)+'%</td><td></td></tr>';}
-  box.innerHTML=h+'</table>';
+  // 🔴 코인 금액은 USDT 다 — 칸이 좁아 $ 로 적고 여기서 밝힌다(데모앱과 같은 규칙)
+  const _hasCoin=MH.some(function(x){return mhIsCoin(x.mk);});
+  const _note=_hasCoin?('<div class="mhnote">'+(en
+    ?"In crypto, $ means USDT."
+    :"암호화폐에서 $는 USDT를 의미함")+'</div>'):"";
+  box.innerHTML=h+'</table>'+_note;
 }
 async function mhTick(){
   if(!MH.length)return;
@@ -886,7 +912,12 @@ async function mhTick(){
   // 종목마다 줄 서면 느리니 한꺼번에 보낸다.
   await Promise.all(MH.slice().map(async function(x){
     try{
-      if(x.mk==="us"){
+      if(mhIsCoin(x.mk)){
+        // 🔴 허브를 안 거친다 — 국내조회 일꾼이 하나뿐이라 끼어들면 본앱 조회가 줄을 선다
+        const d=await fetch("https://api.binance.com/api/v3/ticker/price?symbol="
+                            +encodeURIComponent(x.code)).then(function(r){return r.json();});
+        if(d&&d.price)mhPx[x.code]=+d.price;
+      }else if(x.mk==="us"){
         const d=await usFetch("quote","codes="+encodeURIComponent(x.code));
         const p=d&&d.data&&d.data[0]&&+d.data[0].p; if(p)mhPx[x.code]=p;
       }else{
@@ -903,7 +934,7 @@ E("mhq").addEventListener("input",function(){
   mhT=setTimeout(function(){
     E("mhResults").innerHTML='<div class="soonrow">'+(LANG==="en"?"Searching…":"검색 중…")+'</div>';
     const latin=/[A-Za-z]/.test(q)&&!/[가-힣]/.test(q);
-    let kr=[],us=[];
+    let kr=[],us=[],co=[];
     const paint=function(){
       const en=LANG==="en";
       let h=kr.map(function(r){const dn=(((en&&r.en)?r.en:r.name)||r.code).replace(/['"]/g,"");
@@ -912,11 +943,26 @@ E("mhq").addEventListener("input",function(){
       h+=us.map(function(r){const dn=(r.name||r.tick).replace(/['"]/g,"");
         return '<a onclick="mhPickSel(&quot;us&quot;,&quot;'+r.code+'&quot;,&quot;'+dn+'&quot;)">'
           +'<span>'+mhEsc(dn)+' <span class="mkt us">US</span></span><span class="c">'+r.tick+'</span></a>';}).join("");
+      // 🔴 코인도 같이 — 주식이 KR·US 로 갈리듯 한 코인이 현물·선물 두 줄로 나온다
+      h+=co.map(function(b){
+        const sym=b+"USDT";
+        return ['coinF','coinS'].map(function(mk){
+          const kl=(mk==="coinF")?(en?"PERP":"선물"):(en?"SPOT":"현물");
+          const cc=(mk==="coinF")?"fu":"sp";
+          return '<a onclick="mhPickSel(&quot;'+mk+'&quot;,&quot;'+sym+'&quot;,&quot;'+b+'&quot;)">'
+            +'<span>'+mhEsc(b)+' <span class="mkt '+cc+'">'+kl+'</span></span>'
+            +'<span class="c">'+sym+'</span></a>';}).join("");}).join("");
       E("mhResults").innerHTML=h||'<div class="soonrow">'+(en?"No results":"결과 없음")+'</div>';};
     if(latin)usFetch("search","q="+encodeURIComponent(q)).then(function(d){
       if(seq!==mhSeq)return;us=(d&&d.data)||[];paint();});
     krFetch("search","q="+encodeURIComponent(q),4).then(function(rows){
       if(seq!==mhSeq)return;kr=rows||[];paint();});
+    // 코인은 이미 받아 둔 심볼 목록에서 고른다(본앱 코인 검색과 같은 자리)
+    if(typeof coinSyms==="function")coinSyms().then(function(all){
+      if(seq!==mhSeq)return;
+      const U=q.toUpperCase();
+      co=(all||[]).filter(function(b){return b.indexOf(U)===0;}).slice(0,6);
+      paint();});
   },350);
 });
 mhLoad(); mhRender(); mhTick(); setInterval(mhTick,10000);
