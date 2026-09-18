@@ -147,6 +147,9 @@ body.light .dpnote{background:#fff6e0;border-color:#e8c37a;color:#7a5200}
 .dplbl{font-size:11.5px;color:var(--sub);font-weight:700}
 .dpseg{padding:7px 12px;border:1px solid var(--bd);border-radius:9px;background:var(--bg);color:var(--nm);font-size:12.5px;font-weight:700;cursor:pointer}
 .dpseg.on{background:#1c7ed6;border-color:#1971c2;color:#fff}
+.dplive{margin-left:10px;display:inline-flex;align-items:center;gap:4px;font-weight:800;white-space:nowrap}
+.dpnote.liveon{background:#4a1111;border-color:#a33;color:#ffb3b3}
+body.light .dpnote.liveon{background:#ffe3e3;border-color:#e03131;color:#a01010}
 .ckind{display:inline-block;padding:1px 6px;border-radius:6px;font-size:10.5px;font-weight:800;margin-left:4px;vertical-align:middle}
 .ckind.fu{background:#5f3dc4;color:#fff}
 .ckind.sp{background:#2b8a3e;color:#fff}
@@ -225,7 +228,7 @@ body.light #installBar{background:#eaf3ff;border-color:#b9d5f5;color:#1a4b7a}
    <button class="tgl" id="lng" onclick="toggleLang()">EN</button>
    <button class="tgl" id="tg" onclick="toggle()">🌙</button></div>
 </div>
-<div class="dpnote" id="dpNote">⚠ 모의(시늉) 주문 판 — 실제 주문은 나가지 않습니다 · 심사·시연용<button class="dpreset" onclick="dpReset()">초기화</button></div>
+<div class="dpnote" id="dpNote"><span id="dpNoteTxt">⚠모의(시늉) 주문 판 — 실제 주문은 나가지 않습니다 · 심사·시연용</span><label class="dplive"><input type="checkbox" id="dpLiveCb" onchange="dpLiveTgl(this.checked)"> 실주문</label><button class="dpreset" onclick="dpReset()">초기화</button></div>
 <div class="asof" id="asof">불러오는 중…</div>
 <div id="installBar" hidden><span id="installTxt">📲 홈 화면에 앱으로 추가하고 바로 여세요</span><button id="installBtn" onclick="doInstall()">앱설치</button><span class="ix" onclick="dismissInstall()">✕</span></div>
 
@@ -1336,6 +1339,122 @@ async function rlOkx(path) {
     throw new Error(String(j.code) + " " + (j.msg || ""));
   return j;
 }
+// ── 실주문 (OKX) ──────────────────────────────────────────────────
+// 🔴 여기부터는 **진짜 돈**이다. 부르는 쪽에서 반드시 확인창을 거친다.
+async function rlOkxPost(path, body) {
+  const c = ST.co;
+  if (!c || !c.key || !c.sec || !c.pass) throw new Error("설정에 OKX 키가 없습니다");
+  const ts = new Date().toISOString().slice(0, 23) + "Z";
+  const txt = JSON.stringify(body || {});
+  const sg = await rlSign(c.sec.trim(), ts + "POST" + path + txt);
+  const r = await fetch("https://www.okx.com" + path, {
+    method: "POST",
+    headers: {"OK-ACCESS-KEY": c.key.trim(), "OK-ACCESS-SIGN": sg,
+              "OK-ACCESS-TIMESTAMP": ts, "OK-ACCESS-PASSPHRASE": c.pass.trim(),
+              "Content-Type": "application/json"},
+    body: txt});
+  const j = await r.json();
+  // 🔴 OKX 는 거부도 200 으로 준다. 바깥 code 와 줄별 sCode 를 **둘 다** 본다.
+  const d0 = ((j && j.data) || [])[0] || {};
+  if (j && j.code !== undefined && String(j.code) !== "0")
+    throw new Error(String(d0.sCode || j.code) + " " + (d0.sMsg || j.msg || ""));
+  if (d0.sCode !== undefined && String(d0.sCode) !== "0")
+    throw new Error(String(d0.sCode) + " " + (d0.sMsg || ""));
+  return j;
+}
+// 헤지 모드면 주문에 posSide 가 필수다 — 한 번 받아 두고 쓴다
+async function rlPosMode() {
+  if (RL.pmode) return RL.pmode;
+  try {
+    const j = await rlOkx("/api/v5/account/config");
+    RL.pmode = String(((j.data || [])[0] || {}).posMode || "net_mode");
+  } catch (e) { RL.pmode = "net_mode"; }
+  return RL.pmode;
+}
+// 선물 주문 수량 단위(lotSz) — 이 배수라야 거래소가 받는다
+async function rlLotSz(instId) {
+  if (!RL.lot) RL.lot = {};
+  if (RL.lot[instId] !== undefined) return RL.lot[instId];
+  let v = 0;
+  try {
+    const r = await fetch("https://www.okx.com/api/v5/public/instruments?instType=SWAP&instId="
+                          + encodeURIComponent(instId));
+    const j = await r.json();
+    v = rlNum(((j.data || [])[0] || {}).lotSz);
+  } catch (e) {}
+  RL.lot[instId] = v > 0 ? v : 0.1;
+  return RL.lot[instId];
+}
+
+// 현물 — 사는 것은 USDT 금액, 파는 것은 코인 수량
+async function rlSpotBuy(inst, amtUsdt, limitPx) {
+  const b = {instId: inst, tdMode: "cash", side: "buy"};
+  if (limitPx > 0) {                       // 🔴 지정가면 sz 가 코인 수량이다
+    b.ordType = "limit"; b.px = String(limitPx);
+    b.sz = String(+(amtUsdt / limitPx).toFixed(8));
+  } else {
+    b.ordType = "market"; b.sz = String(+(+amtUsdt).toFixed(2)); b.tgtCcy = "quote_ccy";
+  }
+  return rlOkxPost("/api/v5/trade/order", b);
+}
+async function rlSpotSell(inst, qty, limitPx) {
+  const b = {instId: inst, tdMode: "cash", side: "sell", sz: String(+(+qty).toFixed(8))};
+  if (limitPx > 0) { b.ordType = "limit"; b.px = String(limitPx); }
+  else { b.ordType = "market"; b.tgtCcy = "base_ccy"; }
+  return rlOkxPost("/api/v5/trade/order", b);
+}
+
+// 선물 — 증거금×레버를 계약 수로 바꿔 낸다
+async function rlPerpOpen(inst, side, marginUsdt, lev, px, limitPx) {
+  try {
+    await rlOkxPost("/api/v5/account/set-leverage",
+                    {instId: inst, lever: String(lev), mgnMode: "isolated"});
+  } catch (e) {}                            // 이미 같은 배율이면 거부될 수 있다 — 넘어간다
+  const use = limitPx > 0 ? limitPx : px;
+  if (!(use > 0)) throw new Error("값을 못 받았습니다");
+  const cv = await rlCtVal(inst), lot = await rlLotSz(inst);
+  let sz = (marginUsdt * lev) / (use * cv);
+  sz = Math.max(lot, Math.floor(sz / lot) * lot);
+  sz = +sz.toFixed(8);
+  const b = {instId: inst, tdMode: "isolated", side: (side === "L" ? "buy" : "sell"),
+             sz: String(sz)};
+  if (limitPx > 0) { b.ordType = "limit"; b.px = String(limitPx); }
+  else { b.ordType = "market"; }
+  if ((await rlPosMode()) === "long_short_mode") b.posSide = (side === "L" ? "long" : "short");
+  const j = await rlOkxPost("/api/v5/trade/order", b);
+  return {sz: sz, qty: sz * cv, res: j};
+}
+// 선물 청산 — 거래소가 들고 있는 계약 수를 그대로 반대로 낸다
+async function rlPerpClose(inst, ratio) {
+  const j = await rlOkx("/api/v5/account/positions?instType=SWAP&instId="
+                        + encodeURIComponent(inst));
+  const p = ((j.data || [])[0]) || null;
+  if (!p) throw new Error("거래소에 그 자리가 없습니다");
+  const ct = rlNum(p.pos);
+  if (!ct) throw new Error("계약 수가 0입니다");
+  const lot = await rlLotSz(inst);
+  let sz = Math.abs(ct) * Math.max(0, Math.min(1, ratio || 1));
+  sz = Math.max(lot, Math.floor(sz / lot) * lot);
+  sz = +sz.toFixed(8);
+  const b = {instId: inst, tdMode: "isolated", ordType: "market", sz: String(sz),
+             side: (ct > 0 ? "sell" : "buy")};
+  if ((await rlPosMode()) === "long_short_mode") b.posSide = (ct > 0 ? "long" : "short");
+  else b.reduceOnly = true;
+  return rlOkxPost("/api/v5/trade/order", b);
+}
+// 실주문 스위치 — 이 폰에만 저장된다. 기본은 꺼짐.
+function rlLiveOn() {
+  try { return localStorage.getItem("demo_live_v1") === "1"; } catch (e) { return false; }
+}
+function rlLiveSet(on) {
+  try { localStorage.setItem("demo_live_v1", on ? "1" : "0"); } catch (e) {}
+}
+// 실주문을 낼 수 있는 상태인가 — 스위치가 켜졌고 키가 있어야 한다
+function rlCanLive() {
+  return rlLiveOn() && !!(ST.co && ST.co.key && ST.co.sec && ST.co.pass
+                          && ST.co.broker === "okx");
+}
+
 // 🔴 계약당 코인 수(ctVal)는 포지션 응답에 **없다**. 공개 API 로 따로 받아 둔다.
 //    실측 2026-09-17: BTC-USDT-SWAP 0.13계약 × 0.01 = 0.0013 BTC (명목 99.28 USDT).
 //    이걸 빼먹으면 수량이 100배가 되고 손익률이 0.35% 대신 8% 로 나온다.
@@ -1621,6 +1740,36 @@ function dpShowCoinBar(){
 }
 function dpMsg(id,t){ const e=E(id); if(e)e.textContent=t; }
 
+// ── 실주문 ───────────────────────────────────────────────────────
+// 🔴 켜져 있고 OKX 키가 있어야 진짜로 나간다. 아니면 지금까지처럼 시늉이다.
+function dpLive(){ return (typeof rlCanLive==="function") && rlCanLive(); }
+function dpAsk(t){ try{ return confirm(t); }catch(e){ return false; } }
+// 실주문 스위치 — 맨 위 띠에서 켜고 끈다
+function dpLiveTgl(on){
+  if(typeof rlLiveSet!=="function")return;
+  if(on && !dpAsk(LANG==="en"
+      ? "REAL ORDERS will be sent to the exchange with your own money. Turn on?"
+      : "진짜 주문이 거래소로 나갑니다. 사장님 실제 돈이 움직입니다.\n켤까요?")){
+    const c=E("dpLiveCb"); if(c)c.checked=false; return;
+  }
+  rlLiveSet(!!on);
+  dpBarCoin="";                       // 주문칸을 다시 그려 딱지를 바꾼다
+  try{ dpShowCoinBar(); }catch(e){}
+  dpNoteSync();
+}
+// 맨 위 띠 — 실주문이면 빨갛게, 아니면 모의 안내 그대로
+function dpNoteSync(){
+  const n=E("dpNote"); if(!n)return;
+  const on=dpLive(), en=LANG==="en";
+  n.classList.toggle("liveon",on);
+  const t=E("dpNoteTxt");
+  if(t)t.textContent = on
+    ? (en?"REAL ORDERS — coin orders go to OKX with real money"
+        :"⚠ 실주문 — 코인 주문이 OKX 로 실제로 나갑니다")
+    : (en?"Demo orders — nothing is sent to the exchange"
+        :"⚠ 모의(시늉) 주문 판 — 실제 주문은 나가지 않습니다 · 심사·시연용");
+}
+
 // ── 주문(시늉) ──
 function dpOrder(side){
   const en=LANG==="en";
@@ -1670,6 +1819,24 @@ function dpCoin(act){
   if(mg<=0){ dpMsg("dpMsgC",en?"Enter margin":"증거금을 넣으세요"); return; }
   if(mg>DP.usdt){ dpMsg("dpMsgC",en?"Not enough USDT":"바이낸스 USDT가 모자랍니다"); return; }
   if(p){ dpMsg("dpMsgC",en?"Close the position first":"먼저 청산하세요"); return; }
+  if(dpLive()){
+    const inst=String(coinSym).replace(/USDT$/,"")+"-USDT-SWAP";
+    if(!dpAsk((en?"REAL ":"실주문 · ")+(act==="L"?(en?"LONG ":"롱 "):(en?"SHORT ":"숏 "))+inst
+              +"  "+(en?"margin ":"증거금 ")+mg+" USDT × "+lev+"x"
+              +(isLim?(" @ "+lim):(en?" (market)":" (시장가)"))))return;
+    dpBusyC=true; dpMsg("dpMsgC",en?"Sending to OKX…":"OKX 로 보내는 중…");
+    rlPerpOpen(inst,act,mg,lev,cur,isLim?lim:0).then(function(r){
+      DP.log.unshift({t:dpNow(),kind:"coin",code:coinSym,name:coinSym,side:act,qty:mg,px:fill,
+        how:(isLim?(en?"limit":"지정가"):(en?"market":"시장가"))+" · "+lev+"x"
+            +(en?" · REAL":" · 실주문")});
+      DP.log=DP.log.slice(0,60); dpSave(); dpBusyC=false;
+      dpMsg("dpMsgC",(en?"Sent to OKX · ":"OKX 로 나갔습니다 · ")+r.sz+(en?" contracts":"계약"));
+      try{ rlLoad(true); }catch(e){}
+    }).catch(function(e){
+      dpBusyC=false; dpMsg("dpMsgC",(en?"Rejected: ":"거부됨: ")+(e&&e.message||e));
+    });
+    return;
+  }
   dpBusyC=true; dpMsg("dpMsgC",en?"Sending…":"주문 내는 중…");
   setTimeout(function(){
     DP.usdt-=mg;
@@ -1712,6 +1879,24 @@ function dpCoinSpot(side){
   const q=amt/fill;                                  // 금액 → 코인 수량
   // 🔴 이 길은 **매수 전용**이다. 파는 것은 dpSpotSell() 의 수량 판으로 간다.
   if(amt>DP.usdt){ dpMsg("dpMsgC",en?"Not enough USDT":"USDT가 모자랍니다"); return; }
+  // 🔴 실주문이면 거래소로 보낸다. 장부는 건드리지 않는다 — 실계좌 갱신이 가져온다.
+  if(dpLive()){
+    const inst=String(coinSym).replace(/USDT$/,"")+"-USDT";
+    if(!dpAsk((en?"REAL spot BUY ":"실주문 · 현물 매수 ")+inst+"  "+amt+" USDT"
+              +(isLim?(" @ "+lim):(en?" (market)":" (시장가)"))))return;
+    dpBusyC=true; dpMsg("dpMsgC",en?"Sending to OKX…":"OKX 로 보내는 중…");
+    rlSpotBuy(inst,amt,isLim?lim:0).then(function(){
+      DP.log.unshift({t:dpNow(),kind:"coin",code:coinSym,name:coinSym,side:"B",qty:q,px:fill,
+        how:(en?"spot ":"현물 ")+(isLim?(en?"limit":"지정가"):(en?"market":"시장가"))
+            +(en?" · REAL":" · 실주문")});
+      DP.log=DP.log.slice(0,60); dpSave(); dpBusyC=false;
+      dpMsg("dpMsgC",(en?"Sent to OKX ":"OKX 로 나갔습니다 ")+amt+" USDT");
+      try{ rlLoad(true); }catch(e){}          // 실계좌를 바로 다시 읽는다
+    }).catch(function(e){
+      dpBusyC=false; dpMsg("dpMsgC",(en?"Rejected: ":"거부됨: ")+(e&&e.message||e));
+    });
+    return;
+  }
   dpBusyC=true; dpMsg("dpMsgC",en?"Sending…":"주문 내는 중…");
   setTimeout(function(){
     const cost=fill*q;
@@ -1815,6 +2000,24 @@ function dpCloseGo(){
   const amt=dpNum(E("dpAmt").value);
   if(amt<=0){ E("dpCloseMsg").textContent=en?"Enter an amount":"수량을 넣으세요"; return; }
   const r=Math.min(1,amt/p.margin);
+  if(p._real&&dpLive()){
+    // 🔴 실주문 — 거래소가 들고 있는 계약 수를 그대로 반대로 낸다
+    const inst=String(p.code);
+    if(!dpAsk((en?"REAL close ":"실주문 · 청산 ")+inst+"  "+Math.round(r*100)+"%"))return;
+    E("dpCloseMsg").textContent=en?"Sending to OKX…":"OKX 로 보내는 중…";
+    rlPerpClose(inst,r).then(function(){
+      DP.log.unshift({t:dpNow(),kind:"coin",code:p.code,name:p.code,side:"X",qty:amt,
+                      px:dpPxOf(key,p)||p.entry,
+                      how:(en?"close ":"청산 ")+Math.round(r*100)+"%"+(en?" · REAL":" · 실주문")});
+      DP.log=DP.log.slice(0,60); dpSave();
+      E("dpCloseMsg").textContent=en?"Sent to OKX":"OKX 로 나갔습니다";
+      try{ rlLoad(true); }catch(e){}
+      setTimeout(dpCloseCancel,1200);
+    }).catch(function(e){
+      E("dpCloseMsg").textContent=(en?"Rejected: ":"거부됨: ")+(e&&e.message||e);
+    });
+    return;
+  }
   if(p._real){
     const cur=dpPxOf(key,p)||p.entry;
     const pl=(p.side==="L"?1:-1)*(cur/p.entry-1)*(p.lev||1)*amt;
@@ -1903,6 +2106,24 @@ function dpSellGo(){
   const px=isLim?lim:(dpPxOf(key,p)||p.avg);
   const pnl=(px-p.avg)*q;                       // 실현손익
   const how=(isLim?(en?"limit":"지정가"):(en?"market":"시장가"));
+  if(p._real&&p.mk==="coinS"&&dpLive()){
+    // 🔴 실주문 — 코인 현물 매도. 수량(코인 수)으로 낸다.
+    const inst=String(p.code).replace(/USDT$/,"")+"-USDT";
+    if(!dpAsk((en?"REAL spot SELL ":"실주문 · 현물 매도 ")+inst+"  "+(+q.toFixed(8))
+              +(isLim?(" @ "+lim):(en?" (market)":" (시장가)"))))return;
+    E("dpSellMsg").textContent=en?"Sending to OKX…":"OKX 로 보내는 중…";
+    rlSpotSell(inst,q,isLim?lim:0).then(function(){
+      DP.log.unshift({t:dpNow(),kind:"coin",code:p.code,name:p.name,side:"S",qty:q,px:px,
+                      how:how+(en?" · REAL":" · 실주문"),pnl:pnl});
+      DP.log=DP.log.slice(0,60); dpSave();
+      E("dpSellMsg").textContent=en?"Sent to OKX":"OKX 로 나갔습니다";
+      try{ rlLoad(true); }catch(e){}
+      setTimeout(dpSellCancel,1200);
+    }).catch(function(e){
+      E("dpSellMsg").textContent=(en?"Rejected: ":"거부됨: ")+(e&&e.message||e);
+    });
+    return;
+  }
   if(p._real){
     // 🔴 실계좌 줄은 증권사가 가진 값이다. 여기서 줄이면 1분 뒤 되돌아와 거짓말이 된다.
     DP.log.unshift({t:dpNow(),kind:p.mk,code:p.code,name:p.name,side:"S",qty:q,px:px,
@@ -2111,6 +2332,12 @@ function dpSyncHold(){ try{ dpHoldRender(); }catch(e){} }
 
 
 dpLoad(); try{ dpRender(); }catch(e){}            // 카드가 처음부터 차 있게
+// 🔴 실주문 스위치를 되살린다 — 이 폰에 켜 뒀으면 켠 채로 뜬다
+try{
+  const _c=E("dpLiveCb");
+  if(_c&&typeof rlLiveOn==="function")_c.checked=rlLiveOn();
+  dpNoteSync();
+}catch(e){}
 setTimeout(function(){ dpRender(); dpTick(); }, 1200); setInterval(dpTick,10000);
 
 function applyLang(){
