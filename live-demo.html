@@ -573,6 +573,7 @@ async function loadData(){
   const src=MDR?(MDR+"/data"):(HUB?(HUB.replace(/\/$/,"")+"/data"):("data.json?t="+Date.now()));
   try{d=await fetch(src,{cache:"no-store"}).then(r=>r.json());}catch(e){}
   if(!d||d.loading||!d.groups)d=window.SNAP||null;
+  if(MDR&&d&&d.groups&&typeof rlKrIdxFill==="function"){try{await rlKrIdxFill(d);}catch(e){}}
   if(!d||!d.groups){document.getElementById("asof").textContent="서버 준비 중…";return;}
   render(d);
 }
@@ -1811,6 +1812,50 @@ async function rlUsDaily(code, n) {
               v: rlAbs(b.acc_trde_qty), vw: rlAbs(b.acc_trde_prica)});
   });
   return out.slice(0, n || 250);
+}
+
+// ── 국내 지수 — 키움 ka20001(현재가) · ka20006(일봉, 값×100) — 이용자 본인 키 (사장님 2026-09-19) ──
+//    "내 컴퓨터(중계기)" 모드에서 국내 묶음을 야후 지연 대신 이것으로 채운다(코스피200 도 여기서만 나온다).
+//    업종코드: 코스피 001 · 코스닥 101 · 코스피200 201 (실측 — 201 은 mrkt_tp 0 으로 된다)
+const RL_KIDX = [["코스피", "0", "001"], ["코스닥", "1", "101"], ["코스피200", "0", "201"]];
+const RL_KSPK = {};
+function rlYmd(d) { return d.getFullYear() + String(d.getMonth() + 1).padStart(2, "0") + String(d.getDate()).padStart(2, "0"); }
+async function rlKrIndex() {
+  const tok = await rlToken(), out = [], today = rlYmd(new Date());
+  for (const x of RL_KIDX) {
+    const nm = x[0], mk = x[1], cd = x[2];
+    try {
+      const j = await rlKiwoom(tok, "/api/dostk/sect", "ka20001", {mrkt_tp: mk, inds_cd: cd});
+      if (!j || j.return_code !== 0) continue;
+      const cur = rlAbs(j.cur_prc); if (!(cur > 0)) continue;
+      let pct = rlAbs(j.flu_rt); const sig = String(j.pred_pre_sig || "");
+      if (sig === "4" || sig === "5") pct = -pct; else if (sig !== "1" && sig !== "2") pct = 0;
+      let sp = RL_KSPK[cd];
+      if (!sp || Date.now() - sp.at > 600000) {           // 일봉은 10분에 한 번
+        try {
+          const c = await rlKiwoom(tok, "/api/dostk/chart", "ka20006", {inds_cd: cd, base_dt: today});
+          const rows = (c && c.inds_dt_pole_qry) || [];
+          sp = {at: Date.now(), last: String((rows[0] || {}).dt || ""),
+                arr: rows.slice(0, 30).reverse().map(function (r) { return rlAbs(r.cur_prc) / 100; })};
+          RL_KSPK[cd] = sp;
+        } catch (e) {}
+      }
+      let arr = (sp && sp.arr) ? sp.arr.slice() : [];
+      if (arr.length) { if (sp.last === today) arr[arr.length - 1] = cur; else if (Math.abs(arr[arr.length - 1] - cur) > 1e-9) arr.push(cur); }   // 주말·장 전엔 같은 값을 두 번 찍지 않는다
+      out.push({nm: nm, val: cur.toLocaleString("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2}),
+                pct: Math.round(pct * 100) / 100, spark: arr});
+    } catch (e) {}
+  }
+  return out;
+}
+async function rlKrIdxFill(d) {
+  if (!ST || !ST.kr || !ST.kr.key || !ST.kr.sec) return;
+  const g = (d.groups || []).find(function (x) { return x.title === "국내"; }); if (!g) return;
+  if (!RL.kidx || Date.now() - (RL.kidxAt || 0) > 3000) { RL.kidx = await rlKrIndex(); RL.kidxAt = Date.now(); }
+  if (!RL.kidx || !RL.kidx.length) return;
+  g.items = RL.kidx.map(function (x) { return Object.assign({}, x); }); g.rt = true;
+  (d.changes || []).forEach(function (c) {
+    const k = RL.kidx.find(function (x) { return x.nm === c.nm; }); if (k) c.pct = k.pct; });
 }
 
 // ── 계좌 합계 — kt00018 은 보유목록과 함께 계좌 요약도 준다 ──
