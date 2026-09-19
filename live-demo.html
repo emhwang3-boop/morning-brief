@@ -2386,6 +2386,7 @@ async function rlLoad(auto) {
     try { dpHoldRender(); } catch (e) {}
     try { dpRender(); } catch (e) {}
     setTimeout(function () { try { rlOsoLoad(); } catch (e) {} }, 300);   // 미체결도 같이 (2026-09-19)
+    setTimeout(function () { try { rlHoldSince(); } catch (e) {} }, 2500); // 산 날 (매매일지, 하루 한 번)
   }
 }
 function rlHas() { return (RL.kr.length + RL.us.length + RL.co.length) > 0; }
@@ -2516,6 +2517,68 @@ async function rlOsoCancel(i) {
     say((en ? "Cancel rejected: " : "취소 거부: ") + e.message);
   }
   setTimeout(rlOsoLoad, 1500);
+}
+
+
+// ── 산 날 — 매매일지(ka10170)를 거슬러 (2026-09-19, 본앱 HoldSinceWorker 와 같은 셈) ──────────
+// 증권사 잔고(kt00018)엔 산 날 칸이 없다(실측 23칸). 오늘부터 거슬러 가며 종목마다 순매수(산 것 − 판 것)를
+// 쌓고, 지금 보유수량에 닿는 날(그날 산 것이 있어야)을 산 날로 본다. 팔았다 다시 산 것도 이 셈이 가른다.
+// 70영업일(60일 만기를 보려고)까지 · 초당 4회 이하 · 폰에 저장 · 수량이 바뀐 종목만 다시 찾는다(하루 한 번).
+const RL_HS_KEY = "hold_since_v1";
+function rlHsGet() { try { return JSON.parse(localStorage.getItem(RL_HS_KEY) || "{}"); } catch (e) { return {}; } }
+function rlHsSave(o) { try { localStorage.setItem(RL_HS_KEY, JSON.stringify(o)); } catch (e) {} }
+let RL_HS_BUSY = false;
+async function rlHoldSince() {
+  if (RL_HS_BUSY || !(ST.kr && ST.kr.key && ST.kr.sec)) return;
+  const hs = rlHsGet(), today = new Date().toISOString().slice(0, 10), want = {};
+  hs._t = hs._t || {};
+  const codes = (RL.kr || []).map(function (p) { return p.code; });
+  Object.keys(hs).forEach(function (c) { if (c !== "_t" && codes.indexOf(c) < 0) delete hs[c]; });
+  (RL.kr || []).forEach(function (p) {
+    const h = hs[p.code];
+    if ((!h || h.q !== p.qty) && hs._t[p.code] !== today) want[p.code] = p.qty;
+  });
+  if (!Object.keys(want).length) { rlHsSave(hs); return; }
+  RL_HS_BUSY = true;
+  try {
+    const tok = await rlToken(), net = {}, got = {};
+    Object.keys(want).forEach(function (c) { net[c] = 0; });
+    let seen = 0;
+    for (let k = 0; seen < 70 && k < 140 && Object.keys(got).length < Object.keys(want).length; k++) {
+      const d = new Date(); d.setDate(d.getDate() - k);
+      const w = d.getDay(); if (w === 0 || w === 6) continue;
+      seen++;
+      const ds = d.getFullYear() + String(d.getMonth() + 1).padStart(2, "0") + String(d.getDate()).padStart(2, "0");
+      let j = null;
+      try { j = await rlKiwoom(tok, "/api/dostk/acnt", "ka10170", {base_dt: ds, ottks_tp: "1", ch_crd_tp: "0"}); } catch (e) {}
+      await new Promise(function (r) { setTimeout(r, 260); });
+      if (!j || String(j.return_code) !== "0") continue;
+      for (const kk in j) {
+        if (!Array.isArray(j[kk])) continue;
+        j[kk].forEach(function (r) {
+          const c = String(r.stk_cd || "").replace(/^A/, "").replace(/_.*$/, "");
+          if (!(c in want) || got[c]) return;
+          const bq = rlNum(r.buy_qty), sq = rlNum(r.sell_qty);
+          net[c] += bq - sq;
+          if (bq > 0 && net[c] >= want[c] - 0.001) got[c] = ds;
+        });
+      }
+    }
+    Object.keys(want).forEach(function (c) { if (got[c]) hs[c] = {d: got[c], q: want[c]}; hs._t[c] = today; });
+    rlHsSave(hs);
+  } finally {
+    RL_HS_BUSY = false;
+    try { dpHoldRender(); } catch (e) {}
+    try { recoRender(); } catch (e) {}
+  }
+}
+// 산 날부터 오늘까지 영업일 수(주말 뺌) — 못 찾았으면 null
+function rlHeldDays(code) {
+  const h = rlHsGet()[code]; if (!h || !h.d) return null;
+  const s = h.d, a = new Date(+s.slice(0, 4), +s.slice(4, 6) - 1, +s.slice(6, 8)), b = new Date();
+  let n = 0;
+  for (let d = new Date(a); d < b; d.setDate(d.getDate() + 1)) { const w = d.getDay(); if (w !== 0 && w !== 6) n++; }
+  return {since: s, days: n};
 }
 
 // ── OKX 공개 시세 (사장님 2026-09-19 — 코인은 전부 OKX 기준) ──
@@ -3158,7 +3221,9 @@ function dpHoldRender(){
       :((en?"PERP ":"선물 ")+(p.side==="L"?(en?"LONG":"롱"):(en?"SHORT":"숏"))+" "+p.lev+"x");
     const tagc=(p.mk==="coin")?(p.spot?" sp":" fu"):"";
     h+='<tr><td>'+dpEsc(p.name||p.code)+' <span class="mkt'+tagc+'">'+tag+'</span>'
-     +'<span class="rlb">'+(en?"REAL":"실계좌")+'</span></td>'
+     +'<span class="rlb">'+(en?"REAL":"실계좌")+'</span>'
+     +((p.mk==="kr"&&typeof rlHeldDays==="function"&&rlHeldDays(p.code))
+        ?'<br><span class="dplbl">'+(en?"day ":"")+rlHeldDays(p.code).days+(en?"":"일째")+'</span>':'')+'</td>'
      +'<td>'+qtx+'</td><td>'+mny(p.avg)+'</td><td>'+mny(cur)+'</td>'
      +'<td>'+mny(evl)+'</td>'
      +'<td class="'+cls(pl)+'">'+(pl>=0?"+":"-")+mny(Math.abs(pl))
@@ -3608,7 +3673,8 @@ function recoRender(){
     // 팔 것 — +15% 도달 · 60영업일 만기 · (국내·미국 공통 규칙)
     const sells=[];
     held.forEach(function(p){
-      const k=p.mk+":"+p.code, d=seen[k]?recoDays(seen[k]):0, why=[];
+      const k=p.mk+":"+p.code, hd=(p.mk==="kr"&&typeof rlHeldDays==="function")?rlHeldDays(p.code):null;
+      const d=hd?hd.days:(seen[k]?recoDays(seen[k]):0), why=[];
       if(p.rt>=15)why.push(en?"+15% reached":"+15% 도달");
       if(d>=60)why.push((en?"60d · ":"60일 · ")+d+(en?"d":"일째"));
       if(mk==="kr"&&x.regime&&x.regime.cycle_exit)why.push(en?"regime broke (rebound pocket)":"장세 무너짐(과매도 주머니)");
