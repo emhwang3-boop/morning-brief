@@ -331,7 +331,9 @@ const TAG={"국내":'<span class="tag soon">실시간 예정</span>'};
 function grpTag(t){return TAG[t]||'<span class="tag delay">D 지연</span>';}
 
 // 배포 허브(Cloudflare WebSocket). 비우면 data.json 폴링(로컬/깃허브).
-const HUB="https://brief-live-hub.emhwang3.workers.dev";  // Cloudflare WebSocket 허브
+const HUB="https://brief-live-hub.emhwang3.workers.dev";
+// 시세 받는 곳이 "내 컴퓨터"면 중계기 /md 로 — 허브 WebSocket 은 안 붙는다
+const MDR=(function(){try{const c=JSON.parse(localStorage.getItem("app_conf_v1")||"{}");return (c.mdsrc==="relay"&&c.relay)?String(c.relay).trim().replace(/\/$/,"")+"/md":"";}catch(e){return "";}})();  // Cloudflare WebSocket 허브
 try{var _vid=localStorage.getItem("brief_vid");if(!_vid){_vid=Date.now().toString(36)+Math.random().toString(36).slice(2,8);localStorage.setItem("brief_vid",_vid);}
   var _src="";try{_src=(new URLSearchParams(location.search)).get("src")||"";}catch(e){}
   if(!_src){var _r=document.referrer||"";
@@ -425,7 +427,7 @@ function toggleLang(){LANG=LANG==="en"?"ko":"en";try{localStorage.setItem("brief
 function grpLive(gr){
   if(!gr)return false;
   const t=gr.title;
-  if(t==="국내")return krLiveNow();                       // 국내: 평일 08~20시
+  if(t==="국내")return (gr.rt!==false)&&krLiveNow();   // 중계기 야후 모드면 지연                       // 국내: 평일 08~20시
   if(t==="미국 지수")return !!gr.rt&&usIndexLive();        // 미국주식: 정규장 09:30~16:00 ET
   if(t==="원자재"||t==="금리·채권")return !!gr.rt&&usFutLive();   // CME 선물: ~24h
   if(t==="환율·달러")return !!gr.rt&&usFxLive();           // FX: 24h
@@ -568,7 +570,7 @@ function render(d){
 }
 async function loadData(){
   let d=null;
-  const src=HUB?(HUB.replace(/\/$/,"")+"/data"):("data.json?t="+Date.now());
+  const src=MDR?(MDR+"/data"):(HUB?(HUB.replace(/\/$/,"")+"/data"):("data.json?t="+Date.now()));
   try{d=await fetch(src,{cache:"no-store"}).then(r=>r.json());}catch(e){}
   if(!d||d.loading||!d.groups)d=window.SNAP||null;
   if(!d||!d.groups){document.getElementById("asof").textContent="서버 준비 중…";return;}
@@ -583,7 +585,8 @@ function connectWS(){
     ws.onclose=ws.onerror=()=>{ws=null;clearTimeout(wsTimer);wsTimer=setTimeout(connectWS,3000);loadData();};
   }catch(e){clearTimeout(wsTimer);wsTimer=setTimeout(connectWS,3000);}
 }
-if(HUB){connectWS();loadData();setInterval(loadData,30000);}  // WS 실시간 + 30초 HTTP 백업
+if(MDR){loadData();setInterval(loadData,5000);}              // 내 컴퓨터 중계기: 5초 폴링
+else if(HUB){connectWS();loadData();setInterval(loadData,30000);}  // WS 실시간 + 30초 HTTP 백업
 else{loadData();setInterval(loadData,60000);}                  // 로컬/깃허브 폴링
 
 // ---- 코인 (바이낸스 실시간) ----
@@ -676,8 +679,8 @@ async function krFetchHub(op,qs,tries){
   }
   return null;
 }
-async function usFetch(op,qs){ if(!KRB)return null;
-  try{return await fetch(KRB+"/us/"+op+"?"+qs,{cache:"no-store"}).then(r=>r.json());}catch(e){return null;} }
+async function usFetch(op,qs){ const _b=MDR?(MDR+"/us/"):(KRB?(KRB+"/us/"):""); if(!_b)return null;
+  try{return await fetch(_b+op+"?"+qs,{cache:"no-store"}).then(r=>r.json());}catch(e){return null;} }
 function usMoney(n){n=+n;const a=Math.abs(n);
   if(a>=1e9)return "$"+(n/1e9).toFixed(2)+"B"; if(a>=1e6)return "$"+(n/1e6).toFixed(1)+"M";
   return "$"+Math.round(n).toLocaleString();}
@@ -764,8 +767,12 @@ async function loadChartUS(){
   if(!stkCode||stkMarket!=="us")return;
   E("stkChartLbl").textContent=L("chartLoading");
   const kt=US_KT[stkTf]||8;
-  const k=await usFetch("kline","code="+encodeURIComponent(stkCode)+"&type="+kt+"&num=250");
-  const rl=(k&&k.data&&k.data[0]&&k.data[0].respList)||[];
+  let rl=[];
+  if(stkTf==="D"&&typeof rlUsDaily==="function"&&ST&&ST.kr&&ST.kr.key&&ST.kr.sec){
+    try{rl=await rlUsDaily(stkCode,250);}catch(e){rl=[];}          // 키움 일봉(본인 키)
+  }
+  if(rl.length<2){const k=await usFetch("kline","code="+encodeURIComponent(stkCode)+"&type="+kt+"&num=250");
+    rl=(k&&k.data&&k.data[0]&&k.data[0].respList)||[];}
   if(rl.length<2){E("stkChartLbl").textContent=L("chartNone");return;}
   const asc=rl.slice().reverse();
   const bars=asc.map(b=>[usFmtT(+b.t,stkTf),+b.o,+b.h,+b.l,+b.c,+b.v]);
@@ -1664,6 +1671,16 @@ function stRender(){
    + stRow("kr", ST_KR, en ? "KR stocks · broker" : "국내주식 · 증권사")
    + stRow("us", ST_US, en ? "US stocks · broker" : "해외주식 · 증권사")
    + stRow("co", ST_CO, en ? "Crypto · exchange" : "코인 · 거래소")
+   // 시세 받는 곳 (사장님 2026-09-19) — 허브(Infoway, 데모 백업) / 내 컴퓨터(중계기가 받아 줌, 재배포 없음)
+   + '<div class="strow"><div class="sthd">' + (en ? "Market data from" : "시세 받는 곳") + '</div>'
+   + '<select class="stin" onchange="ST.mdsrc=this.value;stSave();stRender();">'
+   + '<option value="hub"' + (ST.mdsrc !== "relay" ? " selected" : "") + '>' + (en ? "Hub (demo)" : "허브 (데모용)") + '</option>'
+   + '<option value="relay"' + (ST.mdsrc === "relay" ? " selected" : "") + '>' + (en ? "My computer (relay)" : "내 컴퓨터 (중계기)") + '</option>'
+   + '</select><div class="stmsg">' + (ST.mdsrc === "relay"
+       ? (en ? "Indices and US stocks come through your relay (below). Yahoo delayed by default; real-time if you put your own Infoway key on the PC. Reload to apply."
+             : "지표·미국 종목을 아래 중계기가 받아 줍니다. 기본은 야후 지연, PC 에 본인 Infoway 키를 넣으면 실시간. 바꾼 뒤 새로고침하세요.")
+         + (ST.relay ? "" : (en ? " Relay address is empty." : " 중계기 주소가 비어 있습니다."))
+       : (en ? "Demo hub. Reload to apply." : "데모용 허브입니다. 바꾼 뒤 새로고침하세요.")) + '</div></div>'
    // 🔴 중계기 주소 (사장님 2026-09-18) — 브라우저 접속을 막는 증권사(예: 한국투자)를 쓸 때만.
    //    이용자 본인 PC 가 중계기다. https 여야 한다(https 페이지는 http 주소를 못 부른다).
    //    주소가 있으면 real.js 의 rlHost/kisHost 가 키움·한국투자 요청을 이리로 보낸다(2026-09-18).
@@ -1749,6 +1766,51 @@ async function rlKiwoom(tok, path, apiId, body) {
     body: JSON.stringify(body || {})
   });
   return r.json();
+}
+
+// ── 미국 일봉 — 키움 usa06012 를 **이용자 본인 키로** (사장님 2026-09-19) ──
+//    한 번에 100봉 · 최신이 앞. 이어받기는 cont-yn/next-key 머리(중계기를 거치면 보인다).
+//    돌려주는 모양은 허브 /us/kline 의 respList 와 같다 — {t,o,h,l,c,v,vw} 최신이 앞.
+//    거래소(ND 나스닥·NY 뉴욕·NA 아멕스)는 처음 한 번 찾아 기억한다.
+const RL_STEX = {};
+async function rlUsDaily(code, n) {
+  const tick = String(code || "").replace(/\.US$/, "").toUpperCase();
+  if (!tick) return [];
+  const tok = await rlToken();
+  const page = async function(stex, nk) {
+    const h = {"Content-Type": "application/json;charset=UTF-8",
+               "authorization": "Bearer " + tok, "api-id": "usa06012"};
+    if (nk) { h["cont-yn"] = "Y"; h["next-key"] = nk; }
+    const r = await fetch(rlHost() + "/api/us/chart", {method: "POST", headers: h,
+      body: JSON.stringify({stex_tp: stex, stk_cd: tick, upd_stkpc_tp: "1"})});
+    const j = await r.json();
+    return {j: j, cont: r.headers.get("cont-yn") || "", nk: r.headers.get("next-key") || ""};
+  };
+  let first = null, stex = RL_STEX[tick];
+  for (const s of (stex ? [stex] : ["ND", "NY", "NA"])) {
+    try {
+      const p = await page(s, "");
+      if (p.j && p.j.return_code === 0 && (p.j.result_list || []).length) { first = p; stex = s; break; }
+    } catch (e) {}
+  }
+  if (!first) return [];
+  RL_STEX[tick] = stex;
+  let rows = (first.j.result_list || []).slice(), cur = first;
+  while (rows.length < (n || 250) && cur.cont === "Y" && cur.nk) {
+    try { cur = await page(stex, cur.nk); } catch (e) { break; }
+    if (!cur.j || cur.j.return_code !== 0) break;
+    rows = rows.concat(cur.j.result_list || []);
+  }
+  const out = [];
+  rows.forEach(function(b) {
+    const dt = String(b.dt || "").trim();
+    const c = rlAbs(b.cur_prc), o = rlAbs(b.open_pric) || c;
+    if (dt.length !== 8 || !(c > 0)) return;
+    const t = Date.UTC(+dt.slice(0, 4), +dt.slice(4, 6) - 1, +dt.slice(6, 8), 12) / 1000;
+    out.push({t: t, o: o, h: rlAbs(b.high_pric) || c, l: rlAbs(b.low_pric) || c, c: c,
+              v: rlAbs(b.acc_trde_qty), vw: rlAbs(b.acc_trde_prica)});
+  });
+  return out.slice(0, n || 250);
 }
 
 // ── 계좌 합계 — kt00018 은 보유목록과 함께 계좌 요약도 준다 ──
