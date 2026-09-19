@@ -1853,7 +1853,10 @@ async function rlKrIdxFill(d) {
   const g = (d.groups || []).find(function (x) { return x.title === "국내"; }); if (!g) return;
   if (!RL.kidx || Date.now() - (RL.kidxAt || 0) > 3000) { RL.kidx = await rlKrIndex(); RL.kidxAt = Date.now(); }
   if (!RL.kidx || !RL.kidx.length) return;
-  g.items = RL.kidx.map(function (x) { return Object.assign({}, x); }); g.rt = true;
+  // 🔴 키움 세 줄만 바꾼다 — 야간선물처럼 중계기가 붙인 줄은 남긴다
+  const rest = (g.items || []).filter(function (it) {
+    return ["코스피", "코스닥", "코스피200"].indexOf(it.nm) < 0; });
+  g.items = RL.kidx.map(function (x) { return Object.assign({}, x); }).concat(rest); g.rt = true;
   (d.changes || []).forEach(function (c) {
     const k = RL.kidx.find(function (x) { return x.nm === c.nm; }); if (k) c.pct = k.pct; });
 }
