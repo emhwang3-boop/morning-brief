@@ -2981,7 +2981,8 @@ function dpHoldRender(){
       const pct=cur?((p.side==="L"?1:-1)*(cur/p.entry-1)*p.lev*100):0;
       h+='<tr><td>'+dpEsc(p.code)+' <span class="mkt fu">'+(en?"PERP":"선물")+' '
        +(p.side==="L"?(en?"LONG":"롱"):(en?"SHORT":"숏"))+' '+p.lev+'x</span></td>'
-       +'<td>'+p.margin.toLocaleString()+' USDT</td><td>$'+p.entry.toLocaleString()+'</td>'
+       // 🔴 머리글대로 수량 위·증거금 아래 — 실계좌 줄과 같게(코인 수 = 증거금×배율÷진입가). 2026-09-19 도면에서 빠진 것 발견
+       +'<td>'+(+(p.margin*p.lev/p.entry).toFixed(6))+' '+String(p.code).replace(/USDT$/,'')+'<br>'+p.margin.toLocaleString()+' USDT</td><td>$'+p.entry.toLocaleString()+'</td>'
        +'<td>'+(cur?("$"+cur.toLocaleString()):"-")+'</td><td>'+(cur?((p.margin+pnl).toFixed(2)+" USDT"):"-")+'</td>'
        +'<td class="'+cls(pnl)+'">'+(cur?((pnl>=0?"+":"-")+Math.abs(pnl).toFixed(2)+" USDT<br>"
          +arw(pnl)+Math.abs(pct).toFixed(2)+"%"):"-")+'</td>'
