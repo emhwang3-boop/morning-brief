@@ -2409,6 +2409,12 @@ function rlCash() { return RL.cash; }
 // 미국 ust21050 조회(실측) · ust20003 취소 — 🔴 ust20003=취소는 국내 번호 규칙(kt10002 정정·kt10003 취소)으로 본 것, 평일 실측 필요
 // OKX  /api/v5/trade/orders-pending · /api/v5/trade/cancel-order (공개 규격)
 // 🔴 국내·미국 미체결 줄의 칸 이름은 걸린 주문이 없어 실물을 못 봤다 — 여러 이름을 차례로 받아 본다.
+// 주문번호 — 키움 ord_no · OKX data[0].ordId. 앞의 0 은 떼고 견준다(미체결 목록과 맞추기)
+function rlOrdId(j) {
+  if (!j) return "";
+  return String(j.ord_no || (((j.data || [])[0] || {}).ordId) || "");
+}
+function rlIdKey(v) { return String(v || "").replace(/^0+/, ""); }
 function rlPick(o, names) {
   for (const n of names) if (o && o[n] !== undefined && o[n] !== null && String(o[n]).trim() !== "") return o[n];
   return "";
@@ -2505,6 +2511,7 @@ async function rlOsoCancel(i) {
       if (j && String(j.return_code) !== "0") throw new Error(j.return_code + " " + (j.return_msg || ""));
     }
     say(en ? "Cancel sent." : "취소를 보냈습니다.");
+    try { (DP.log || []).forEach(function (l) { if (l.oid && rlIdKey(l.oid) === rlIdKey(o.id)) l.cx = true; }); dpSave(); } catch (e) {}
   } catch (e) {
     say((en ? "Cancel rejected: " : "취소 거부: ") + e.message);
   }
@@ -2708,8 +2715,8 @@ function dpOrder(side){
               +"  "+qty+(en?" shares":"주")
               +(ask>0?(" @ "+ask):(en?" (market)":" (시장가)"))))return;
     dpBusyS=true; dpMsg("dpMsg",en?"Sending to Kiwoom…":"키움으로 보내는 중…");
-    rlStockOrder(mk,side,oc,qty,ask>0?ask:0).then(function(){
-      DP.log.unshift({t:dpNow(),kind:mk,code:oc,name:(E("stkq").value||oc),side:side,
+    rlStockOrder(mk,side,oc,qty,ask>0?ask:0).then(function(res){
+      DP.log.unshift({oid:rlOrdId(res),lim:ask>0,ts:Date.now(),t:dpNow(),kind:mk,code:oc,name:(E("stkq").value||oc),side:side,
                       qty:qty,px:px,
                       how:(ask>0?(en?"limit":"지정가"):(en?"market":"시장가"))
                           +(en?" · REAL":" · 실주문")});
@@ -2766,7 +2773,7 @@ function dpCoin(act){
               +(isLim?(" @ "+lim):(en?" (market)":" (시장가)"))))return;
     dpBusyC=true; dpMsg("dpMsgC",en?"Sending to OKX…":"OKX 로 보내는 중…");
     rlPerpOpen(inst,act,mg,lev,cur,isLim?lim:0).then(function(r){
-      DP.log.unshift({t:dpNow(),kind:"coin",code:coinSym,name:coinSym,side:act,qty:mg,px:fill,
+      DP.log.unshift({oid:rlOrdId(r&&r.res),lim:!!isLim,ts:Date.now(),t:dpNow(),kind:"coin",code:coinSym,name:coinSym,side:act,qty:mg,px:fill,
         how:(isLim?(en?"limit":"지정가"):(en?"market":"시장가"))+" · "+lev+"x"
             +(en?" · REAL":" · 실주문")});
       DP.log=DP.log.slice(0,60); dpSave(); dpBusyC=false;
@@ -2825,8 +2832,8 @@ function dpCoinSpot(side){
     if(!dpAsk((en?"REAL spot BUY ":"실주문 · 현물 매수 ")+inst+"  "+amt+" USDT"
               +(isLim?(" @ "+lim):(en?" (market)":" (시장가)"))))return;
     dpBusyC=true; dpMsg("dpMsgC",en?"Sending to OKX…":"OKX 로 보내는 중…");
-    rlSpotBuy(inst,amt,isLim?lim:0).then(function(){
-      DP.log.unshift({t:dpNow(),kind:"coin",code:coinSym,name:coinSym,side:"B",qty:q,px:fill,
+    rlSpotBuy(inst,amt,isLim?lim:0).then(function(res){
+      DP.log.unshift({oid:rlOrdId(res),lim:!!isLim,ts:Date.now(),t:dpNow(),kind:"coin",code:coinSym,name:coinSym,side:"B",qty:q,px:fill,
         how:(en?"spot ":"현물 ")+(isLim?(en?"limit":"지정가"):(en?"market":"시장가"))
             +(en?" · REAL":" · 실주문")});
       DP.log=DP.log.slice(0,60); dpSave(); dpBusyC=false;
@@ -2945,8 +2952,8 @@ function dpCloseGo(){
     const inst=String(p.code);
     if(!dpAsk((en?"REAL close ":"실주문 · 청산 ")+inst+"  "+Math.round(r*100)+"%"))return;
     E("dpCloseMsg").textContent=en?"Sending to OKX…":"OKX 로 보내는 중…";
-    rlPerpClose(inst,r).then(function(){
-      DP.log.unshift({t:dpNow(),kind:"coin",code:p.code,name:p.code,side:"X",qty:amt,
+    rlPerpClose(inst,r).then(function(res){
+      DP.log.unshift({oid:rlOrdId(res),lim:false,ts:Date.now(),t:dpNow(),kind:"coin",code:p.code,name:p.code,side:"X",qty:amt,
                       px:dpPxOf(key,p)||p.entry,
                       how:(en?"close ":"청산 ")+Math.round(r*100)+"%"+(en?" · REAL":" · 실주문")});
       DP.log=DP.log.slice(0,60); dpSave();
@@ -3053,8 +3060,8 @@ function dpSellGo(){
     if(!dpAsk((en?"REAL spot SELL ":"실주문 · 현물 매도 ")+inst+"  "+(+q.toFixed(8))
               +(isLim?(" @ "+lim):(en?" (market)":" (시장가)"))))return;
     E("dpSellMsg").textContent=en?"Sending to OKX…":"OKX 로 보내는 중…";
-    rlSpotSell(inst,q,isLim?lim:0).then(function(){
-      DP.log.unshift({t:dpNow(),kind:"coin",code:p.code,name:p.name,side:"S",qty:q,px:px,
+    rlSpotSell(inst,q,isLim?lim:0).then(function(res){
+      DP.log.unshift({oid:rlOrdId(res),lim:!!isLim,ts:Date.now(),t:dpNow(),kind:"coin",code:p.code,name:p.name,side:"S",qty:q,px:px,
                       how:how+(en?" · REAL":" · 실주문"),pnl:pnl});
       DP.log=DP.log.slice(0,60); dpSave();
       E("dpSellMsg").textContent=en?"Sent to OKX":"OKX 로 나갔습니다";
@@ -3072,8 +3079,8 @@ function dpSellGo(){
     if(!dpAsk((en?"REAL SELL ":"실주문 · 매도 ")+oc+"  "+q+(en?" shares":"주")
               +(isLim?(" @ "+lim):(en?" (market)":" (시장가)"))))return;
     E("dpSellMsg").textContent=en?"Sending to Kiwoom…":"키움으로 보내는 중…";
-    rlStockOrder(p.mk,"S",oc,q,isLim?lim:0).then(function(){
-      DP.log.unshift({t:dpNow(),kind:p.mk,code:oc,name:p.name,side:"S",qty:q,px:px,
+    rlStockOrder(p.mk,"S",oc,q,isLim?lim:0).then(function(res){
+      DP.log.unshift({oid:rlOrdId(res),lim:!!isLim,ts:Date.now(),t:dpNow(),kind:p.mk,code:oc,name:p.name,side:"S",qty:q,px:px,
                       how:how+(en?" · REAL":" · 실주문"),pnl:pnl});
       DP.log=DP.log.slice(0,60); dpSave();
       E("dpSellMsg").textContent=en?"Sent to Kiwoom":"키움으로 나갔습니다";
@@ -3243,9 +3250,19 @@ function dpRender(){
     if((RL.osoErr||[]).length) h+='<div class="dpmsg">'+dpEsc(RL.osoErr.join(" / "))+'</div>';
     h+='<div class="dpmsg" id="osoMsg"></div>';
   }
-  if(DP.log.length){
+  // 🔴 주문 내역은 체결된 것만 (2026-09-19) — 미체결에 걸려 있는 것·앱에서 취소한 것은 뺀다.
+  //    지정가는 주문 뒤 미체결을 한 번 받아 봐야 체결 여부를 안다 — 그 전엔 숨긴다.
+  const osoIds=((typeof RL!=="undefined"&&RL.oso)||[]).map(function(o){return rlIdKey(o.id);});
+  const osoAt=(typeof RL!=="undefined"&&RL.osoAt)||0;
+  const shown=DP.log.filter(function(l){
+    if(l.cx)return false;
+    if(l.oid&&osoIds.indexOf(rlIdKey(l.oid))>=0)return false;
+    if(l.lim&&l.oid&&osoAt<(l.ts||0)+500)return false;
+    return true;
+  });
+  if(shown.length){
     h+='<div class="dphd" style="margin-top:10px">'+(en?"Order log":"주문 내역")+'</div><div class="dplog"><table class="mhtab">';
-    DP.log.slice(0,40).forEach(function(l){
+    shown.slice(0,40).forEach(function(l){
       const nm={B:(en?"BUY":"매수"),S:(en?"SELL":"매도"),L:(en?"LONG":"롱"),X:(en?"CLOSE":"청산")}[l.side]||l.side;
       const col=(l.side==="B"||l.side==="L")?"up":((l.side==="S")?"dn":"fl");
       h+='<tr><td style="white-space:nowrap">'+l.t+'</td>'
@@ -3384,6 +3401,13 @@ setTimeout(function(){ dpRender(); dpTick(); }, 1200); setInterval(dpTick,10000)
  +".ob tr.a:last-child td,.ob tr.a.bst td{border-bottom:2px solid rgba(128,128,128,.35)}"
  +".ob tr:active td{filter:brightness(.85)}"
  +".ob .obn{padding:6px 10px;color:var(--sub,#778);font-size:12px}";
+  document.head.appendChild(st); })();
+// 보유표 — 숫자 칸은 줄바꿈 금지("260,000원"의 원이 아래로 떨어졌다), 좁으면 종목 이름 칸이 줄어 줄바꿈 (사장님 2026-09-19)
+(function(){ const st=document.createElement("style"); st.textContent=
+  "#mhBody .mhtab td:nth-child(3),#mhBody .mhtab td:nth-child(4),#mhBody .mhtab td:nth-child(6){white-space:nowrap}"
+ +"#mhBody .mhtab td,#mhBody .mhtab th{padding-left:2px;padding-right:2px;font-size:10px}"
+ +"#mhBody .mhtab .dpsm{white-space:nowrap;padding:5px 5px}"
+ +"#mhBody .mhtab td:first-child{width:22%}";
   document.head.appendChild(st); })();
 
 function obKrRow(r,side,i){                 // ka10004: 1호가만 fpr, 2~10 은 Nth_pre (3th 도 th)
