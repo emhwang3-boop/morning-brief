@@ -3694,13 +3694,13 @@ function recoRender(){
     const buys=(x.buy12||[]).filter(function(r){return heldCodes.indexOf(r.code)<0;});
     const blk=function(title,list){
       if(!list.length)return "";
-      let t='<table class="mhtab"><tr><th>'+title+'</th><th>'+(en?"Close":"종가")+'</th><th>'+(en?"Qty":"수량")+'</th><th></th></tr>';
+      let t='<table class="mhtab"><tr><th>'+title+'</th><th>'+(mk==="kr"?(en?"Close (KRW)":"종가<br>(원)"):(en?"Close":"종가"))+'</th><th>'+(en?"Qty":"수량")+'</th><th></th></tr>';
       list.forEach(function(r,i){
         const q=(slot>0&&r.close>0)?Math.floor(slot/r.close):0;
         const go=mk==="kr"?("pickStock('"+r.code+"','"+String(r.name).replace(/'/g,"")+"')")
                           :("pickStockUS('"+r.code+".US','"+r.code+"')");
         t+='<tr><td style="text-align:left">'+(i===0?"① ":"")+dpEsc(r.name)+(r.name!==r.code?' <span class="dplbl">'+r.code+'</span>':'')
-          +'<br><span class="dplbl">'+dpEsc(r.why)+'</span></td><td>'+money(r.close)+'</td><td>'+(q?q.toLocaleString():"-")+'</td>'
+          +'<br><span class="dplbl">'+dpEsc(r.why)+'</span></td><td>'+(mk==="kr"?Math.round(r.close).toLocaleString():money(r.close))+'</td><td>'+(q?q.toLocaleString():"-")+'</td>'
           +'<td><button class="dpb buy dpsm" onclick="'+go+';E(\'stock\').scrollIntoView({behavior:\'smooth\'})">'+(en?"View":"조회")+'</button></td></tr>';
       });
       return t+'</table>';
@@ -3735,13 +3735,13 @@ function recoRender(){
   h+=body;
   // 코인 — 왕관 판정과 지금 선물 포지션 비교
   const co=(has?RL.co:[]).filter(function(p){return !p.spot;});
-  let c='<div class="dphd" style="margin-top:8px">'+(en?"Crypto (Hull100 · SMA120 · width 0.3%)":"코인 (헐100 · 120일선 · 폭 0.3%)")+'</div><table class="mhtab">';
+  let c='<div class="dphd" style="margin-top:8px">'+(en?"Crypto (Hull100 · SMA120 · width 0.3%)":"코인 (헐100 · 120일선 · 폭 0.3%)")+'</div><table class="mhtab"><tr><th>'+(en?"Coin":"코인")+'</th><th>'+(en?"Price<br>(USDT)":"가격<br>(USDT)")+'</th><th>'+(en?"Rule":"규칙")+'</th><th>'+(en?"Now":"지금")+'</th><th></th></tr>';
   ["BTC","ETH"].forEach(function(k){
     const z=(R.coin||{})[k]||{}, pos=co.filter(function(p){return String(p.code).indexOf(k+"-")===0;})[0];
     const now=pos?(pos.side==="L"?(en?"LONG":"롱"):(en?"SHORT":"숏")):(en?"none":"없음");
     const want=cs(z), ok=(!pos&&z.state==="cash")||(pos&&((pos.side==="L"&&z.state==="long")||(pos.side==="S"&&z.state==="short")));
-    c+='<tr><td style="text-align:left">'+k+'</td><td>'+(en?"Rule ":"규칙 ")+want+'<br><span class="dplbl">'+(z.width!==undefined?(en?"width ":"폭 ")+z.width+"%":"")+'</span></td>'
-      +'<td>'+(en?"Now ":"지금 ")+now+'</td><td class="'+(ok?"up":"dn")+'">'+(ok?(en?"OK":"맞음"):(en?"Change":"바꿀 것"))+'</td></tr>';
+    c+='<tr><td style="text-align:left">'+k+'</td><td>'+(z.price?(+z.price).toLocaleString(undefined,{maximumFractionDigits:2}):"-")+'</td><td>'+want+'<br><span class="dplbl">'+(z.width!==undefined?(en?"width ":"폭 ")+z.width+"%":"")+'</span></td>'
+      +'<td>'+now+'</td><td class="'+(ok?"up":"dn")+'">'+(ok?(en?"OK":"맞음"):(en?"Change":"바꿀 것"))+'</td></tr>';
   });
   h+=c+'</table>';
   h+='<div class="dpmsg" style="margin-top:6px">'+(en?"Measured rules only. Tap View to open the stock and order.":"잰 규칙만 씁니다. [조회]를 누르면 종목이 열리고 바로 주문할 수 있습니다.")+'</div>';
