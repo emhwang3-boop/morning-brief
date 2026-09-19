@@ -23,7 +23,7 @@
 *{margin:0;box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{-webkit-text-size-adjust:100%;-moz-text-size-adjust:100%;text-size-adjust:100%}
-:root{--bg:#1a1706;--card:#241f0c;--bd:#222a3a;--tx:#f4f5f7;--sub:#9aa4b2;--nm:#e8ecf2;--soon:#6b7688}
+:root{--tint:#f59f00;--bg:#1a1706;--card:#241f0c;--bd:#222a3a;--tx:#f4f5f7;--sub:#9aa4b2;--nm:#e8ecf2;--soon:#6b7688}
 body.light{--bg:#fdf8e3;--card:#ffffff;--bd:#e6e8ec;--tx:#1a1a1a;--sub:#667;--nm:#222;--soon:#9aa}
 body{background:var(--bg);color:var(--tx);font:15px/1.45 -apple-system,"Malgun Gothic",sans-serif;
  max-width:520px;margin:0 auto;padding:14px 14px 40px;transition:background .2s,color .2s;overflow-x:hidden}
@@ -1603,6 +1603,118 @@ function cvToggle() {
   if (!b) return;
   b.innerHTML = b.innerHTML ? "" : cvPanel();
 }
+
+</script>
+<script>
+// 설치 도우미 (사장님 2026-09-20 "사용자가 신경 안 쓰게 깔리게 못 하나")
+// 🔴 웹앱을 사용자 몰래 깔 수는 없다 — 브라우저가 반드시 사용자에게 묻는다. 그래서 **누를 자리를 우리가 띄운다.**
+//   ① 카톡·네이버 등 앱 안 브라우저 : 설치 기능 자체가 없다 → 크롬으로 튕겨 보낸다(안드로이드는 한 번에).
+//   ② 안드로이드 크롬 : beforeinstallprompt 를 잡아 두었다가 우리 단추로 진짜 설치창을 띄운다(메뉴 뒤질 일 없음).
+//   ③ 아이폰 : 사파리의 공유 → 홈 화면에 추가 뿐이다. 그림으로 짚어 준다.
+(function () {
+  var UA = navigator.userAgent || "";
+  var isKakao = /KAKAOTALK/i.test(UA);
+  var isLine = /Line\//i.test(UA);
+  var inApp = isKakao || isLine || /NAVER\(inapp|Instagram|FB_IAB|FBAN|FBAV|DaumApps|everytimeApp/i.test(UA);
+  var isAnd = /Android/i.test(UA);
+  var isIOS = /iPhone|iPad|iPod/i.test(UA);
+  var dismissKey = "ins_off_v1";
+  var prompt_ = null, shown = false;
+
+  // ── 카톡에서 열었을 때 : 톡 안 브라우저를 빠져나간다 ───────────────────
+  // 카톡이 열어 주는 전용 주소(kakaotalk://web/openExternal)가 있다. 안드로이드·아이폰 둘 다 먹는다.
+  // 한 번만 튕긴다(sessionStorage). 주소에 ?stay=1 을 붙이면 안 튕긴다.
+  (function jump() {
+    if (!inApp) return;
+    if (/[?&]stay=1/.test(location.search)) return;
+    try { if (sessionStorage.getItem("ins_jumped")) return; sessionStorage.setItem("ins_jumped", "1"); } catch (e) {}
+    var url = location.href.split("#")[0];
+    if (isKakao) { location.href = "kakaotalk://web/openExternal?url=" + encodeURIComponent(url); return; }
+    if (isLine) { location.href = url + (url.indexOf("?") < 0 ? "?" : "&") + "openExternalBrowser=1"; return; }
+    if (isAnd) { toChrome(); }
+  })();
+
+  function installed() {
+    try {
+      return (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone === true;
+    } catch (e) { return false; }
+  }
+  function muted() {
+    try { return Date.now() < (+localStorage.getItem(dismissKey) || 0); } catch (e) { return false; }
+  }
+  function mute(days) {
+    try { localStorage.setItem(dismissKey, Date.now() + days * 86400000); } catch (e) {}
+  }
+  function kill() { var b = document.getElementById("insBar"); if (b) b.remove(); shown = false; }
+
+  // 카톡 → 크롬. 안드로이드는 intent 로 곧바로 넘어간다(크롬 없으면 스토어로).
+  function toChrome() {
+    var u = location.href.replace(/^https?:\/\//, "");
+    location.href = "intent://" + u + "#Intent;scheme=https;package=com.android.chrome;"
+      + "S.browser_fallback_url=" + encodeURIComponent(location.href) + ";end";
+  }
+  function doInstall() {
+    if (!prompt_) return;
+    prompt_.prompt();
+    prompt_.userChoice.then(function (r) { if (r && r.outcome === "accepted") kill(); });
+    prompt_ = null;
+  }
+  window.insToChrome = toChrome;
+  window.insInstall = doInstall;
+  window.insOut = function () {                    // 톡 밖으로 — 카톡 전용 주소가 먼저, 안드로이드는 크롬 인텐트
+    var url = location.href.split("#")[0];
+    if (isKakao) { location.href = "kakaotalk://web/openExternal?url=" + encodeURIComponent(url); return; }
+    if (isLine) { location.href = url + (url.indexOf("?") < 0 ? "?" : "&") + "openExternalBrowser=1"; return; }
+    if (isAnd) { toChrome(); }
+  };
+  window.insClose = function () { mute(7); kill(); };
+
+  function bar(html) {
+    if (shown || installed() || muted()) return;
+    shown = true;
+    var d = document.createElement("div");
+    d.id = "insBar";
+    d.setAttribute("style",
+      "position:fixed;left:0;right:0;bottom:0;z-index:99999;padding:12px 14px calc(12px + env(safe-area-inset-bottom));"
+      + "background:var(--card,#fff);color:var(--nm,#212529);border-top:1px solid var(--bd,#dee2e6);"
+      + "box-shadow:0 -6px 24px rgba(0,0,0,.18);font-size:13.5px;line-height:1.5");
+    d.innerHTML = '<button onclick="insClose()" style="position:absolute;top:6px;right:8px;border:0;background:transparent;'
+      + 'color:var(--sub,#868e96);font-size:18px;line-height:1;padding:4px 6px;cursor:pointer">×</button>' + html;
+    document.body.appendChild(d);
+  }
+  var BTN = "display:block;width:100%;margin-top:9px;padding:12px;border:0;border-radius:12px;"
+          + "background:var(--tint,#1c7ed6);color:#fff;font-size:14.5px;font-weight:800;cursor:pointer";
+
+  function go() {
+    if (installed()) return;
+    if (inApp) {
+      // 자동으로 튕겼는데도 여기 남아 있다면(차단·구버전) 누를 자리를 준다.
+      bar('<b>앱으로 설치하시려면 한 번만 누르십니다.</b>'
+        + '<div style="color:var(--sub,#868e96);font-size:12px;margin-top:3px">'
+        + '카카오톡 안에서는 설치가 안 됩니다. ' + (isIOS ? "사파리로" : "크롬으로") + ' 넘어가면 설치 단추가 바로 뜹니다.</div>'
+        + '<button onclick="insOut()" style="' + BTN + '">' + (isIOS ? "사파리로" : "크롬으로") + ' 열기</button>');
+      return;
+    }
+    if (isIOS) {                       // 사파리 — 애플은 설치창을 안 준다
+      bar('<b>홈 화면에 앱으로 추가하십니다.</b><div style="color:var(--sub,#868e96);font-size:12px;margin-top:3px">'
+        + '아래쪽 <b>공유</b> 단추(□↑)를 누르고 <b>홈 화면에 추가</b>를 고르십니다.</div>');
+      return;
+    }
+    if (prompt_) {
+      bar('<b>앱으로 설치하시겠습니까?</b><div style="color:var(--sub,#868e96);font-size:12px;margin-top:3px">'
+        + '홈 화면에 아이콘이 생기고, 주소창 없이 앱처럼 열립니다.</div>'
+        + '<button onclick="insInstall()" style="' + BTN + '">앱 설치</button>');
+    }
+  }
+
+  window.addEventListener("beforeinstallprompt", function (e) {
+    e.preventDefault(); prompt_ = e;
+    if (!shown) go();
+  });
+  window.addEventListener("appinstalled", function () { mute(3650); kill(); });
+  // 크롬이 beforeinstallprompt 를 늦게 준다 — 조금 기다렸다가 안내를 띄운다.
+  setTimeout(go, 2500);
+})();
 
 </script>
 </body></html>
