@@ -476,6 +476,8 @@ function render(d){
       sGroups+='<div class="card"><h3>'+tr(gr.title)+' '+tag+'</h3>'+gr.items.map(pcrow).join("")+'</div>';
     }
     let sKrates="";
+    if(MDR&&!(d.krates&&d.krates.length))      // 한국은행 키가 없으면 칸만 비었다 — 어디서 받는지 알려 준다
+      sKrates='<div class="card"><h3>'+L("krateH")+'</h3><div class="soonrow">'+(LANG==="en"?"Add a free Bank of Korea key in Settings (ecos.bok.or.kr/api) to see Korea rates.":"한국은행 무료 키를 설정에 넣으면 보입니다 (ecos.bok.or.kr/api)")+'</div></div>';
     if(d.krates&&d.krates.length){
       sKrates='<div class="card"><h3>'+L("krateH")+' <span class="tag delay">'+(krLiveNow()?L("delay"):L("closed"))+'</span></h3>'
         +d.krates.map(k=>{const c=k.chg>0?"up":(k.chg<0?"dn":"fl"),a=k.chg>0?"▲":(k.chg<0?"▼":"");
@@ -576,7 +578,7 @@ function render(d){
 async function loadData(){
   let d=null;
   const src=MDR?(MDR+"/data"):(HUB?(HUB.replace(/\/$/,"")+"/data"):("data.json?t="+Date.now()));
-  try{d=await fetch(src,{cache:"no-store"}).then(r=>r.json());}catch(e){}
+  try{const _h=(MDR&&typeof ST!=="undefined"&&ST&&ST.ecos)?{"X-Ecos-Key":ST.ecos}:{};d=await fetch(src,{cache:"no-store",headers:_h}).then(r=>r.json());}catch(e){}
   if(!d||d.loading||!d.groups)d=window.SNAP||null;
   if(MDR&&d&&d.groups&&typeof rlKrIdxFill==="function"){try{await rlKrIdxFill(d);}catch(e){}}
   if(!d||!d.groups){document.getElementById("asof").textContent="서버 준비 중…";return;}
@@ -1712,6 +1714,14 @@ function stRender(){
              : "지표·미국 종목을 아래 중계기가 받아 줍니다. 기본은 야후 지연, PC 에 본인 Infoway 키를 넣으면 실시간. 바꾼 뒤 새로고침하세요.")
          + (ST.relay ? "" : (en ? " Relay address is empty." : " 중계기 주소가 비어 있습니다."))
        : (en ? "Demo hub. Reload to apply." : "데모용 허브입니다. 바꾼 뒤 새로고침하세요.")) + '</div></div>'
+   // 한국은행(ECOS) 키 (사장님 2026-09-19) — 한국 금리 칸용. 중계기에 시세를 물을 때만 머리글로 보낸다.
+   + '<div class="strow"><div class="sthd">' + (en ? "Bank of Korea (ECOS) key · optional" : "한국은행(ECOS) 키 · 선택") + '</div>'
+   + '<input class="stin" type="password" autocomplete="off" placeholder="' + (en ? "ECOS API key" : "ECOS 인증키") + '" value="'
+   + stEsc(ST.ecos || "") + '" oninput="ST.ecos=this.value.trim();stSave()">'
+   + '<div class="stmsg">' + (en
+     ? "For the Korea rates card (base rate, CD, KTB). Free at ecos.bok.or.kr/api. Used with \"My computer (relay)\"."
+     : "한국 금리 칸(기준금리·CD·국고채)에 씁니다. ecos.bok.or.kr/api 에서 무료로 받습니다. 시세를 \"내 컴퓨터(중계기)\"로 받을 때 쓰입니다.")
+   + '</div></div>'
    // 🔴 중계기 주소 (사장님 2026-09-18) — 브라우저 접속을 막는 증권사(예: 한국투자)를 쓸 때만.
    //    이용자 본인 PC 가 중계기다. https 여야 한다(https 페이지는 http 주소를 못 부른다).
    //    주소가 있으면 real.js 의 rlHost/kisHost 가 키움·한국투자 요청을 이리로 보낸다(2026-09-18).
@@ -1744,6 +1754,7 @@ function stReqSend(){
 function stClear(){
   if(!confirm(LANG === "en" ? "Clear all saved keys?" : "저장된 키를 모두 지울까요?")) return;
   ST_SLOTS.forEach(function(k){ if(!ST[k])return; ST[k].key = ""; ST[k].sec = ""; ST[k].pass = ""; ST[k].acct = ""; });
+  ST.ecos = "";
   stSave(); stRender();
 }
 document.addEventListener("click", function(e){
