@@ -2432,12 +2432,15 @@ function dpEsc(t){ return String(t==null?"":t).replace(/[<>&"]/g,c=>({"<":"&lt;"
 function dpStockBar(){
   const en=LANG==="en";
   if(!stkCode)return "";
-  return '<div class="dpbar">'
+  return '<div class="dpbar"><span class="dplbl">'+(en?"Order type":"호가")+'</span>'
+   +'<button id="dpSTpM" class="dpseg on" onclick="dpStkTp(0)">'+(en?"Market":"시장가")+'</button>'
+   +'<button id="dpSTpL" class="dpseg" onclick="dpStkTp(1)">'+(en?"Limit":"지정가")+'</button>'
+   +'<input id="dpPx" class="dpin" type="number" inputmode="decimal" placeholder="'+(en?"Limit price":"지정가 가격")+'" disabled>'
+   +'</div><div class="dpbar">'
    +'<input id="dpQty" class="dpin" type="number" inputmode="decimal" placeholder="'+(en?"Qty":"수량")+'">'
-   +'<input id="dpPx" class="dpin" type="number" inputmode="decimal" placeholder="'+(en?"Price (blank=market)":"가격(비우면 시장가)")+'">'
    +'<button class="dpb buy" onclick="dpOrder(\'B\')">'+(en?"BUY":"매수")+'</button>'
    +'<button class="dpb sell" onclick="dpOrder(\'S\')">'+(en?"SELL":"매도")+'</button>'
-   +'</div><div class="dpmsg" id="dpMsg"></div>';
+   +'</div><div class="dpmsg" id="dpMsg"></div><div id="obStk" class="ob"></div>';
 }
 function dpCoinBar(){
   const en=LANG==="en";
@@ -2463,7 +2466,7 @@ function dpCoinBar(){
      +'<button class="dpb buy" onclick="dpCoinSpot(\'B\')">'+(en?"BUY":"매수")+'</button>'
      +'<button class="dpb sell" onclick="dpSpotSell()">'+(en?"SELL":"매도")+'</button>'
      +'</div><div class="dpmsg" id="dpMsgC">'+(en?"Spot — no leverage, no liquidation."
-       :"현물 — 레버리지도 청산도 없습니다.")+'</div>';
+       :"현물 — 레버리지도 청산도 없습니다.")+'</div><div id="obCoin" class="ob"></div>';
   }
   const lev=[1,2,3,5,10].map(function(v){
     return '<option value="'+v+'"'+(v===2?" selected":"")+'>'+v+'x</option>'; }).join("");
@@ -2476,7 +2479,7 @@ function dpCoinBar(){
    +'<button class="dpb buy" onclick="dpCoin(\'L\')">'+(en?"LONG":"롱")+'</button>'
    +'<button class="dpb sell" onclick="dpCoin(\'S\')">'+(en?"SHORT":"숏")+'</button>'
    +'<button class="dpb flat" onclick="dpCoin(\'X\')">'+(en?"CLOSE":"청산")+'</button>'
-   +'</div><div class="dpmsg" id="dpMsgC"></div>';
+   +'</div><div class="dpmsg" id="dpMsgC"></div><div id="obCoin" class="ob"></div>';
 }
 // 🔴 현물도 **USDT 금액**으로 넣는다(선물 증거금과 같은 단위). 코인 수량은 여기서 보여 준다.
 function dpSpotEst(){
@@ -2493,6 +2496,20 @@ function dpCoinTp(limit){
   px.disabled=!limit; if(!limit)px.value="";
   if(limit&&!px.value&&dpPx["coin:"+coinSym])px.value=dpPx["coin:"+coinSym];
   if(limit)px.focus();
+  const ob=E("obCoin"); if(ob&&!limit)ob.innerHTML="";          // 호가창은 지정가일 때만
+  if(limit)setTimeout(obTick,30);
+}
+// 주식도 같은 방식 — 시장가면 지정가 칸을 비우고 막는다(빈 칸 = 시장가 주문, 규칙 그대로)
+function dpStkTp(limit){
+  const m=E("dpSTpM"), l=E("dpSTpL"), px=E("dpPx");
+  if(!m||!l||!px)return;
+  m.classList.toggle("on",!limit); l.classList.toggle("on",!!limit);
+  px.disabled=!limit; if(!limit)px.value="";
+  const k=(stkMarket==="us"?"us:":"kr:")+stkCode;
+  if(limit&&!px.value&&dpPx[k])px.value=dpPx[k];
+  if(limit)px.focus();
+  const ob=E("obStk"); if(ob&&!limit)ob.innerHTML="";
+  if(limit)setTimeout(obTick,30);
 }
 
 // 🔴 입력칸은 **종목이 바뀔 때만** 새로 그린다. 시세 갱신마다 다시 그리면 치던 수량이 날아간다.
@@ -3198,6 +3215,111 @@ setTimeout(function(){ dpRender(); dpTick(); }, 1200); setInterval(dpTick,10000)
   s.textContent="body:not(.light) .bdot:not(.on):not(.dl){background:#4a5160;box-shadow:0 0 0 1px #fff}"
     +"body.light .bdot:not(.on):not(.dl){background:#7a828e}";   // 라이트 모드는 옅어서 안 보였다
   document.head.appendChild(s); })();
+
+
+// ── 10호가 창 (사장님 2026-09-19) ─────────────────────────────────────────
+// 주문 줄 아래에 매도 10호가(위)·매수 10호가(아래). **호가를 누르면 그 값이 지정가 칸에 들어간다.**
+// 국내 ka10004 · 미국 usa20101 은 이용자 본인 키움 키로(중계기 설정이면 중계기로) · 코인은 OKX 공개 호가(키 없음).
+// 🔴 키움은 초당 요청 한도가 있다 — 2.5초에 한 번, 화면이 숨으면 안 묻는다.
+(function(){ const st=document.createElement("style"); st.textContent=
+  ".ob{margin:6px 0 4px;border:1px solid rgba(128,128,128,.25);border-radius:8px;overflow:hidden;font-size:13px}"
+ +".ob:empty{display:none}.ob table{width:100%;border-collapse:collapse;table-layout:fixed}"
+ +".ob td{padding:3px 8px;cursor:pointer;font-variant-numeric:tabular-nums}"
+ +".ob tr.a td{background:rgba(30,95,214,.07)}.ob tr.b td{background:rgba(214,46,46,.07)}"
+ +".ob td.p{font-weight:700;text-align:center}.ob tr.a td.p{color:#1e5fd6}.ob tr.b td.p{color:#d62e2e}"
+ +".ob td.qa{text-align:right;color:#1e5fd6}.ob td.qb{text-align:left;color:#d62e2e}"
+ +".ob tr.a:last-child td,.ob tr.a.bst td{border-bottom:2px solid rgba(128,128,128,.35)}"
+ +".ob tr:active td{filter:brightness(.85)}"
+ +".ob .obn{padding:6px 10px;color:var(--sub,#778);font-size:12px}";
+  document.head.appendChild(st); })();
+
+function obKrRow(r,side,i){                 // ka10004: 1호가만 fpr, 2~10 은 Nth_pre (3th 도 th)
+  const k=(i===1)?(side+"_fpr_"):(side+"_"+i+"th_pre_");
+  return [rlAbs(r[k+"bid"]), rlAbs(r[k+"req"])];
+}
+async function obKr(code){
+  const tok=await rlToken();
+  const r=await rlKiwoom(tok,"/api/dostk/mrkcond","ka10004",{stk_cd:String(code)});
+  if(!r||String(r.return_code)!=="0")return null;
+  const a=[],b=[];
+  for(let i=1;i<=10;i++){ a.push(obKrRow(r,"sel",i)); b.push(obKrRow(r,"buy",i)); }
+  return {a:a,b:b};
+}
+async function obUs(code){
+  const tick=String(code||"").replace(/\.US$/,"").toUpperCase(), tok=await rlToken();
+  for(const s of (RL_STEX[tick]?[RL_STEX[tick]]:["ND","NY","NA"])){
+    try{
+      const r=await rlKiwoom(tok,"/api/us/mrkcond","usa20101",{stex_tp:s,stk_cd:tick});
+      if(r&&String(r.return_code)==="0"&&(rlAbs(r.sel_1bid)>0||rlAbs(r.buy_1bid)>0)){
+        RL_STEX[tick]=s; const a=[],b=[];
+        for(let i=1;i<=10;i++){ a.push([rlAbs(r["sel_"+i+"bid"]),rlAbs(r["sel_"+i+"bid_req"])]);
+                                b.push([rlAbs(r["buy_"+i+"bid"]),rlAbs(r["buy_"+i+"bid_req"])]); }
+        return {a:a,b:b};
+      }
+    }catch(e){}
+  }
+  return null;
+}
+async function obCoin(sym,kind){
+  const id=okxId(sym,kind);
+  const j=await fetch("https://www.okx.com/api/v5/market/books?instId="+id+"&sz=10").then(function(r){return r.json();});
+  const d=(j&&j.data||[])[0]; if(!d)return null;
+  const cv=(kind==="F")?await rlCtVal(id):1;          // 선물 잔량은 계약 수 → 코인 수로
+  const m=function(x){ return [x[0], +x[1]*cv]; };     // 값은 받은 글자 그대로(소수 자리 보존)
+  return {a:(d.asks||[]).slice(0,10).map(m), b:(d.bids||[]).slice(0,10).map(m)};
+}
+function obFmtP(p,mk){
+  if(mk==="kr")return Math.round(+p).toLocaleString();
+  if(mk==="us")return (+p).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:(+p<1?4:2)});
+  const t=String(p).split("."); return (+t[0]).toLocaleString()+(t[1]?"."+t[1]:"");
+}
+function obFmtQ(q,mk){
+  q=+q; if(!(q>0))return "";
+  if(mk!=="coin")return Math.round(q).toLocaleString();
+  return q>=1000?Math.round(q).toLocaleString():(+q.toPrecision(4)).toString();
+}
+function obHtml(bk,mk){
+  const en=LANG==="en";
+  if(!bk)return '<div class="obn">'+(en?"No order book":"호가 없음")+'</div>';
+  if(bk.err)return '<div class="obn">'+dpEsc(bk.err)+'</div>';
+  let h='<table>';
+  bk.a.slice().reverse().forEach(function(x){ if(!(+x[0]>0))return;           // 매도: 10호가가 맨 위
+    h+='<tr class="a" data-p="'+x[0]+'" onclick="obPick(this)"><td class="qa">'+obFmtQ(x[1],mk)+'</td><td class="p">'+obFmtP(x[0],mk)+'</td><td></td></tr>'; });
+  bk.b.forEach(function(x){ if(!(+x[0]>0))return;
+    h+='<tr class="b" data-p="'+x[0]+'" onclick="obPick(this)"><td></td><td class="p">'+obFmtP(x[0],mk)+'</td><td class="qb">'+obFmtQ(x[1],mk)+'</td></tr>'; });
+  return h+'</table>';
+}
+function obPick(tr){
+  const p=tr&&tr.getAttribute("data-p"); if(!p)return;
+  const box=tr.closest(".ob"), en=LANG==="en";
+  if(box&&box.id==="obCoin"){
+    dpCoinTp(1); const x=E("dpCPx"); if(x)x.value=p;           // 지정가로 바꾸고 값 넣기
+    dpMsg("dpMsgC",(en?"Limit price set: ":"지정가 입력: ")+p);
+  }else{
+    const x=E("dpPx"); if(x)x.value=(stkMarket==="us")?p:String(Math.round(+p));
+    dpMsg("dpMsg",(en?"Limit price set: ":"지정가 입력: ")+(x?x.value:p));
+  }
+}
+let obBusy=false;
+async function obTick(){
+  if(obBusy||document.hidden)return; obBusy=true;
+  try{
+    const s=E("obStk");
+    if(s&&stkCode&&E("dpSTpL")&&E("dpSTpL").classList.contains("on")){
+      const mk=(stkMarket==="us")?"us":"kr"; let bk=null;
+      try{ bk=(mk==="us")?await obUs(stkCode):await obKr(stkCode); }
+      catch(e){ bk={err:(/키움 키/.test(String(e&&e.message))?(LANG==="en"?"Enter your Kiwoom key in Settings to see the order book."
+                                                                  :"설정에 키움 키를 넣으면 10호가가 보입니다."):(LANG==="en"?"Order book unavailable":"호가를 못 받았습니다"))}; }
+      if(E("obStk")===s&&E("dpSTpL")&&E("dpSTpL").classList.contains("on"))s.innerHTML=obHtml(bk,mk);
+    }
+    const c=E("obCoin");
+    if(c&&coinSym&&E("dpTpL")&&E("dpTpL").classList.contains("on")){
+      let bk=null; try{ bk=await obCoin(coinSym,(coinKind==="S")?"S":"F"); }catch(e){}
+      if(E("obCoin")===c&&E("dpTpL")&&E("dpTpL").classList.contains("on"))c.innerHTML=obHtml(bk,"coin");
+    }
+  }finally{ obBusy=false; }
+}
+setInterval(obTick,2500);
 
 function applyLang(){
   var b=E("lng");if(b)b.textContent=LANG==="en"?"한":"EN";
