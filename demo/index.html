@@ -2811,7 +2811,7 @@ function dpOpenSell(key){
    +'<option value="25"></option><option value="50"></option><option value="75"></option>'
    +'<option value="100"></option></datalist>'
    +'<div class="dpbar">'+pct
-   +'<input id="dpSQty" class="dpin" type="number" inputmode="decimal" oninput="dpSellSync(2)" value="'
+   +'<input id="dpSQty" class="dpin" style="text-align:right" type="number" inputmode="decimal" oninput="dpSellSync(2)" value="'
    +p.qty+'"><span class="dplbl">'+(p.mk==="coinS"?String(p.code).replace(/USDT$/,""):(en?"shares":"주"))+'</span></div>'
    +'<div class="dpbar"><span class="dplbl">'+(en?"Order type":"호가")+'</span>'
    +'<button id="dpSM" class="dpseg on" onclick="dpSellTp(0)">'+(en?"Market":"시장가")+'</button>'
