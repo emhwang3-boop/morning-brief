@@ -285,7 +285,7 @@ body.light #installBar{background:#eaf3ff;border-color:#b9d5f5;color:#1a4b7a}
 </div>
 
 <div class="card" id="coin2">
-  <h3>코인 조회 <span class="tag live">● 바이낸스</span></h3>
+  <h3>코인 조회 <span class="tag live">● OKX</span></h3>
   <input id="coinq" class="stkq" placeholder="코인 심볼 (예: BTC, ETH, SOL)" autocomplete="off">
   <div id="coinResults" class="stkres"></div>
   <div id="coinDetail"></div>
@@ -304,7 +304,7 @@ body.light #installBar{background:#eaf3ff;border-color:#b9d5f5;color:#1a4b7a}
 <div id="cards"></div>
 
 <div class="card" id="coin-card">
-  <h3>암호화폐 <span class="tag live">● 바이낸스</span></h3>
+  <h3>암호화폐 <span class="tag live">● OKX</span></h3>
   <div id="coin"><div class="soonrow">불러오는 중…</div></div>
 </div>
 
@@ -423,7 +423,7 @@ const T={title:{ko:"Daily Brief",en:"Daily Brief"},stockH:{ko:"종목 조회",en
  coinPH:{ko:"코인 심볼 (예: BTC, ETH, SOL)",en:"Coin symbol (e.g. BTC, ETH, SOL)"},
  ophrs:{ko:"실시간 운영 05:00 ~ 익일 02:00 (KST) · 그 밖의 시간은 마지막 값",
   en:"Live 05:00–02:00 KST · outside these hours, last values shown"},
- asof:{ko:" 기준",en:""},binance:{ko:"● 바이낸스",en:"● Binance"},snap:{ko:" · 스냅샷",en:" · snapshot"}};
+ asof:{ko:" 기준",en:""},binance:{ko:"● OKX",en:"● OKX"},snap:{ko:" · 스냅샷",en:" · snapshot"}};
 function L(k){const t=T[k];return t?(t[LANG]||t.ko):k;}
 const TEMPW={ko:["차가움","서늘","미지근","따뜻","뜨거움"],en:["Cold","Cool","Neutral","Warm","Hot"]};
 const TFW={"3":{ko:"3분",en:"3m"},"5":{ko:"5분",en:"5m"},"15":{ko:"15분",en:"15m"},"30":{ko:"30분",en:"30m"},"60":{ko:"60분",en:"60m"},"D":{ko:"일",en:"1D"}};
@@ -602,7 +602,7 @@ const coinSpark={};   // 심볼→최근 종가 배열(선그래프용, 5분마�
 const _last24={};     // 심볼→방금 받은 현재가 (김프 셈에 쓴다)
 async function loadCoinKlines(){
   for(const [nm,sym] of COINS){
-    try{const k=await fetch("https://api.binance.com/api/v3/klines?symbol="+sym+"&interval=1h&limit=30").then(r=>r.json());
+    try{const k=await okxKlines(sym,"S","1h",30);
       coinSpark[sym]=k.map(c=>+c[4]);}catch(e){}
   }
 }
@@ -657,7 +657,7 @@ setTimeout(refreshKimp,2000);                   // 켠 직후 한 번(시세·�
 async function loadCoin(){
   try{const out=[];
     for(const [nm,sym] of COINS){
-      const d=await fetch("https://api.binance.com/api/v3/ticker/24hr?symbol="+sym).then(r=>r.json());
+      const d=await okxTicker(sym,"S");
       const p=parseFloat(d.priceChangePercent),cls=p>0?"up":(p<0?"dn":"fl"),arw=p>0?"▲":(p<0?"▼":"");
       _last24[sym]=+d.lastPrice;
       const sp=(coinSpark[sym]||[]).concat([+d.lastPrice]);
@@ -1187,8 +1187,7 @@ function coinFmtTime(ms,tf){const d=new Date(ms),p=n=>String(n).padStart(2,"0"),
   return tf==="D"?md:md+" "+p(d.getHours())+":"+p(d.getMinutes());}
 async function coinSyms(){
   if(coinList)return coinList;
-  try{const ei=await fetch("https://api.binance.com/api/v3/exchangeInfo").then(r=>r.json());
-    coinList=ei.symbols.filter(s=>s.quoteAsset==="USDT"&&s.status==="TRADING").map(s=>s.baseAsset);}catch(e){coinList=[];}
+  try{const o=await okxBases(); coinList=o.all;}catch(e){coinList=[];}
   return coinList;
 }
 E("coinq").addEventListener("input",function(){clearTimeout(coinSearchTimer);const q=this.value.trim().toUpperCase();
@@ -1196,8 +1195,9 @@ E("coinq").addEventListener("input",function(){clearTimeout(coinSearchTimer);con
   coinSearchTimer=setTimeout(async()=>{const all=await coinSyms();
     const en=LANG==="en", rows=[];
     all.filter(b=>b.startsWith(q)).slice(0,12).forEach(function(b){
-      rows.push({sym:b+"USDT",name:b,kind:"F"});      // 선물이 먼저 — 기본이 선물이다
-      rows.push({sym:b+"USDT",name:b,kind:"S"});});
+      const o=_okxList||{F:new Set([b]),S:new Set([b])};   // OKX 에 있는 것만 — 없는 건 주문이 거절된다
+      if(o.F.has(b)) rows.push({sym:b+"USDT",name:b,kind:"F"});      // 선물이 먼저 — 기본이 선물이다
+      if(o.S.has(b)) rows.push({sym:b+"USDT",name:b,kind:"S"});});
     coinLast=rows;
     E("coinResults").innerHTML=rows.map(function(r){
       const kl=(r.kind==="F")?(en?"PERP":"선물"):(en?"SPOT":"현물");
@@ -1214,7 +1214,7 @@ function pickCoin(sym,name,kind){coinSym=sym;coinKind=(kind==="S")?"S":"F";
   E("coinDetail").innerHTML='<div class="soonrow">'+L("loading")+'</div>';
   loadCoinDetail();loadCoin2Chart();clearInterval(coinTimer);coinTimer=setInterval(loadCoinDetail,3000);}
 async function loadCoinDetail(){if(!coinSym)return;
-  try{const d=await fetch("https://api.binance.com/api/v3/ticker/24hr?symbol="+coinSym).then(r=>r.json());
+  try{const d=await okxTicker(coinSym,coinKind);
     const p=parseFloat(d.priceChangePercent),cls=p>0?"up":(p<0?"dn":"fl"),arw=p>0?"▲":(p<0?"▼":"");
     E("coinDetail").innerHTML='<div class="stkhd">'+coinSym.replace("USDT","")+' <span style="color:var(--sub);font-size:13px;font-weight:600">'+coinSym+'</span></div>'
      +'<table class="stktab">'
@@ -1231,7 +1231,7 @@ document.querySelectorAll("#coinTf button").forEach(b=>b.onclick=()=>{coinTf=b.d
   document.querySelectorAll("#coinTf button").forEach(x=>x.classList.toggle("on",x===b));loadCoin2Chart();});
 async function loadCoin2Chart(){if(!coinSym)return;E("coinChartLbl").textContent=L("chartLoading");
   const iv={"3":"3m","5":"5m","15":"15m","30":"30m","60":"1h","D":"1d"}[coinTf]||"1d";
-  let kl;try{kl=await fetch("https://api.binance.com/api/v3/klines?symbol="+coinSym+"&interval="+iv+"&limit=400").then(r=>r.json());}catch(e){E("coinChartLbl").textContent=L("chartNone");return;}
+  let kl;try{kl=await okxKlines(coinSym,coinKind,iv,400);}catch(e){E("coinChartLbl").textContent=L("chartNone");return;}
   if(!Array.isArray(kl)||!kl.length){E("coinChartLbl").textContent=L("chartNone");return;}
   const bars=kl.map(c=>[coinFmtTime(c[0],coinTf),+c[1],+c[2],+c[3],+c[4],+c[5]]);
   const raw=kl.map(c=>[c[0],+c[1],+c[2],+c[3],+c[4],+c[7]]);
@@ -1375,8 +1375,7 @@ async function mhTick(){
     try{
       if(mhIsCoin(x.mk)){
         // 🔴 허브를 안 거친다 — 국내조회 일꾼이 하나뿐이라 끼어들면 본앱 조회가 줄을 선다
-        const d=await fetch("https://api.binance.com/api/v3/ticker/price?symbol="
-                            +encodeURIComponent(x.code)).then(function(r){return r.json();});
+        const d=await okxTicker(x.code,x.mk==="coinF"?"F":"S");
         if(d&&d.price)mhPx[x.code]=+d.price;
       }else if(x.mk==="us"){
         const d=await usFetch("quote","codes="+encodeURIComponent(x.code));
@@ -2366,7 +2365,7 @@ function rlHas() { return (RL.kr.length + RL.us.length + RL.co.length) > 0; }
 function rlRows() { return RL.kr.concat(RL.us).concat(RL.co); }
 // 🔴 시세는 앱이 이미 받는 통로로 받는다 — OKX 이름을 바이낸스 심볼로 바꾼다
 function rlBn(instId) { return String(instId || "").split("-").slice(0, 2).join(""); }
-function rlPxKey(p) { return (p.mk === "coin") ? ("coin:" + rlBn(p.code)) : (p.mk + ":" + p.code); }
+function rlPxKey(p) { return (p.mk === "coin") ? ((p.spot ? "coinS:" : "coin:") + rlBn(p.code)) : (p.mk + ":" + p.code); }   // 현물은 현물값(OKX, 2026-09-19)
 function rlClear() {
   if (RL.auto) clearInterval(RL.auto);
   RL = {kr: [], us: [], co: [], cash: null, sum: null,
@@ -2376,6 +2375,41 @@ function rlClear() {
   try { dpRender(); } catch (e) {}
 }
 function rlCash() { return RL.cash; }
+
+// ── OKX 공개 시세 (사장님 2026-09-19 — 코인은 전부 OKX 기준) ──
+// 🔴 키 없이 받는 공개 자료다. 돌려주는 모양은 옛 바이낸스 응답과 같게 맞춰 나머지 코드를 안 건드린다.
+// 🔴 kind: "F"=무기한선물(BTC-USDT-SWAP) · "S"=현물(BTC-USDT). 선물 거래량은 volCcy24h(코인 수)다.
+function okxId(sym,kind){ return String(sym).replace(/-.*$/,"").replace(/USDT$/,"")+"-USDT"+(kind==="F"?"-SWAP":""); }
+async function okxTicker(sym,kind){
+  const j=await fetch("https://www.okx.com/api/v5/market/ticker?instId="+okxId(sym,kind)).then(function(r){return r.json();});
+  const t=(j&&j.data||[])[0]; if(!t) throw new Error("okx ticker");
+  const last=+t.last, open=+t.open24h, base=(kind==="F")?+t.volCcy24h:+t.vol24h;
+  return {lastPrice:last, price:last, priceChangePercent:open?((last/open-1)*100):0,
+          volume:base, quoteVolume:(kind==="F")?base*last:+t.volCcy24h};
+}
+async function okxKlines(sym,kind,iv,limit){
+  const bar={"3m":"3m","5m":"5m","15m":"15m","30m":"30m","1h":"1H","1d":"1Dutc"}[iv]||"1Dutc";   // 일봉은 UTC 경계(한국 09:00)
+  const id=okxId(sym,kind); let out=[];
+  let j=await fetch("https://www.okx.com/api/v5/market/candles?instId="+id+"&bar="+bar+"&limit="+Math.min(300,limit)).then(function(r){return r.json();});
+  out=(j&&j.data)||[];
+  while(out.length&&out.length<limit){          // 한 번에 300봉까지 — 1년치는 나눠 받는다
+    j=await fetch("https://www.okx.com/api/v5/market/history-candles?instId="+id+"&bar="+bar
+                  +"&limit="+Math.min(100,limit-out.length)+"&after="+out[out.length-1][0]).then(function(r){return r.json();});
+    const more=(j&&j.data)||[]; if(!more.length)break; out=out.concat(more);
+  }
+  // 새것→옛것 순을 뒤집고, 바이낸스 칸 자리로: [시각,시,고,저,종,거래량(코인),_,거래대금(USDT)]
+  return out.reverse().map(function(c){ return [+c[0],c[1],c[2],c[3],c[4],(kind==="F")?c[6]:c[5],0,c[7]]; });
+}
+let _okxList=null;
+async function okxBases(){
+  if(_okxList)return _okxList;
+  const g=function(t){ return fetch("https://www.okx.com/api/v5/public/instruments?instType="+t).then(function(r){return r.json();}); };
+  const sp=await g("SPOT"), sw=await g("SWAP");
+  const S=new Set(((sp&&sp.data)||[]).filter(function(i){return i.quoteCcy==="USDT"&&i.state==="live";}).map(function(i){return i.baseCcy;}));
+  const F=new Set(((sw&&sw.data)||[]).filter(function(i){return i.settleCcy==="USDT"&&i.state==="live";}).map(function(i){return i.ctValCcy;}));
+  const all=Array.from(new Set(Array.from(F).concat(Array.from(S)))).sort();
+  _okxList={all:all,S:S,F:F}; return _okxList;
+}
 
 // ── 심사용 모의 주문 (사장님 2026-09-16) — 🔴 시늉이다. 거래소로 **절대** 안 나간다 ──
 const DP_KEY="demo_acct_v1";
@@ -2573,7 +2607,7 @@ function dpCoin(act){
   if(isLim&&lim<=0){ dpMsg("dpMsgC",en?"Enter limit price":"지정가 가격을 넣으세요"); return; }
   const fill=isLim?lim:cur;
   if(mg<=0){ dpMsg("dpMsgC",en?"Enter margin":"증거금을 넣으세요"); return; }
-  if(mg>DP.usdt){ dpMsg("dpMsgC",en?"Not enough USDT":"바이낸스 USDT가 모자랍니다"); return; }
+  if(mg>DP.usdt){ dpMsg("dpMsgC",en?"Not enough USDT":"USDT가 모자랍니다"); return; }
   if(p){ dpMsg("dpMsgC",en?"Close the position first":"먼저 청산하세요"); return; }
   if(dpLive()){
     const inst=String(coinSym).replace(/USDT$/,"")+"-USDT-SWAP";
@@ -3083,8 +3117,8 @@ async function dpTick(){
   await Promise.all(keys.filter((v,i,a)=>a.indexOf(v)===i).map(async function(k){
     const mk=k.split(":")[0], code=k.slice(mk.length+1);
     try{
-      if(mk==="coin"||mk==="coinS"){      // 현물도 같은 시세를 쓴다
-        const d=await fetch("https://api.binance.com/api/v3/ticker/price?symbol="+code).then(r=>r.json());
+      if(mk==="coin"||mk==="coinS"){      // OKX — 선물은 선물값(SWAP), 현물은 현물값. 보고 있는 현물 칸도 현물값
+        const d=await okxTicker(code,(mk==="coinS"||(code===coinSym&&coinKind==="S"))?"S":"F");
         if(d&&d.price)dpPx[k]=+d.price;
       }else if(mk==="us"){
         const d=await usFetch("quote","codes="+encodeURIComponent(code));
