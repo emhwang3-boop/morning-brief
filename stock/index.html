@@ -112,6 +112,10 @@ body.light .mk img.lt{display:block}
 .svleg{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:6px;font-size:11px;color:var(--nm)}
 .svleg i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px}
 .svmts{margin-top:6px}
+.discCard .discList{margin:0;padding-left:16px}
+.discCard .discList li{font-size:12.5px;color:var(--sub);line-height:1.65;margin:6px 0}
+.discNote{margin-top:10px;padding:9px 11px;border:1px solid var(--bd);border-radius:10px;
+  font-size:11.5px;color:var(--sub);line-height:1.6}
 .svlink{display:block;text-align:center;padding:12px;border-radius:12px;font-weight:800;font-size:14px;
   color:#fff;text-decoration:none}
 #stkChart,#coinChart{width:calc(100% + 28px);margin-left:-14px;margin-right:-14px;border-radius:0;height:300px}
@@ -212,6 +216,7 @@ body.light #installBar{background:#eaf3ff;border-color:#b9d5f5;color:#1a4b7a}
 <div class="card svcard" id="svReco">
   <h3>추천 포트폴리오</h3>
   <div id="svRecoBody"></div>
+  <div class="discNote">본 서비스는 특정 종목의 매수·매도를 추천하지 않으며, 투자 판단의 책임은 본인에게 있습니다.<br>과거의 실적이 미래의 수익을 보장하지 않으며, 본 서비스는 원금 손실의 가능성이 있습니다.</div>
 </div>
 
 <div class="card" id="myhold">
@@ -264,6 +269,17 @@ body.light #installBar{background:#eaf3ff;border-color:#b9d5f5;color:#1a4b7a}
 <textarea id="vcTxt" maxlength="300" rows="3" style="width:100%;box-sizing:border-box;background:var(--bg);color:var(--nm);border:1px solid var(--bd);border-radius:10px;padding:8px 10px;font:inherit;font-size:13px;resize:vertical" placeholder="바라는 기능, 불편한 점, 쓰고 싶은 증권사를 적어 주세요"></textarea>
 <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;gap:8px"><span id="vcMsg" style="font-size:12px;color:var(--sub)"></span>
 <button id="vcBtn" onclick="vcSend()" style="border:0;border-radius:9px;padding:7px 16px;background:#1c7ed6;color:#fff;font-weight:700;cursor:pointer">보내기</button></div></div>
+
+
+<div class="card discCard">
+  <h3>투자 유의사항</h3>
+  <ul class="discList">
+    <li>본 서비스는 특정 종목의 매수·매도를 추천하지 않으며, 투자 판단의 책임은 본인에게 있습니다.</li>
+    <li>과거의 실적이 미래의 수익을 보장하지 않으며, 본 서비스는 원금 손실의 가능성이 있습니다.</li>
+    <li>본 서비스는 1:1 개별 투자 상담을 진행하지 않는 단방향 정보 제공 서비스입니다.</li>
+  </ul>
+  <button class="svbtn" onclick="discShow()">다시 보기</button>
+</div>
 
 <div class="foot" id="foot"></div>
 
@@ -1782,7 +1798,7 @@ function svRecoRender() {
   const p = svGet();
   if (!p) { box.innerHTML = '<div class="soonrow">성향 검사를 마치면 맞는 상품을 보여 드립니다.</div>'; return; }
   const g = SV_GRADE[p.grade];
-  let h = '<div class="svsub">' + g.nm + '에 맞춘 자산 배분입니다. 금액은 사장님이 정하시고, 주문은 증권사 앱에서 하십니다.</div>'
+  let h = '<div class="svsub">' + g.nm + '에 맞춘 자산 배분 예시입니다. 금액은 고객님이 정하시고, 주문은 거래하시는 증권사 앱에서 하십니다.</div>'
         + svPie(g.mix) + '<table class="mhtab"><tr><th>갈래</th><th>비중</th><th>상품</th></tr>';
   g.mix.forEach(function (m) {
     let prods = (SV_PROD[m[0]] || []).map(function (x) { return x[0] + (x[1] && /^\d/.test(x[1]) ? ' <span class="dplbl">' + x[1] + '</span>' : ''); });
@@ -1794,7 +1810,7 @@ function svRecoRender() {
   h += '</table>';
   if (SVR && SVR.kr && SVR.kr.regime) h += '<div class="svsub">오늘 장세 · 국내 ' + (SVR.kr.regime.good ? "좋음" : "나쁨")
      + ' · 미국 ' + ((SVR.us && SVR.us.regime && SVR.us.regime.good) ? "좋음" : "나쁨") + ' (' + (SVR.at || "") + ' 기준)</div>';
-  h += '<div class="svsub">상품은 성향에 맞는 갈래를 보여 드리는 것이고, 사고파는 결정과 주문은 사장님이 증권사에서 하십니다.</div>';
+  h += '<div class="svsub">특정 종목의 매수·매도를 추천하는 것이 아니라 성향에 맞는 갈래를 보여 드리는 것이며, 사고파는 결정과 주문은 고객님이 증권사에서 하십니다.</div>';
   box.innerHTML = h;
 }
 
@@ -1839,115 +1855,57 @@ setInterval(function () { try { svRecoLoad(); } catch (e) {} }, 30 * 60000);
 
 </script>
 <script>
-// 설치 도우미 (사장님 2026-09-20 "사용자가 신경 안 쓰게 깔리게 못 하나")
-// 🔴 웹앱을 사용자 몰래 깔 수는 없다 — 브라우저가 반드시 사용자에게 묻는다. 그래서 **누를 자리를 우리가 띄운다.**
-//   ① 카톡·네이버 등 앱 안 브라우저 : 설치 기능 자체가 없다 → 크롬으로 튕겨 보낸다(안드로이드는 한 번에).
-//   ② 안드로이드 크롬 : beforeinstallprompt 를 잡아 두었다가 우리 단추로 진짜 설치창을 띄운다(메뉴 뒤질 일 없음).
-//   ③ 아이폰 : 사파리의 공유 → 홈 화면에 추가 뿐이다. 그림으로 짚어 준다.
-(function () {
-  var UA = navigator.userAgent || "";
-  var isKakao = /KAKAOTALK/i.test(UA);
-  var isLine = /Line\//i.test(UA);
-  var inApp = isKakao || isLine || /NAVER\(inapp|Instagram|FB_IAB|FBAN|FBAV|DaumApps|everytimeApp/i.test(UA);
-  var isAnd = /Android/i.test(UA);
-  var isIOS = /iPhone|iPad|iPod/i.test(UA);
-  var dismissKey = "ins_off_v1";
-  var prompt_ = null, shown = false;
+// 투자 유의사항 (사장님 2026-09-20) — 두 앱 공통.
+// 🔴 이 앱에는 가입 절차가 없다(고객 정보를 받지 않으므로). 그래서 **첫 실행 화면**이 가입 화면 자리다.
+//    여기서 세 문구를 보여 주고 확인을 받는다. 확인 기록은 이 폰에만 남는다(서버로 보내지 않는다).
+var DISC_KEY = "disc_ok_v2";
+var DISC_LINES = [
+  "본 서비스는 특정 종목의 매수·매도를 추천하지 않으며, 투자 판단의 책임은 본인에게 있습니다.",
+  "과거의 실적이 미래의 수익을 보장하지 않으며, 본 서비스는 원금 손실의 가능성이 있습니다.",
+  "본 서비스는 1:1 개별 투자 상담을 진행하지 않는 단방향 정보 제공 서비스입니다.",
+];
 
-  // ── 카톡에서 열었을 때 : 톡 안 브라우저를 빠져나간다 ───────────────────
-  // 카톡이 열어 주는 전용 주소(kakaotalk://web/openExternal)가 있다. 안드로이드·아이폰 둘 다 먹는다.
-  // 한 번만 튕긴다(sessionStorage). 주소에 ?stay=1 을 붙이면 안 튕긴다.
-  (function jump() {
-    if (!inApp) return;
-    if (/[?&]stay=1/.test(location.search)) return;
-    try { if (sessionStorage.getItem("ins_jumped")) return; sessionStorage.setItem("ins_jumped", "1"); } catch (e) {}
-    var url = location.href.split("#")[0];
-    if (isKakao) { location.href = "kakaotalk://web/openExternal?url=" + encodeURIComponent(url); return; }
-    if (isLine) { location.href = url + (url.indexOf("?") < 0 ? "?" : "&") + "openExternalBrowser=1"; return; }
-    if (isAnd) { toChrome(); }
-  })();
-
-  function installed() {
-    try {
-      return (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone === true;
-    } catch (e) { return false; }
-  }
-  function muted() {
-    try { return Date.now() < (+localStorage.getItem(dismissKey) || 0); } catch (e) { return false; }
-  }
-  function mute(days) {
-    try { localStorage.setItem(dismissKey, Date.now() + days * 86400000); } catch (e) {}
-  }
-  function kill() { var b = document.getElementById("insBar"); if (b) b.remove(); shown = false; }
-
-  // 카톡 → 크롬. 안드로이드는 intent 로 곧바로 넘어간다(크롬 없으면 스토어로).
-  function toChrome() {
-    var u = location.href.replace(/^https?:\/\//, "");
-    location.href = "intent://" + u + "#Intent;scheme=https;package=com.android.chrome;"
-      + "S.browser_fallback_url=" + encodeURIComponent(location.href) + ";end";
-  }
-  function doInstall() {
-    if (!prompt_) return;
-    prompt_.prompt();
-    prompt_.userChoice.then(function (r) { if (r && r.outcome === "accepted") kill(); });
-    prompt_ = null;
-  }
-  window.insToChrome = toChrome;
-  window.insInstall = doInstall;
-  window.insOut = function () {                    // 톡 밖으로 — 카톡 전용 주소가 먼저, 안드로이드는 크롬 인텐트
-    var url = location.href.split("#")[0];
-    if (isKakao) { location.href = "kakaotalk://web/openExternal?url=" + encodeURIComponent(url); return; }
-    if (isLine) { location.href = url + (url.indexOf("?") < 0 ? "?" : "&") + "openExternalBrowser=1"; return; }
-    if (isAnd) { toChrome(); }
-  };
-  window.insClose = function () { mute(7); kill(); };
-
-  function bar(html) {
-    if (shown || installed() || muted()) return;
-    shown = true;
-    var d = document.createElement("div");
-    d.id = "insBar";
-    d.setAttribute("style",
-      "position:fixed;left:0;right:0;bottom:0;z-index:99999;padding:12px 14px calc(12px + env(safe-area-inset-bottom));"
-      + "background:var(--card,#fff);color:var(--nm,#212529);border-top:1px solid var(--bd,#dee2e6);"
-      + "box-shadow:0 -6px 24px rgba(0,0,0,.18);font-size:13.5px;line-height:1.5");
-    d.innerHTML = '<button onclick="insClose()" style="position:absolute;top:6px;right:8px;border:0;background:transparent;'
-      + 'color:var(--sub,#868e96);font-size:18px;line-height:1;padding:4px 6px;cursor:pointer">×</button>' + html;
-    document.body.appendChild(d);
-  }
-  var BTN = "display:block;width:100%;margin-top:9px;padding:12px;border:0;border-radius:12px;"
-          + "background:var(--tint,#1c7ed6);color:#fff;font-size:14.5px;font-weight:800;cursor:pointer";
-
-  function go() {
-    if (installed()) return;
-    if (inApp) {
-      // 자동으로 튕겼는데도 여기 남아 있다면(차단·구버전) 누를 자리를 준다.
-      bar('<b>앱으로 설치하시려면 한 번만 누르십니다.</b>'
-        + '<div style="color:var(--sub,#868e96);font-size:12px;margin-top:3px">'
-        + '카카오톡 안에서는 설치가 안 됩니다. ' + (isIOS ? "사파리로" : "크롬으로") + ' 넘어가면 설치 단추가 바로 뜹니다.</div>'
-        + '<button onclick="insOut()" style="' + BTN + '">' + (isIOS ? "사파리로" : "크롬으로") + ' 열기</button>');
-      return;
-    }
-    if (isIOS) {                       // 사파리 — 애플은 설치창을 안 준다
-      bar('<b>홈 화면에 앱으로 추가하십니다.</b><div style="color:var(--sub,#868e96);font-size:12px;margin-top:3px">'
-        + '아래쪽 <b>공유</b> 단추(□↑)를 누르고 <b>홈 화면에 추가</b>를 고르십니다.</div>');
-      return;
-    }
-    if (prompt_) {
-      bar('<b>앱으로 설치하시겠습니까?</b><div style="color:var(--sub,#868e96);font-size:12px;margin-top:3px">'
-        + '홈 화면에 아이콘이 생기고, 주소창 없이 앱처럼 열립니다.</div>'
-        + '<button onclick="insInstall()" style="' + BTN + '">앱 설치</button>');
-    }
-  }
-
-  window.addEventListener("beforeinstallprompt", function (e) {
-    e.preventDefault(); prompt_ = e;
-    if (!shown) go();
-  });
-  window.addEventListener("appinstalled", function () { mute(3650); kill(); });
-  // 크롬이 beforeinstallprompt 를 늦게 준다 — 조금 기다렸다가 안내를 띄운다.
-  setTimeout(go, 2500);
-})();
+function discAgreed() {
+  try { return !!localStorage.getItem(DISC_KEY); } catch (e) { return false; }
+}
+function discOk() {
+  try { localStorage.setItem(DISC_KEY, new Date().toISOString().slice(0, 10)); } catch (e) {}
+  var g = document.getElementById("discGate");
+  if (g) g.remove();
+}
+function discShow() {                                   // 다시 보기 — 유의사항 카드에서 부른다
+  var g = document.getElementById("discGate");
+  if (g) return;
+  discGate(true);
+}
+function discGate(force) {
+  if (!force && discAgreed()) return;
+  var d = document.createElement("div");
+  d.id = "discGate";
+  d.setAttribute("style",
+    "position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.55);display:flex;align-items:center;"
+    + "justify-content:center;padding:18px");
+  d.innerHTML =
+    '<div style="background:var(--card);color:var(--nm);border-radius:18px;max-width:420px;width:100%;'
+    + 'padding:22px 20px calc(18px + env(safe-area-inset-bottom));box-shadow:0 18px 50px rgba(0,0,0,.4);'
+    + 'max-height:86vh;overflow:auto">'
+    + '<div style="font-size:17px;font-weight:800;margin-bottom:4px">투자 유의사항</div>'
+    + '<div style="font-size:12.5px;color:var(--sub);margin-bottom:14px">시작하기 전에 아래를 꼭 읽어 주십시오.</div>'
+    + DISC_LINES.map(function (t) {
+        return '<div style="display:flex;gap:8px;margin:11px 0;font-size:13.5px;line-height:1.62">'
+             + '<span style="color:var(--tint,#1c7ed6);font-weight:900">·</span><span>' + t + '</span></div>';
+      }).join("")
+    + '<div style="font-size:12px;color:var(--sub);margin-top:14px;line-height:1.6">'
+    + '이 앱은 시세와 참고 정보를 보여 줄 뿐, 주문을 내지 않습니다. 매매는 고객님이 거래하시는 '
+    + '증권사·거래소 앱에서 직접 하십니다.</div>'
+    + '<button onclick="discOk()" style="display:block;width:100%;margin-top:18px;padding:13px;border:0;'
+    + 'border-radius:12px;background:var(--tint,#1c7ed6);color:#fff;font-size:15px;font-weight:800;cursor:pointer">'
+    + '확인했습니다</button></div>';
+  document.body.appendChild(d);
+}
+// 설치 안내보다 먼저 보이도록 곧바로 띄운다.
+if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { discGate(); });
+else discGate();
 
 </script>
 </body></html>
