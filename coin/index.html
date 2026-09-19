@@ -1638,28 +1638,44 @@ else discGate();
 
 </script>
 <script>
+// 깔려 있는 앱 열기 (사장님 2026-09-20 "이미 깔려 있는데 마켓으로 간다")
+// 🔴 전에 쓰던 `intent://#Intent;package=…` 은 **틀린 꼴**이다.
+//    주소(데이터)만 있고 '무엇을 하라'가 없어 안드로이드가 앱을 못 찾고 바로 스토어로 떨어졌다.
+//    앱을 그냥 켜려면 실행 항목을 찍어 줘야 한다 — action=MAIN · category=LAUNCHER · package=…
+// 🔴 되돌아갈 곳(browser_fallback_url)도 '검색'이 아니라 그 앱의 스토어 쪽으로 보낸다.
+function appOpen(pkg, name) {
+  var UA = navigator.userAgent || "";
+  if (/Android/i.test(UA)) {
+    location.href = "intent:#Intent;action=android.intent.action.MAIN;"
+      + "category=android.intent.category.LAUNCHER;package=" + pkg + ";"
+      + "S.browser_fallback_url="
+      + encodeURIComponent("https://play.google.com/store/apps/details?id=" + pkg) + ";end";
+    return;
+  }
+  // 아이폰은 남의 앱을 주소로 켤 길이 없다(각 회사가 전용 주소를 공개해야 한다) → 앱스토어로.
+  location.href = "https://apps.apple.com/kr/search?term=" + encodeURIComponent(name.split(" ")[0]);
+}
+
+</script>
+<script>
 // 데일리 브리프 라이브 — 코인앱 전용 (2026-09-20)
 // 🔴 정보만 준다. 보유·주문·매수·매도 없음. 거래는 거래소 앱에서.
 const CV_EX_KEY = "cv_ex_v1";
+// 🔴 패키지 이름은 2026-09-20 에 Play 스토어에서 하나씩 열어 200 을 확인한 것들이다.
+//    바이비트는 국내 Play 스토어에 없어서 뺐다.
 const CV_EX = [
   ["upbit", "업비트", "com.dunamu.exchange"],
   ["bithumb", "빗썸", "com.btckorea.bithumb"],
-  ["coinone", "코인원", "com.coinone.android"],
+  ["coinone", "코인원", "coinone.co.kr.official"],
+  ["korbit", "코빗", "com.korbit.exchange"],
   ["okx", "OKX", "com.okinc.okex.gp"],
   ["binance", "바이낸스", "com.binance.dev"],
-  ["bybit", "바이비트", "com.bybit.app"],
 ];
-// 🔴 패키지 이름이 틀릴 수 있어, 앱이 없으면 스토어 '검색'으로 떨어뜨린다.
 function cvOpenEx(code) {
   const m = CV_EX.filter(function (x) { return x[0] === code; })[0];
   if (!m) return;
   try { localStorage.setItem(CV_EX_KEY, code); } catch (e) {}
-  const nm = encodeURIComponent(m[1]);
-  if (/Android/i.test(navigator.userAgent))
-    location.href = "intent://#Intent;package=" + m[2] + ";S.browser_fallback_url="
-      + encodeURIComponent("https://play.google.com/store/search?q=" + nm + "&c=apps") + ";end";
-  else
-    location.href = "https://apps.apple.com/kr/search?term=" + nm;
+  appOpen(m[2], m[1]);
 }
 function cvPanel() {
   let cur = ""; try { cur = localStorage.getItem(CV_EX_KEY) || ""; } catch (e) {}
