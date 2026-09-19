@@ -3694,7 +3694,7 @@ function recoRender(){
     const buys=(x.buy12||[]).filter(function(r){return heldCodes.indexOf(r.code)<0;});
     const blk=function(title,list){
       if(!list.length)return "";
-      let t='<table class="mhtab"><tr><th>'+title+'</th><th>'+(en?"Close":"종가")+'</th><th>'+(en?"Qty/slot":"1칸 수량")+'</th><th></th></tr>';
+      let t='<table class="mhtab"><tr><th>'+title+'</th><th>'+(en?"Close":"종가")+'</th><th>'+(en?"Qty":"수량")+'</th><th></th></tr>';
       list.forEach(function(r,i){
         const q=(slot>0&&r.close>0)?Math.floor(slot/r.close):0;
         const go=mk==="kr"?("pickStock('"+r.code+"','"+String(r.name).replace(/'/g,"")+"')")
