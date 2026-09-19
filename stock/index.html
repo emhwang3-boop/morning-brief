@@ -1595,19 +1595,39 @@ const RECO_URL="https://emhwang3-boop.github.io/morning-brief/reco.json";
 // 데일리 브리프 라이브 — 주식앱 전용 (2026-09-20)
 // 🔴 고객 정보를 서버로 보내지 않는다. 성향 답·증권사 선택·보유 입력은 모두 이 폰에만 저장한다.
 // 🔴 주문은 하지 않는다. [주문]은 고객이 고른 증권사 MTS 를 여는 것으로 끝난다(로그인 화면까지).
-// 성향 5등급은 금융투자협회 표준투자권유준칙의 이름을 따른다.
+// 🔴 설문·배점·등급 구간은 **금융투자협회 표준투자권유준칙 별지 제1호(투자자정보 확인서)·제2호(배점 기준)** 그대로다.
+//    지어내지 않는다. 문항 7개 합 32점 → 100점 환산 → 20/40/60/80 으로 5등급.
+//    (원문 확인: 증권사 투자권유준칙에 실린 별지 제1호·제2호, 2026-09-20)
 
-const SV_KEY = "sv_profile_v1";      // {at:"YYYY-MM-DD", score:n, grade:i, ans:[...]}
+const SV_KEY = "sv_profile_v2";      // {at:"YYYY-MM-DD", raw:n, score:n(100점), grade:i, ans:[...]}
 const SV_BROKER = "sv_broker_v1";    // 내 증권사 코드
 
+const SV_MAX = 32;                   // 별지 제2호 — 1~7번 합 총점 32점
 const SV_Q = [
-  {q: "나이대는?", a: [["19세 이하", 4], ["20~40세", 4], ["41~50세", 3], ["51~60세", 2], ["61세 이상", 1]]},
-  {q: "투자하려는 돈을 얼마나 오래 둘 수 있나요?", a: [["6개월 이내", 1], ["1년 정도", 2], ["2~3년", 3], ["3년 이상", 4]]},
-  {q: "투자 경험은?", a: [["예금·적금만", 1], ["채권·ELS 등", 2], ["펀드·ETF", 3], ["주식 직접 매매", 4], ["선물·옵션·레버리지", 5]]},
-  {q: "이 돈은 전체 재산에서 얼마나 되나요?", a: [["10% 이내", 4], ["10~20%", 3], ["20~30%", 2], ["30% 넘음", 1]]},
-  {q: "수입은 앞으로 어떻게 될 것 같나요?", a: [["꾸준하거나 늘어남", 4], ["그대로", 3], ["줄어들거나 은퇴", 1]]},
-  {q: "1년 안에 원금이 20% 줄면?", a: [["더 산다", 5], ["그대로 둔다", 4], ["일부 판다", 2], ["전부 판다", 1]]},
-  {q: "무엇을 바라시나요?", a: [["원금은 꼭 지킨다", 1], ["예금보다 조금 더", 2], ["물가상승률 이상", 3], ["높은 수익, 손실 감수", 5]]},
+  {q: "고객님의 연령대는 어떻게 되십니까?",
+   a: [["19세 이하", 4], ["20세 ~ 40세", 4], ["41세 ~ 50세", 3], ["51세 ~ 60세", 2], ["61세 이상", 1]]},
+  {q: "투자가능 기간은 얼마나 되십니까?",
+   a: [["6개월 미만", 1], ["6개월 이상 ~ 1년 미만", 2], ["1년 이상 ~ 2년 미만", 3], ["2년 이상 ~ 3년 미만", 4], ["3년 이상", 5]]},
+  {q: "투자경험과 가장 가까운 금융투자상품은 어느 것입니까?", sub: "여럿에 해당하면 가장 높은 쪽을 고르십니다.",
+   a: [["안정형 상품 (은행 예·적금, 국채, 지방채, 보증채, MMF, CMA 등)", 1],
+       ["안정추구형 상품 (금융채, 신용도 높은 회사채, 채권형펀드, 원금보장형 ELS 등)", 2],
+       ["위험중립형 상품 (신용도 중간 등급 회사채, 원금 일부만 보장되는 ELS, 혼합형 펀드 등)", 3],
+       ["적극투자형 상품 (신용도 낮은 회사채, 주식, 원금비보장 ELS, 시장수익률 추구 주식형펀드 등)", 4],
+       ["공격형 상품 (ELW, 선물·옵션, 시장수익률 이상 추구 주식형펀드, 파생상품 투자펀드, 주식 신용거래 등)", 5]]},
+  {q: "금융상품 투자에 대한 본인의 지식수준이 어느 정도라고 생각하십니까?",
+   a: [["매우 낮은 수준 — 투자의사결정을 스스로 내려본 경험이 없는 정도", 1],
+       ["낮은 수준 — 주식과 채권의 차이를 구별할 수 있는 정도", 2],
+       ["높은 수준 — 투자할 수 있는 대부분의 금융상품의 차이를 구별할 수 있는 정도", 3],
+       ["매우 높은 수준 — 금융상품을 비롯하여 모든 투자대상 상품의 차이를 이해할 수 있는 정도", 4]]},
+  {q: "투자자금이 전체 금융자산(부동산 등 제외) 중 어느 정도의 비중을 차지합니까?",
+   a: [["10% 미만", 5], ["10% 이상 ~ 20% 미만", 4], ["20% 이상 ~ 30% 미만", 3], ["30% 이상 ~ 40% 미만", 2], ["40% 이상", 1]]},
+  {q: "고객님의 수입원을 가장 잘 나타내는 것은 어느 것입니까?",
+   a: [["현재 일정한 수입이 발생하고 있으며, 향후 현재 수준을 유지하거나 증가할 것으로 예상", 3],
+       ["현재 일정한 수입이 발생하고 있으나, 향후 감소하거나 불안정할 것으로 예상", 2],
+       ["현재 일정한 수입이 없으며, 연금이 주 수입원임", 1]]},
+  {q: "고객님의 손실 감내도는 어느 정도이십니까?",
+   a: [["반드시 원금 보전", -2], ["10% 미만까지는 손실 감수", 2], ["20% 미만 손실 감수", 4],
+       ["기대수익이 높다면 위험이 높아도 상관하지 않겠다", 6]]},
 ];
 // 등급: 이름 · 자산 배분(%) — 안전한 쪽부터
 const SV_GRADE = [
@@ -1633,10 +1653,11 @@ function svDaysLeft(at) {
   const d = new Date(at); d.setFullYear(d.getFullYear() + 1);
   return Math.ceil((d - new Date()) / 86400000);
 }
-function svGradeOf(score) {
-  const mx = SV_Q.reduce(function (s, q) { return s + Math.max.apply(null, q.a.map(function (x) { return x[1]; })); }, 0);
-  const r = score / mx;                                   // 0~1
-  return r < 0.35 ? 0 : (r < 0.5 ? 1 : (r < 0.65 ? 2 : (r < 0.8 ? 3 : 4)));
+// 별지 제2호 — 합계(총점 32)를 100점으로 환산한 뒤 20/40/60/80 으로 가른다.
+function svScore100(raw) { return raw / SV_MAX * 100; }
+function svGradeOf(raw) {
+  const s = svScore100(raw);
+  return s <= 20 ? 0 : (s <= 40 ? 1 : (s <= 60 ? 2 : (s <= 80 ? 3 : 4)));
 }
 
 // ── 설문 ──────────────────────────────────────────────
@@ -1649,15 +1670,16 @@ function svQ(i) {
   const box = document.getElementById("svBody");
   if (!box) return;
   if (i >= SV_Q.length) {
-    const score = SV_ANS.reduce(function (a, b) { return a + b; }, 0);
-    const g = svGradeOf(score);
-    svSave({at: new Date().toISOString().slice(0, 10), score: score, grade: g, ans: SV_ANS.slice()});
+    const raw = SV_ANS.reduce(function (a, b) { return a + b; }, 0);
+    const g = svGradeOf(raw);
+    svSave({at: new Date().toISOString().slice(0, 10), raw: raw, score: svScore100(raw), grade: g, ans: SV_ANS.slice()});
     svRender();
     try { svRecoRender(); } catch (e) {}
     return;
   }
   const q = SV_Q[i];
   box.innerHTML = '<div class="svq">' + (i + 1) + '/' + SV_Q.length + ' · ' + q.q + '</div>'
+    + (q.sub ? '<div class="svsub">' + q.sub + '</div>' : '')
     + q.a.map(function (a, k) {
         return '<button class="svbtn" onclick="SV_ANS.push(' + a[1] + ');svQ(' + (i + 1) + ')">' + a[0] + '</button>';
       }).join("");
@@ -1667,13 +1689,16 @@ function svRender() {
   if (!box) return;
   const p = svGet();
   if (!p) {
-    box.innerHTML = '<div class="svq">투자 성향을 먼저 확인해 주세요. 7가지만 고르면 됩니다.</div>'
+    box.innerHTML = '<div class="svq">투자 성향을 먼저 확인해 주세요. 7문항입니다.</div>'
+      + '<div class="svsub">금융투자협회 표준투자권유준칙의 투자자정보 확인서와 같은 문항·배점입니다.</div>'
       + '<button class="svbtn svgo" onclick="svStart()">성향 검사 시작</button>';
     return;
   }
   const g = SV_GRADE[p.grade], left = svDaysLeft(p.at);
+  const sc = (p.score != null ? p.score : svScore100(p.raw || 0));
   box.innerHTML = '<div class="svres">' + g.nm + '</div>'
-    + '<div class="svsub">' + p.at + ' 검사 · 다음 검사까지 ' + (left > 0 ? left + "일" : "지남") + '</div>'
+    + '<div class="svsub">' + sc.toFixed(1) + '점 (100점 환산) · ' + p.at + ' 검사 · 다음 검사까지 '
+    + (left > 0 ? left + "일" : "지남") + '</div>'
     + '<button class="svbtn" onclick="svStart()">다시 검사</button>';
 }
 
