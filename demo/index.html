@@ -265,7 +265,7 @@ body.light #installBar{background:#eaf3ff;border-color:#b9d5f5;color:#1a4b7a}
 </div>
 
 <div class="card" id="demoacct">
-  <h3>모의 계좌 <span class="tag live">● 실시간</span></h3>
+  <h3>계좌 <span class="tag live">● 실시간</span></h3>
   <div id="dpBody"></div>
 </div>
 
@@ -3037,10 +3037,10 @@ function dpRender(){
   try{
     const any=rc&&(rc.krw!==null||rc.usd!==null||rc.usdt!==null);
     const t=document.querySelector("#demoacct h3");
-    if(t) t.childNodes[0].nodeValue=(any?(en?"Account ":"계좌 "):(en?"Demo account ":"모의 계좌 "));
+    if(t) t.childNodes[0].nodeValue=(en?"Account ":"계좌 ")   /* 사장님 2026-09-19 — 그냥 계좌 */;
   }catch(e){}
   if(DP.log.length){
-    h+='<div class="dphd" style="margin-top:10px">'+(en?"Order log (demo)":"주문 내역 (모의)")+'</div><div class="dplog"><table class="mhtab">';
+    h+='<div class="dphd" style="margin-top:10px">'+(en?"Order log":"주문 내역")+'</div><div class="dplog"><table class="mhtab">';
     DP.log.slice(0,40).forEach(function(l){
       const nm={B:(en?"BUY":"매수"),S:(en?"SELL":"매도"),L:(en?"LONG":"롱"),X:(en?"CLOSE":"청산")}[l.side]||l.side;
       const col=(l.side==="B"||l.side==="L")?"up":((l.side==="S")?"dn":"fl");
