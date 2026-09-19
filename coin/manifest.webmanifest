@@ -1,7 +1,7 @@
 {
  "id": "/morning-brief/coin/",
  "name": "데일리 브리프 라이브 코인",
- "short_name": "코인",
+ "short_name": "브리프 코인",
  "description": "데일리 브리프 라이브 코인 — 시세·성향별 추천 (정보 제공)",
  "lang": "ko",
  "start_url": "./?src=pwa",
