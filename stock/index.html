@@ -1607,6 +1607,26 @@ function vcSend(){
 })();
 </script>
 <script>
+// 깔려 있는 앱 열기 (사장님 2026-09-20 "이미 깔려 있는데 마켓으로 간다")
+// 🔴 전에 쓰던 `intent://#Intent;package=…` 은 **틀린 꼴**이다.
+//    주소(데이터)만 있고 '무엇을 하라'가 없어 안드로이드가 앱을 못 찾고 바로 스토어로 떨어졌다.
+//    앱을 그냥 켜려면 실행 항목을 찍어 줘야 한다 — action=MAIN · category=LAUNCHER · package=…
+// 🔴 되돌아갈 곳(browser_fallback_url)도 '검색'이 아니라 그 앱의 스토어 쪽으로 보낸다.
+function appOpen(pkg, name) {
+  var UA = navigator.userAgent || "";
+  if (/Android/i.test(UA)) {
+    location.href = "intent:#Intent;action=android.intent.action.MAIN;"
+      + "category=android.intent.category.LAUNCHER;package=" + pkg + ";"
+      + "S.browser_fallback_url="
+      + encodeURIComponent("https://play.google.com/store/apps/details?id=" + pkg) + ";end";
+    return;
+  }
+  // 아이폰은 남의 앱을 주소로 켤 길이 없다(각 회사가 전용 주소를 공개해야 한다) → 앱스토어로.
+  location.href = "https://apps.apple.com/kr/search?term=" + encodeURIComponent(name.split(" ")[0]);
+}
+
+</script>
+<script>
 const RECO_URL="https://emhwang3-boop.github.io/morning-brief/reco.json";
 // 데일리 브리프 라이브 — 주식앱 전용 (2026-09-20)
 // 🔴 고객 정보를 서버로 보내지 않는다. 성향 답·증권사 선택·보유 입력은 모두 이 폰에만 저장한다.
@@ -1816,27 +1836,22 @@ function svRecoRender() {
 
 // ── [주문] — 증권사 고르고 그 MTS 를 연다 (주문은 MTS 에서) ─────────────
 // 🔴 우리 앱은 주문을 만들지도, 보내지도 않는다. 앱을 여는 것으로 끝난다.
+// 🔴 패키지 이름은 2026-09-20 에 Play 스토어에서 하나씩 열어 200 을 확인한 것들이다(추측 금지).
 const SV_MTS = [
-  ["kiwoom", "키움증권 영웅문S#", "com.kiwoom.smartone"],
-  ["korea_inv", "한국투자증권", "com.koreainvestment.mts"],
+  ["kiwoom", "키움증권 영웅문S#", "com.kiwoom.heromts"],
+  ["korea_inv", "한국투자증권", "com.truefriend.neosmartarenewal"],
   ["samsung", "삼성증권 mPOP", "com.samsungpop.android.mpop"],
   ["mirae", "미래에셋 M-STOCK", "com.miraeasset.trade"],
-  ["nh", "NH투자 나무", "com.nhqv.namuh"],
-  ["kb", "KB증권 M-able", "com.kbsec.mable"],
-  ["shinhan", "신한투자 SOL증권", "com.shinhaninvest.sinhan"],
+  ["nh", "NH투자 나무증권", "com.wooriwm.txsmart"],
+  ["kb", "KB증권 M-able", "com.kbsec.mts.iplustarngm2"],
+  ["shinhan", "신한투자 SOL증권", "com.shinhaninvest.nsmts"],
   ["toss", "토스증권", "viva.republica.toss"],
 ];
-// 🔴 패키지 이름이 틀릴 수 있어, 앱이 없으면 스토어 '검색'으로 떨어뜨린다(엉뚱한 앱을 열지 않게).
 function svOpenMts(code) {
   const m = SV_MTS.filter(function (x) { return x[0] === code; })[0];
   if (!m) return;
   try { localStorage.setItem(SV_BROKER, code); } catch (e) {}
-  const nm = encodeURIComponent(m[1].split(" ")[0]);
-  if (/Android/i.test(navigator.userAgent))
-    location.href = "intent://#Intent;package=" + m[2] + ";S.browser_fallback_url="
-      + encodeURIComponent("https://play.google.com/store/search?q=" + nm + "&c=apps") + ";end";
-  else
-    location.href = "https://apps.apple.com/kr/search?term=" + nm;
+  appOpen(m[2], m[1]);
 }
 function svOrderPanel() {
   const cur = svBroker();
