@@ -2156,7 +2156,9 @@ async function rlStockOrder(mk, side, code, qty, limitPx) {
   } else {
     path = "/api/us/ordr";
     aid = (side === "B") ? "ust20000" : "ust20001";
-    body = {stex_tp: "ND", stk_cd: String(code),
+    // 🔴 거래소를 찾아서 낸다 — ND 로 박아 두었더니 아멕스(NA) 종목 DRAM 이 1903(종목 없음)으로 거부됐다(2026-09-19)
+    const tick = String(code).replace(/\.US$/, "").toUpperCase();
+    body = {stex_tp: await rlUsStex(tok, tick), stk_cd: tick,
             ord_qty: String(Math.floor(qty)),
             trde_tp: limitPx > 0 ? "00" : "03",     // 03=시장가 · 00=지정가
             ord_uv: limitPx > 0 ? rlUsPx(limitPx) : ""};
@@ -2167,6 +2169,17 @@ async function rlStockOrder(mk, side, code, qty, limitPx) {
   if (j && String(j.return_code) !== "0")
     throw new Error(String(j.return_code) + " " + (j.return_msg || ""));
   return j;
+}
+// 미국 종목의 거래소 구분(ND 나스닥 · NY 뉴욕 · NA 아멕스) — 차트·호가가 찾아 둔 값이 있으면 그것, 없으면 현재가(usa20100)로 찾는다
+async function rlUsStex(tok, tick) {
+  if (RL_STEX[tick]) return RL_STEX[tick];
+  for (const s of ["ND", "NY", "NA"]) {
+    try {
+      const r = await rlKiwoom(tok, "/api/us/mrkcond", "usa20100", {stex_tp: s, stk_cd: tick});
+      if (r && String(r.return_code) === "0" && (r.stk_nm || rlAbs(r.cur_prc) > 0)) { RL_STEX[tick] = s; return s; }
+    } catch (e) {}
+  }
+  throw new Error(tick + " — 거래소(ND/NY/NA)에서 종목을 찾지 못했습니다");
 }
 // 주식 실주문을 낼 수 있는 상태인가
 function rlCanLiveStock(mk) {
