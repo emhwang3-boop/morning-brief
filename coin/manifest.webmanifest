@@ -2,9 +2,15 @@
  "id": "/morning-brief/coin/",
  "name": "데일리 브리프 라이브 코인",
  "short_name": "코인",
- "start_url": ".",
- "scope": ".",
+ "description": "데일리 브리프 라이브 코인 — 시세·성향별 추천 (정보 제공)",
+ "lang": "ko",
+ "start_url": "./?src=pwa",
+ "scope": "./",
  "display": "standalone",
+ "orientation": "portrait",
+ "categories": [
+  "finance"
+ ],
  "background_color": "#fdf8e3",
  "theme_color": "#f59f00",
  "icons": [
