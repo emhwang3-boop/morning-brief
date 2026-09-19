@@ -3516,6 +3516,175 @@ async function obTick(){
 }
 setInterval(obTick,2500);
 
+
+// ── 포트폴리오 추천 (사장님 2026-09-19) ─────────────────────────────────────
+// 집 PC(_m_reco.py)가 장 마감 뒤 계산해 사이트에 올린 reco.json + 실계좌를 합친다. 잰 규칙만 쓴다.
+//  국내·미국 12칸: 정배열+얕은낙폭+벽없음 → 20일 상승 순 · 1칸=총자산÷12 · +15% 익절 · 60일 · 되굴림
+//  과매도 반등(하락장에서만) · 폭락 단추(국내만) · 코인 왕관(헐100·게이트120·폭0.3%)
+const RECO_URL="https://emhwang3-boop.github.io/morning-brief/reco.json";
+let RECO=null, RECO_AT=0;
+function recoSeen(){ try{ return JSON.parse(localStorage.getItem("reco_seen_v1")||"{}"); }catch(e){ return {}; } }
+function recoSeenSave(o){ try{ localStorage.setItem("reco_seen_v1",JSON.stringify(o)); }catch(e){} }
+async function recoLoad(){
+  try{ RECO=await fetch(RECO_URL+"?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}); RECO_AT=Date.now(); }
+  catch(e){}
+  recoRender();
+}
+function recoDays(since){                 // 처음 본 날부터 지난 영업일(주말 뺌) 어림
+  const a=new Date(since), b=new Date(); let n=0;
+  for(let d=new Date(a); d<b; d.setDate(d.getDate()+1)){ const w=d.getDay(); if(w!==0&&w!==6)n++; }
+  return n;
+}
+
+// 원형 그래프 — 조각 = [이름, 원화 금액, 구분]. 큰 순서로 · 2% 미만은 '기타'로 묶는다.
+function recoPie(parts){
+  const en=LANG==="en";
+  parts=parts.filter(function(p){return p[1]>0;}).sort(function(a,b){return b[1]-a[1];});
+  const tot=parts.reduce(function(s,p){return s+p[1];},0); if(!(tot>0))return "";
+  let small=0; const big=[];
+  parts.forEach(function(p){ if(p[1]/tot<0.01)small+=p[1]; else big.push(p); });
+  if(small>0)big.push([en?"Others":"기타",small,"etc"]);
+  const PAL=["#e8590c","#1c7ed6","#2f9e44","#ae3ec9","#f59f00","#0ca678","#d6336c","#4263eb","#74b816","#f76707",
+             "#1098ad","#9c36b5","#e03131","#5c940d","#3b5bdb","#c2255c"];
+  let ci=0; const CASH=["#adb5bd","#ced4da","#8f98a3"];
+  big.forEach(function(p){ if(p[2]==="cash")p[3]=CASH[(ci++)%3]; });
+  const col=function(p,i){ return p[2]==="cash"?p[3]:(p[2]==="etc"?"#868e96":PAL[i%PAL.length]); };
+  const R=90, cx=100, cy=100; let a0=-Math.PI/2, svg='';
+  big.forEach(function(p,i){
+    const f=p[1]/tot, a1=a0+f*2*Math.PI;
+    if(f>0.9999){ svg+='<circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="'+col(p,i)+'"/>'; }
+    else{
+      const x0=cx+R*Math.cos(a0), y0=cy+R*Math.sin(a0), x1=cx+R*Math.cos(a1), y1=cy+R*Math.sin(a1);
+      svg+='<path d="M'+cx+','+cy+' L'+x0.toFixed(2)+','+y0.toFixed(2)+' A'+R+','+R+' 0 '+(f>0.5?1:0)+',1 '
+        +x1.toFixed(2)+','+y1.toFixed(2)+' Z" fill="'+col(p,i)+'" stroke="#fff" stroke-width="1"/>';
+      if(f>=0.03){ const am=(a0+a1)/2;
+        svg+='<text x="'+(cx+R*0.62*Math.cos(am)).toFixed(1)+'" y="'+(cy+R*0.62*Math.sin(am)+4).toFixed(1)
+          +'" font-size="'+(f>=0.06?11:9)+'" font-weight="700" fill="'+(p[2]==="cash"?"#333":"#fff")+'" text-anchor="middle">'+Math.round(f*100)+'%</text>'; }
+    }
+    a0=a1;
+  });
+  let leg='<div style="display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:6px;font-size:11px">';
+  big.forEach(function(p,i){
+    leg+='<span style="white-space:nowrap"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:'
+      +col(p,i)+';margin-right:4px"></span>'+dpEsc(p[0])+(p[2]==="new"?(en?" (new)":" (추천)"):"")+' '+(p[1]/tot*100).toFixed(1)+'%</span>';
+  });
+  leg+='</div>';
+  return '<div style="text-align:center"><svg viewBox="0 0 200 200" width="200" height="200">'+svg+'</svg></div>'+leg
+    +'<div class="dpmsg" style="text-align:center">'+(en?"Total ":"합계 ")+Math.round(tot).toLocaleString()+(en?" KRW":"원")+'</div>';
+}
+function recoRender(){
+  let card=E("recoCard");
+  if(!card){
+    const acct=E("demoacct"); if(!acct)return;
+    card=document.createElement("div"); card.className="card"; card.id="recoCard";
+    acct.parentNode.insertBefore(card,acct.nextSibling);
+  }
+  const en=LANG==="en", R=RECO;
+  let h='<h3>'+(en?"Portfolio picks":"포트폴리오 추천")+(R&&R.at?' <span class="dplbl">'+dpEsc(R.at)+(en?" calc":" 계산")+'</span>':'')+'</h3>';
+  if(!R){ card.innerHTML=h+'<div class="soonrow">'+(en?"Loading…":"불러오는 중…")+'</div>'; return; }
+  const reg=function(x){ return x&&x.regime?((x.regime.good?(en?"good":"좋음"):(en?"weak":"나쁨"))+" ("+(x.regime.vs_ma60>0?"+":"")+x.regime.vs_ma60+"%)"):"-"; };
+  const cs=function(c){ return c&&c.state?({long:(en?"LONG":"롱"),short:(en?"SHORT":"숏"),cash:(en?"CASH":"현금")}[c.state]):"-"; };
+  h+='<div class="dpmsg" style="margin:4px 0 8px">'+(en?"Regime · ":"장세 · ")+(en?"KR ":"국내 ")+reg(R.kr)+" · "+(en?"US ":"미국 ")+reg(R.us)
+    +" · BTC "+cs(R.coin&&R.coin.BTC)+" · ETH "+cs(R.coin&&R.coin.ETH)+'</div>';
+  // 실계좌 → 시장별 총자산 · 보유 수
+  const has=(typeof RL!=="undefined")&&RL.at;
+  const kr=has?RL.kr:[], us=has?RL.us:[], cash=has&&RL.cash?RL.cash:{};
+  const totKR=kr.reduce(function(s,p){return s+(p.evl||0);},0)+(cash.krw||0);
+  const totUS=us.reduce(function(s,p){return s+(p.evl||0);},0)+(cash.usd||0);
+  // 처음 본 날 기록(60일 만기 셈용 — 증권사가 산 날을 안 준다)
+  const seen=recoSeen(), today=new Date().toISOString().slice(0,10), live={};
+  kr.concat(us).forEach(function(p){ const k=p.mk+":"+p.code; live[k]=1; if(!seen[k])seen[k]=today; });
+  if(has){ Object.keys(seen).forEach(function(k){ if(!live[k])delete seen[k]; }); recoSeenSave(seen); }
+  const PIEP=[];                           // 원형 그래프 조각 [이름, 원화, 구분]
+  const fx=(typeof fxKrw==="function"&&fxKrw()>0)?fxKrw():0;
+  const sec=function(mk,x,tot,held){
+    if(!x||x.err)return '<div class="dpmsg">'+(mk==="kr"?"국내":"미국")+' '+(en?"not ready":"자료 없음")+'</div>';
+    const slot=tot>0?tot/12:0, empty=Math.max(0,12-held.length);
+    const money=function(v){ return mk==="kr"?(Math.round(v).toLocaleString()+(en?" KRW":"원")):("$"+(+v).toLocaleString(undefined,{maximumFractionDigits:2})); };
+    let s='<div class="dphd" style="margin-top:8px">'+(mk==="kr"?(en?"KR stocks":"국내 주식"):(en?"US stocks":"미국 주식"))
+      +' <span class="dplbl">'+(en?"as of ":"")+x.asof+(en?"":" 종가")+'</span></div>';
+    s+='<div class="dpmsg">'+(has?((en?"Slot ":"1칸 ")+money(slot)+" · "+(en?"empty ":"빈 칸 ")+empty+"/12")
+                             :(en?"Load your real account to size slots.":"실계좌를 불러오면 칸 금액이 나옵니다."))+'</div>';
+    // 팔 것 — +15% 도달 · 60영업일 만기 · (국내·미국 공통 규칙)
+    const sells=[];
+    held.forEach(function(p){
+      const k=p.mk+":"+p.code, d=seen[k]?recoDays(seen[k]):0, why=[];
+      if(p.rt>=15)why.push(en?"+15% reached":"+15% 도달");
+      if(d>=60)why.push((en?"60d · ":"60일 · ")+d+(en?"d":"일째"));
+      if(mk==="kr"&&x.regime&&x.regime.cycle_exit)why.push(en?"regime broke (rebound pocket)":"장세 무너짐(과매도 주머니)");
+      if(why.length)sells.push({p:p,why:why.join(" · ")});
+    });
+    if(sells.length){
+      s+='<table class="mhtab"><tr><th>'+(en?"Sell":"팔 것")+'</th><th>'+(en?"Why":"이유")+'</th><th></th></tr>';
+      sells.forEach(function(o){
+        const ri=(typeof rlRows==="function")?rlRows().indexOf(o.p):-1;
+        s+='<tr><td>'+dpEsc(o.p.name)+'</td><td class="dn">'+dpEsc(o.why)+'</td><td>'
+          +(ri>=0?'<button class="dpb sell dpsm" onclick="dpSellKey(\'real:'+ri+'\')">'+(en?"SELL":"매도")+'</button>':'')+'</td></tr>';
+      });
+      s+='</table>';
+    }
+    // 살 것 — 12칸 후보(20일 상승 순). 빈 칸이 있을 때 1순위부터. 이미 든 종목은 뺀다.
+    const heldCodes=held.map(function(p){return String(p.code).replace(/\.US$/,"");});
+    const buys=(x.buy12||[]).filter(function(r){return heldCodes.indexOf(r.code)<0;});
+    const blk=function(title,list){
+      if(!list.length)return "";
+      let t='<table class="mhtab"><tr><th>'+title+'</th><th>'+(en?"Close":"종가")+'</th><th>'+(en?"Qty/slot":"1칸 수량")+'</th><th></th></tr>';
+      list.forEach(function(r,i){
+        const q=(slot>0&&r.close>0)?Math.floor(slot/r.close):0;
+        const go=mk==="kr"?("pickStock('"+r.code+"','"+String(r.name).replace(/'/g,"")+"')")
+                          :("pickStockUS('"+r.code+".US','"+r.code+"')");
+        t+='<tr><td style="text-align:left">'+(i===0?"① ":"")+dpEsc(r.name)+(r.name!==r.code?' <span class="dplbl">'+r.code+'</span>':'')
+          +'<br><span class="dplbl">'+dpEsc(r.why)+'</span></td><td>'+money(r.close)+'</td><td>'+(q?q.toLocaleString():"-")+'</td>'
+          +'<td><button class="dpb buy dpsm" onclick="'+go+';E(\'stock\').scrollIntoView({behavior:\'smooth\'})">'+(en?"View":"조회")+'</button></td></tr>';
+      });
+      return t+'</table>';
+    };
+    s+=blk((en?"Buy (12-slot)":"살 것 (12칸)"),empty>0||!has?buys.slice(0,5):[]);
+    // 원형 그래프: 보유는 지금 평가금 · 빈 칸은 추천 1순위부터 1칸씩 · 남는 예수금은 현금
+    if(has){
+      const k=(mk==="kr")?1:fx;
+      if(k>0){
+        held.forEach(function(p){ PIEP.push([p.name,(p.evl||0)*k,"held"]); });
+        const nb=Math.min(empty,buys.length);
+        buys.slice(0,nb).forEach(function(r){ PIEP.push([r.name,slot*k,"new"]); });
+        const left=((mk==="kr")?(cash.krw||0):(cash.usd||0))-slot*nb;
+        if(left>0)PIEP.push([(mk==="kr")?(en?"KRW cash":"원화 현금"):(en?"USD cash":"달러 현금"),left*k,"cash"]);
+      }
+    }
+    if(has&&empty===0)s+='<div class="dpmsg">'+(en?"All 12 slots full — wait for exits.":"12칸이 다 찼습니다 — 익절·만기로 빈 칸이 나면 삽니다.")+'</div>';
+    if((x.oversold||[]).length)s+=blk((en?"Oversold rebound (weak regime)":"과매도 반등 (하락장)"),x.oversold);
+    if(x.panic&&x.panic.on&&(x.panic.list||[]).length)s+=blk((en?"Crash button":"폭락 단추")+" ("+x.panic.idx3d+"%)",x.panic.list);
+    return s;
+  };
+  const body=sec("kr",R.kr,totKR,kr)+sec("us",R.us,totUS,us);
+  if(has){
+    if(fx>0){
+      (RL.co||[]).filter(function(p){return !p.spot;}).forEach(function(p){ PIEP.push([String(p.code).split("-")[0]+(en?" perp":" 선물"),(p.evl||0)*fx,"held"]); });
+      (RL.co||[]).filter(function(p){return p.spot;}).forEach(function(p){ PIEP.push([String(p.code).split("-")[0]+(en?" spot":" 현물"),(p.qty||0)*(p.cur||0)*fx,"held"]); });
+      if(cash.usdt>0)PIEP.push(["USDT",cash.usdt*fx,"cash"]);
+    }
+    h+='<div class="dphd" style="margin-top:4px">'+(en?"Portfolio if you follow the picks":"추천대로 채운 포트폴리오")+'</div>'+recoPie(PIEP)
+      +(fx>0?"":'<div class="dpmsg">'+(en?"USD rate not loaded yet — KR only.":"환율을 아직 못 받아 국내만 그렸습니다.")+'</div>');
+  }
+  h+=body;
+  // 코인 — 왕관 판정과 지금 선물 포지션 비교
+  const co=(has?RL.co:[]).filter(function(p){return !p.spot;});
+  let c='<div class="dphd" style="margin-top:8px">'+(en?"Crypto (Hull100 · SMA120 · width 0.3%)":"코인 (헐100 · 120일선 · 폭 0.3%)")+'</div><table class="mhtab">';
+  ["BTC","ETH"].forEach(function(k){
+    const z=(R.coin||{})[k]||{}, pos=co.filter(function(p){return String(p.code).indexOf(k+"-")===0;})[0];
+    const now=pos?(pos.side==="L"?(en?"LONG":"롱"):(en?"SHORT":"숏")):(en?"none":"없음");
+    const want=cs(z), ok=(!pos&&z.state==="cash")||(pos&&((pos.side==="L"&&z.state==="long")||(pos.side==="S"&&z.state==="short")));
+    c+='<tr><td style="text-align:left">'+k+'</td><td>'+(en?"Rule ":"규칙 ")+want+'<br><span class="dplbl">'+(z.width!==undefined?(en?"width ":"폭 ")+z.width+"%":"")+'</span></td>'
+      +'<td>'+(en?"Now ":"지금 ")+now+'</td><td class="'+(ok?"up":"dn")+'">'+(ok?(en?"OK":"맞음"):(en?"Change":"바꿀 것"))+'</td></tr>';
+  });
+  h+=c+'</table>';
+  h+='<div class="dpmsg" style="margin-top:6px">'+(en?"Measured rules only. Tap View to open the stock and order.":"잰 규칙만 씁니다. [조회]를 누르면 종목이 열리고 바로 주문할 수 있습니다.")+'</div>';
+  card.innerHTML=h;
+}
+setTimeout(recoLoad,2500);
+setInterval(recoLoad,30*60000);
+setInterval(function(){ try{ recoRender(); }catch(e){} },15000);   // 실계좌가 바뀌면 칸·팔 것을 다시
+
 function applyLang(){
   var b=E("lng");if(b)b.textContent=LANG==="en"?"한":"EN";
   var t=E("ttl");if(t)t.innerHTML=brandMark();
