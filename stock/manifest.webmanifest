@@ -2,9 +2,15 @@
  "id": "/morning-brief/stock/",
  "name": "데일리 브리프 라이브 주식",
  "short_name": "주식",
- "start_url": ".",
- "scope": ".",
+ "description": "데일리 브리프 라이브 주식 — 시세·성향별 추천 (정보 제공)",
+ "lang": "ko",
+ "start_url": "./?src=pwa",
+ "scope": "./",
  "display": "standalone",
+ "orientation": "portrait",
+ "categories": [
+  "finance"
+ ],
  "background_color": "#eef7ee",
  "theme_color": "#2f9e44",
  "icons": [
