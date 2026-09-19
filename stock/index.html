@@ -1644,7 +1644,23 @@ const SV_PROD = {
   "국내 주식 ETF": [["KODEX 200", "069500"], ["TIGER 200", "102110"]],
   "해외 ETF": [["TIGER 미국S&P500", "360750"], ["TIGER 미국나스닥100", "133690"]],
 };
-const SV_PAL = ["#adb5bd", "#4c6ef5", "#37b24d", "#f59f00", "#e8590c", "#1098ad", "#ae3ec9"];
+// 색은 무지개로 흩뿌리지 않는다. 배분은 안전한 쪽 → 위험한 쪽 차례라서
+// 차가운 남색에서 따뜻한 테라코타로 이어지는 한 줄기 색띠로 둔다(채도 낮춤).
+const SV_PAL = ["#3D6B8E", "#4C93A6", "#5AA189", "#C9A03F", "#C4764F", "#A85A66", "#7A6B93"];
+// 🔴 색은 순서가 아니라 **갈래**에 붙인다 — 등급이 달라져도 정기예금은 늘 같은 남색이다.
+const SV_COLOR = {
+  "정기예금": "#3D6B8E", "국내 채권 ETF": "#4C93A6", "국내 주식 ETF": "#5AA189",
+  "해외 ETF": "#C9A03F", "국내 주식": "#C4764F", "해외 주식": "#A85A66",
+};
+function svColor(nm, i) { return SV_COLOR[nm] || SV_PAL[i % SV_PAL.length]; }
+
+// 색 밝기 조절 — 겉면 그라데이션·옆면(그늘) 만들기
+function svShade(hex, f) {
+  const n = parseInt(hex.slice(1), 16);
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  const m = function (v) { return Math.max(0, Math.min(255, Math.round(f < 1 ? v * f : v + (255 - v) * (f - 1)))); };
+  return "#" + ((1 << 24) + (m(r) << 16) + (m(g) << 8) + m(b)).toString(16).slice(1);
+}
 
 function svGet() { try { return JSON.parse(localStorage.getItem(SV_KEY) || "null"); } catch (e) { return null; } }
 function svSave(o) { try { localStorage.setItem(SV_KEY, JSON.stringify(o)); } catch (e) {} }
@@ -1708,25 +1724,56 @@ async function svRecoLoad() {
   try { SVR = await fetch(RECO_URL + "?t=" + Date.now(), {cache: "no-store"}).then(function (r) { return r.json(); }); } catch (e) {}
   svRecoRender();
 }
+// 입체 원그래프 — 타원으로 눕히고 옆면을 겹쳐 쌓아 두께를 만든다 (사장님 2026-09-20).
+//   옆면은 조각 전체를 아래로 한 칸씩 내려 그린 뒤 겉면을 덮는다. 그러면 앞쪽 옆면만 남아 두께로 보인다.
 function svPie(mix) {
-  const tot = mix.reduce(function (s, m) { return s + m[1]; }, 0);
-  let a0 = -Math.PI / 2, svg = "";
-  mix.forEach(function (m, i) {
-    const f = m[1] / tot, a1 = a0 + f * 2 * Math.PI, R = 78, cx = 90, cy = 90;
-    const x0 = cx + R * Math.cos(a0), y0 = cy + R * Math.sin(a0), x1 = cx + R * Math.cos(a1), y1 = cy + R * Math.sin(a1);
-    svg += '<path d="M' + cx + ',' + cy + ' L' + x0.toFixed(1) + ',' + y0.toFixed(1) + ' A' + R + ',' + R + ' 0 '
-        + (f > 0.5 ? 1 : 0) + ',1 ' + x1.toFixed(1) + ',' + y1.toFixed(1) + ' Z" fill="' + SV_PAL[i % SV_PAL.length]
-        + '" stroke="var(--card)" stroke-width="1"/>';
-    if (f >= 0.06) {
-      const am = (a0 + a1) / 2;
-      svg += '<text x="' + (cx + R * 0.62 * Math.cos(am)).toFixed(1) + '" y="' + (cy + R * 0.62 * Math.sin(am) + 4).toFixed(1)
-          + '" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">' + m[1] + '%</text>';
-    }
-    a0 = a1;
+  const tot = mix.reduce(function (s, m) { return s + m[1]; }, 0) || 1;
+  const cx = 130, cy = 92, rx = 112, ry = 64, dep = 24;
+  // 🔴 한 화면에 그래프가 둘 이상이면 id 가 겹쳐 앞 그래프 색을 따라간다 — 부를 때마다 다른 이름을 준다.
+  const uid = "sv" + (svPie.n = (svPie.n || 0) + 1) + "_";
+  const seg = mix.map(function (m, i) { return {nm: m[0], v: m[1], c: svColor(m[0], i)}; });
+  let a = -Math.PI / 2;
+  seg.forEach(function (s) { s.a0 = a; a += (s.v / tot) * 2 * Math.PI; s.a1 = a; });
+
+  function wedge(a0, a1, dy) {
+    const x0 = cx + rx * Math.cos(a0), y0 = cy + ry * Math.sin(a0) + dy;
+    const x1 = cx + rx * Math.cos(a1), y1 = cy + ry * Math.sin(a1) + dy;
+    return 'M' + cx + ',' + (cy + dy) + ' L' + x0.toFixed(2) + ',' + y0.toFixed(2)
+         + ' A' + rx + ',' + ry + ' 0 ' + ((a1 - a0) > Math.PI ? 1 : 0) + ',1 ' + x1.toFixed(2) + ',' + y1.toFixed(2) + ' Z';
+  }
+
+  let defs = "", sides = "", tops = "", labels = "";
+  seg.forEach(function (s, i) {
+    defs += '<linearGradient id="' + uid + i + '" x1="0.1" y1="0" x2="0.5" y2="1">'
+          + '<stop offset="0" stop-color="' + svShade(s.c, 1.3) + '"/>'
+          + '<stop offset="0.5" stop-color="' + s.c + '"/>'
+          + '<stop offset="1" stop-color="' + svShade(s.c, 0.85) + '"/></linearGradient>';
   });
-  return '<div style="text-align:center"><svg viewBox="0 0 180 180" width="180" height="180">' + svg + '</svg></div>'
-    + '<div class="svleg">' + mix.map(function (m, i) {
-        return '<span><i style="background:' + SV_PAL[i % SV_PAL.length] + '"></i>' + m[0] + ' ' + m[1] + '%</span>';
+  for (let d = dep; d >= 1; d--) {
+    const t = 1 - d / dep;                                  // 아래로 갈수록 어둡게
+    seg.forEach(function (s) {
+      sides += '<path d="' + wedge(s.a0, s.a1, d) + '" fill="' + svShade(s.c, 0.64 + 0.16 * t) + '"/>';
+    });
+  }
+  seg.forEach(function (s, i) {
+    tops += '<path d="' + wedge(s.a0, s.a1, 0) + '" fill="url(#' + uid + i + ')" stroke="rgba(255,255,255,.5)" stroke-width="0.9"/>';
+    if (s.v / tot >= 0.05) {
+      const am = (s.a0 + s.a1) / 2;
+      labels += '<text x="' + (cx + rx * 0.64 * Math.cos(am)).toFixed(1) + '" y="' + (cy + ry * 0.64 * Math.sin(am) + 4.5).toFixed(1)
+             + '" font-size="13" font-weight="800" text-anchor="middle" fill="#fff"'
+             + ' stroke="rgba(0,0,0,.30)" stroke-width="2.6" style="paint-order:stroke">' + s.v + '%</text>';
+    }
+  });
+  return '<div style="text-align:center;margin:2px 0 8px">'
+    + '<svg viewBox="0 0 260 186" width="100%" style="max-width:300px">'
+    + '<defs>' + defs
+    + '<radialGradient id="' + uid + 'sh"><stop offset="0.35" stop-color="rgba(0,0,0,.26)"/><stop offset="1" stop-color="rgba(0,0,0,0)"/></radialGradient>'
+    + '</defs>'
+    + '<ellipse cx="' + cx + '" cy="' + (cy + dep + 14) + '" rx="' + (rx * 0.95) + '" ry="' + (ry * 0.28) + '" fill="url(#' + uid + 'sh)"/>'
+    + sides + tops + labels + '</svg></div>'
+    + '<div class="svleg">' + seg.map(function (s) {
+        return '<span><i style="background:linear-gradient(145deg,' + svShade(s.c, 1.24) + ',' + svShade(s.c, 0.8) + ')"></i>'
+             + s.nm + ' ' + s.v + '%</span>';
       }).join("") + '</div>';
 }
 function svRecoRender() {
