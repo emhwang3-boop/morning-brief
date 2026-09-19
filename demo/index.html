@@ -3281,6 +3281,9 @@ function obHtml(bk,mk){
   const en=LANG==="en";
   if(!bk)return '<div class="obn">'+(en?"No order book":"호가 없음")+'</div>';
   if(bk.err)return '<div class="obn">'+dpEsc(bk.err)+'</div>';
+  // 호가가 전부 0 이면(예: ETF 는 넥스트레이드가 없어 정규장 뒤엔 호가가 빈다) 빈 상자 대신 글로 (2026-09-19)
+  if(!bk.a.concat(bk.b).some(function(x){return +x[0]>0;}))
+    return '<div class="obn">'+(en?"No quotes right now (market closed)":"지금은 호가가 없습니다 (장 마감)")+'</div>';
   let h='<table>';
   bk.a.slice().reverse().forEach(function(x){ if(!(+x[0]>0))return;           // 매도: 10호가가 맨 위
     h+='<tr class="a" data-p="'+x[0]+'" onclick="obPick(this)"><td class="qa">'+obFmtQ(x[1],mk)+'</td><td class="p">'+obFmtP(x[0],mk)+'</td><td></td></tr>'; });
