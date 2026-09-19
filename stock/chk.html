@@ -1,0 +1,79 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="manifest" href="manifest.webmanifest">
+<title>설치 진단</title>
+<style>
+body{font-family:-apple-system,'Malgun Gothic',sans-serif;background:#eef7ee;margin:0;padding:16px;color:#212529}
+h1{font-size:18px;margin:0 0 4px}
+.sub{font-size:12px;color:#868e96;margin-bottom:14px}
+.row{background:#fff;border-radius:12px;padding:11px 13px;margin:8px 0;font-size:13px;line-height:1.6;
+  box-shadow:0 1px 3px rgba(0,0,0,.07);word-break:break-all}
+.k{font-weight:800;color:#2f9e44;display:block;font-size:12px;margin-bottom:2px}
+.ok{color:#2f9e44;font-weight:800}
+.no{color:#e03131;font-weight:800}
+button{display:block;width:100%;padding:13px;margin-top:14px;border:0;border-radius:12px;
+  background:#2f9e44;color:#fff;font-size:15px;font-weight:800}
+</style></head><body>
+<h1>설치 진단</h1>
+<div class="sub">이 화면을 그대로 찍어서 보내 주십시오.</div>
+<div id="out"></div>
+<button id="btn" onclick="tryInstall()">설치 신호가 오면 여기를 누르십시오</button>
+
+<script>
+var P = null, lines = [];
+function put(k, v, good) {
+  lines.push('<div class="row"><span class="k">' + k + '</span>'
+    + (good === true ? '<span class="ok">' + v + '</span>' : good === false ? '<span class="no">' + v + '</span>' : v)
+    + '</div>');
+  document.getElementById("out").innerHTML = lines.join("");
+}
+var UA = navigator.userAgent || "";
+var kakao = /KAKAOTALK/i.test(UA), inapp = kakao || /NAVER\(|Instagram|FBAN|FBAV|Line\/|DaumApps|; wv\)/i.test(UA);
+var standalone = false;
+try { standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true; } catch (e) {}
+
+put("1. 브라우저", UA);
+put("2. 카카오톡 안인가", kakao ? "예 — 여기선 설치 안 됨" : "아니오", !kakao);
+put("3. 다른 앱 안 브라우저인가", inapp ? "예 — 여기선 설치 안 됨" : "아니오", !inapp);
+put("4. 이미 앱으로 실행 중인가", standalone ? "예 (이미 설치됨)" : "아니오", null);
+put("5. 주소", location.href);
+put("6. https 인가", location.protocol === "https:" ? "예" : "아니오 — " + location.protocol, location.protocol === "https:");
+
+fetch("manifest.webmanifest").then(function (r) {
+  put("7. 매니페스트 응답", r.status + " " + r.headers.get("content-type"), r.ok);
+  return r.json();
+}).then(function (m) {
+  put("8. 매니페스트 내용", "name=" + m.name + " / display=" + m.display
+    + " / start_url=" + m.start_url + " / scope=" + m.scope + " / 아이콘 " + (m.icons || []).length + "개", true);
+  (m.icons || []).forEach(function (ic) {
+    var im = new Image();
+    im.onload = function () { put("9. 아이콘 " + ic.sizes, ic.src + " — 실제 " + im.width + "×" + im.height, true); };
+    im.onerror = function () { put("9. 아이콘 " + ic.sizes, ic.src + " — 못 읽음", false); };
+    im.src = ic.src;
+  });
+}).catch(function (e) { put("7. 매니페스트", "실패 — " + e, false); });
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js").then(function (r) {
+    put("10. 서비스워커", "등록됨 · scope=" + r.scope, true);
+  }).catch(function (e) { put("10. 서비스워커", "등록 실패 — " + e, false); });
+} else { put("10. 서비스워커", "이 브라우저엔 없음", false); }
+
+put("11. 설치 신호(beforeinstallprompt)", "기다리는 중… (최대 20초)", null);
+window.addEventListener("beforeinstallprompt", function (e) {
+  e.preventDefault(); P = e;
+  lines[10] = '<div class="row"><span class="k">11. 설치 신호(beforeinstallprompt)</span><span class="ok">왔습니다 — 아래 단추를 누르면 설치창이 뜹니다</span></div>';
+  document.getElementById("out").innerHTML = lines.join("");
+});
+setTimeout(function () {
+  if (!P) {
+    lines[10] = '<div class="row"><span class="k">11. 설치 신호(beforeinstallprompt)</span><span class="no">20초 동안 안 왔습니다</span></div>';
+    document.getElementById("out").innerHTML = lines.join("");
+  }
+}, 20000);
+function tryInstall() {
+  if (!P) { alert("아직 설치 신호가 안 왔습니다. 11번 줄을 확인해 주십시오."); return; }
+  P.prompt();
+  P.userChoice.then(function (r) { alert("결과: " + (r && r.outcome)); });
+}
+</script></body></html>
