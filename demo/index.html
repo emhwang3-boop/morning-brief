@@ -2036,6 +2036,7 @@ async function rlOkxPost(path, body) {
     throw new Error(String(d0.sCode || j.code) + " " + (d0.sMsg || j.msg || ""));
   if (d0.sCode !== undefined && String(d0.sCode) !== "0")
     throw new Error(String(d0.sCode) + " " + (d0.sMsg || ""));
+  setTimeout(function () { try { rlOsoLoad(); } catch (e) {} }, 1500);
   return j;
 }
 // 헤지 모드면 주문에 posSide 가 필수다 — 한 번 받아 두고 쓴다
@@ -2179,6 +2180,7 @@ async function rlStockOrder(mk, side, code, qty, limitPx) {
   // 🔴 키움은 거부도 200 으로 준다 — return_code 를 봐야 한다
   if (j && String(j.return_code) !== "0")
     throw new Error(String(j.return_code) + " " + (j.return_msg || ""));
+  setTimeout(function () { try { rlOsoLoad(); } catch (e) {} }, 1500);   // 걸린 주문이면 미체결에 뜬다
   return j;
 }
 // 미국 종목의 거래소 구분(ND 나스닥 · NY 뉴욕 · NA 아멕스) — 차트·호가가 찾아 둔 값이 있으면 그것, 없으면 현재가(usa20100)로 찾는다
@@ -2383,6 +2385,7 @@ async function rlLoad(auto) {
     }, 60000);
     try { dpHoldRender(); } catch (e) {}
     try { dpRender(); } catch (e) {}
+    setTimeout(function () { try { rlOsoLoad(); } catch (e) {} }, 300);   // 미체결도 같이 (2026-09-19)
   }
 }
 function rlHas() { return (RL.kr.length + RL.us.length + RL.co.length) > 0; }
@@ -2399,6 +2402,114 @@ function rlClear() {
   try { dpRender(); } catch (e) {}
 }
 function rlCash() { return RL.cash; }
+
+
+// ── 미체결 주문 · 취소 (사장님 2026-09-19 "미체결 주문을 취소하는 기능이 없다") ──────────────
+// 국내 ka10075 조회 · kt10003 취소 (둘 다 09-19 실측: 없는 원주문번호 → "원주문내역이 존재하지 않습니다")
+// 미국 ust21050 조회(실측) · ust20003 취소 — 🔴 ust20003=취소는 국내 번호 규칙(kt10002 정정·kt10003 취소)으로 본 것, 평일 실측 필요
+// OKX  /api/v5/trade/orders-pending · /api/v5/trade/cancel-order (공개 규격)
+// 🔴 국내·미국 미체결 줄의 칸 이름은 걸린 주문이 없어 실물을 못 봤다 — 여러 이름을 차례로 받아 본다.
+function rlPick(o, names) {
+  for (const n of names) if (o && o[n] !== undefined && o[n] !== null && String(o[n]).trim() !== "") return o[n];
+  return "";
+}
+function rlSideOf(x) {
+  const t = String(rlPick(x, ["io_tp_nm", "sll_buy_tp_nm", "trde_tp_nm", "ord_tp_nm", "bs_tp_nm", "sll_buy_tp"]));
+  if (/매도|sell/i.test(t) || /^-/.test(t)) return "S";
+  if (/매수|buy/i.test(t) || /^\+/.test(t)) return "B";
+  return "?";
+}
+async function rlOsoLoad() {
+  if (RL.osoBusy) return; RL.osoBusy = true;
+  const out = [], err = [];
+  try {
+    if (ST.kr && ST.kr.key && ST.kr.sec) {
+      let tok = null;
+      try { tok = await rlToken(); } catch (e) { err.push("키움 " + e.message); }
+      if (tok) {
+        try {
+          const j = await rlKiwoom(tok, "/api/dostk/acnt", "ka10075",
+                                   {all_stk_tp: "0", trde_tp: "0", stk_cd: "", stex_tp: "0"});
+          if (j && String(j.return_code) !== "0") throw new Error(j.return_code + " " + (j.return_msg || ""));
+          (j.oso || []).forEach(function (x) {
+            const left = rlAbs(rlPick(x, ["oso_qty", "nccs_qty", "rmn_qty"]));
+            if (!(left > 0)) return;
+            const st = String(rlPick(x, ["stex_tp_txt", "stex_tp", "dmst_stex_tp"]));
+            out.push({mk: "kr", id: String(rlPick(x, ["ord_no"])),
+                      code: String(rlPick(x, ["stk_cd"])).replace(/^A/, "").replace(/_.*$/, ""),
+                      name: rlPick(x, ["stk_nm"]) || x.stk_cd, side: rlSideOf(x),
+                      px: rlAbs(rlPick(x, ["ord_pric", "ord_uv"])), left: left,
+                      stex: /NXT/i.test(st) ? "NXT" : (/SOR/i.test(st) ? "SOR" : "KRX")});
+          });
+        } catch (e) { err.push("국내 미체결 " + e.message); }
+        if (!(ST.us && ST.us.broker === "korea_inv")) {
+          try {
+            const j = await rlKiwoom(tok, "/api/us/acnt", "ust21050", {}) || {};
+            if (String(j.return_code) !== "0" && !/미체결내역이 없/.test(j.return_msg || ""))
+              throw new Error(j.return_code + " " + (j.return_msg || ""));
+            let rows = [];
+            for (const k in j) if (Array.isArray(j[k])) rows = rows.concat(j[k]);
+            rows.forEach(function (x) {
+              const left = rlAbs(rlPick(x, ["oso_qty", "nccs_qty", "rmn_qty", "ord_rmn_qty", "ncls_qty"]));
+              if (!(left > 0)) return;
+              out.push({mk: "us", id: String(rlPick(x, ["ord_no", "odno"])),
+                        code: String(rlPick(x, ["stk_cd", "pdno"])),
+                        name: rlPick(x, ["stk_nm", "fgn_stk_nm", "stk_enm"]) || x.stk_cd, side: rlSideOf(x),
+                        px: rlAbs(rlPick(x, ["ord_uv", "ord_pric", "ord_pr"])), left: left,
+                        stex: String(rlPick(x, ["stex_tp"]))});
+            });
+          } catch (e) { err.push("미국 미체결 " + e.message); }
+        }
+      }
+    }
+    if (ST.co && ST.co.key && ST.co.sec && ST.co.pass && ST.co.broker === "okx") {
+      try {
+        const j = await rlOkx("/api/v5/trade/orders-pending");
+        for (const x of (j.data || [])) {
+          const swap = x.instType === "SWAP";
+          const cv = swap ? await rlCtVal(x.instId) : 1;        // 선물은 계약 수 → 코인 수
+          const base = String(x.instId).split("-")[0];
+          out.push({mk: "co", id: x.ordId, code: x.instId,
+                    name: base + (swap ? " 선물" : " 현물"), side: x.side === "buy" ? "B" : "S",
+                    px: rlNum(x.px), left: (rlNum(x.sz) - rlNum(x.accFillSz)) * cv, swap: swap});
+        }
+      } catch (e) { err.push("코인 미체결 " + e.message); }
+    }
+  } finally {
+    RL.oso = out; RL.osoErr = err; RL.osoAt = Date.now(); RL.osoBusy = false;
+    try { dpRender(); } catch (e) {}
+  }
+}
+async function rlOsoCancel(i) {
+  const o = (RL.oso || [])[i]; if (!o) return;
+  const en = LANG === "en", say = function (t) { const e = E("osoMsg"); if (e) e.textContent = t; };
+  const sd = o.side === "B" ? (en ? "BUY" : "매수") : (o.side === "S" ? (en ? "SELL" : "매도") : "");
+  if (!confirm((en ? "Cancel this order?\n" : "이 주문을 취소할까요?\n") + o.name + " " + sd + " "
+               + (+o.left.toFixed(8)) + " @ " + o.px)) return;
+  say(en ? "Cancelling…" : "취소 보내는 중…");
+  try {
+    if (o.mk === "co") {
+      await rlOkxPost("/api/v5/trade/cancel-order", {instId: o.code, ordId: String(o.id)});
+    } else {
+      const tok = await rlToken(); let j;
+      if (o.mk === "kr") {
+        // cncl_qty "0" = 남은 수량 전부 취소(키움 규격)
+        j = await rlKiwoom(tok, "/api/dostk/ordr", "kt10003",
+                           {dmst_stex_tp: o.stex || "KRX", orig_ord_no: o.id, stk_cd: o.code, cncl_qty: "0"});
+      } else {
+        const tick = String(o.code).replace(/\.US$/, "").toUpperCase();
+        const ex = /^(ND|NY|NA)$/.test(o.stex) ? o.stex : await rlUsStex(tok, tick);
+        j = await rlKiwoom(tok, "/api/us/ordr", "ust20003",
+                           {stex_tp: ex, stk_cd: tick, orig_ord_no: o.id, cncl_qty: String(Math.floor(o.left))});
+      }
+      if (j && String(j.return_code) !== "0") throw new Error(j.return_code + " " + (j.return_msg || ""));
+    }
+    say(en ? "Cancel sent." : "취소를 보냈습니다.");
+  } catch (e) {
+    say((en ? "Cancel rejected: " : "취소 거부: ") + e.message);
+  }
+  setTimeout(rlOsoLoad, 1500);
+}
 
 // ── OKX 공개 시세 (사장님 2026-09-19 — 코인은 전부 OKX 기준) ──
 // 🔴 키 없이 받는 공개 자료다. 돌려주는 모양은 옛 바이낸스 응답과 같게 맞춰 나머지 코드를 안 건드린다.
@@ -3113,6 +3224,25 @@ function dpRender(){
     const t=document.querySelector("#demoacct h3");
     if(t) t.childNodes[0].nodeValue=(en?"Account ":"계좌 ")   /* 사장님 2026-09-19 — 그냥 계좌 */;
   }catch(e){}
+  // 미체결 (2026-09-19) — 실계좌를 불러온 뒤에만. 줄마다 [취소]
+  if(typeof RL!=="undefined"&&RL.osoAt){
+    const oso=RL.oso||[];
+    h+='<div class="dphd" style="margin-top:10px">'+(en?"Open orders ":"미체결 ")+'<span class="dplbl">'+oso.length+(en?"":"건")+'</span></div>';
+    if(oso.length){
+      h+='<div class="dplog"><table class="mhtab">';
+      oso.forEach(function(o,i){
+        const sd=o.side==="B"?(en?"BUY":"매수"):(o.side==="S"?(en?"SELL":"매도"):"-");
+        const px=(o.mk==="kr")?(Math.round(o.px).toLocaleString()+(en?"":"원")):("$"+(+o.px).toLocaleString(undefined,{maximumFractionDigits:8}));
+        h+='<tr><td style="text-align:left">'+dpEsc(o.name)+'</td>'
+         +'<td class="'+(o.side==="B"?"up":"dn")+'" style="text-align:center">'+sd+'</td>'
+         +'<td>'+(+o.left.toFixed(8)).toLocaleString(undefined,{maximumFractionDigits:8})+'</td><td>'+px+'</td>'
+         +'<td><button class="dpb flat dpsm" onclick="rlOsoCancel('+i+')">'+(en?"Cancel":"취소")+'</button></td></tr>';
+      });
+      h+='</table></div>';
+    }
+    if((RL.osoErr||[]).length) h+='<div class="dpmsg">'+dpEsc(RL.osoErr.join(" / "))+'</div>';
+    h+='<div class="dpmsg" id="osoMsg"></div>';
+  }
   if(DP.log.length){
     h+='<div class="dphd" style="margin-top:10px">'+(en?"Order log":"주문 내역")+'</div><div class="dplog"><table class="mhtab">';
     DP.log.slice(0,40).forEach(function(l){
