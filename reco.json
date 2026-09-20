@@ -1,5 +1,5 @@
 {
- "at": "2026-09-20 21:08",
+ "at": "2026-09-20 21:19",
  "rules": {
   "slots": 12,
   "tp": 15,
@@ -120,65 +120,80 @@
   "buy": []
  },
  "levu": {
-  "n": 0,
-  "buy": []
+  "n": 5,
+  "buy": [
+   {
+    "code": "BRZU",
+    "name": "BRZU (브라질3x)",
+    "close": 102.62,
+    "width": 1.84,
+    "r20": 19.6
+   },
+   {
+    "code": "GUSH",
+    "name": "GUSH (원유탐사3x)",
+    "close": 45.71,
+    "width": 0.92,
+    "r20": 2.8
+   }
+  ]
  },
  "coin": {
   "BTC": {
-   "price": 80520.0,
-   "chg": -0.9,
+   "price": 80410.4,
+   "chg": -1.03,
    "state": "long",
    "new": true,
    "asof": "2026-09-20",
-   "turn": 990593275
+   "turn": 990221147
   },
   "ETH": {
-   "price": 2581.68,
-   "chg": -1.94,
+   "price": 2576.43,
+   "chg": -2.14,
    "state": "long",
    "new": true,
    "asof": "2026-09-20",
-   "turn": 487774869
+   "turn": 487758013
   },
   "ZEC": {
-   "price": 1462.1,
-   "chg": -0.6,
+   "price": 1445.61,
+   "chg": -1.72,
    "state": "long",
    "new": false,
    "asof": "2026-09-20",
-   "turn": 267049222
+   "turn": 269816916
   },
   "NEAR": {
-   "price": 3.622,
-   "chg": 0.95,
+   "price": 3.61,
+   "chg": 0.61,
    "state": "long",
    "new": false,
    "asof": "2026-09-20",
-   "turn": 239440369
+   "turn": 240659808
   },
   "SOL": {
-   "price": 108.78,
-   "chg": -2.05,
+   "price": 108.34,
+   "chg": -2.45,
    "state": "long",
    "new": false,
    "asof": "2026-09-20",
-   "turn": 233336194
+   "turn": 232623354
   },
   "XRP": {
-   "price": 1.3823,
-   "chg": -1.99,
+   "price": 1.3787,
+   "chg": -2.25,
    "state": "long",
    "new": false,
    "asof": "2026-09-20",
-   "turn": 218990304
+   "turn": 217437938
   },
   "AVAX": {
-   "price": 10.405,
-   "chg": 3.08,
+   "price": 10.51,
+   "chg": 4.12,
    "state": "long",
    "new": false,
    "asof": "2026-09-20",
-   "turn": 108022173
+   "turn": 110014904
   }
  }
 }
