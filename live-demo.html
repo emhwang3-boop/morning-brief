@@ -3780,7 +3780,7 @@ function recoRender(){
       (RL.co||[]).filter(function(p){return p.spot;}).forEach(function(p){ PIEP.push([String(p.code).split("-")[0]+(en?" spot":" 현물"),(p.qty||0)*(p.cur||0)*fx,"held"]); });
       if(cash.usdt>0)PIEP.push(["USDT",cash.usdt*fx,"cash"]);
     }
-    h+='<div class="dphd" style="margin-top:4px">'+(en?"Portfolio if you follow the picks (with your cash)":"추천대로 채운 포트폴리오 (지금 현금으로)")+'</div>'+recoPie(PIEP)
+    h+='<div class="dphd" style="margin-top:4px">'+(en?"Recommended portfolio":"추천 포트폴리오")+'</div>'+recoPie(PIEP)
       +(fx>0?"":'<div class="dpmsg">'+(en?"USD rate not loaded yet — KR only.":"환율을 아직 못 받아 국내만 그렸습니다.")+'</div>');
   }
   h+=body;
