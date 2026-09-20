@@ -1,5 +1,5 @@
 {
- "at": "2026-09-20 20:16",
+ "at": "2026-09-20 20:49",
  "rules": {
   "slots": 12,
   "tp": 15,
@@ -111,62 +111,66 @@
    "list": []
   }
  },
+ "etfw": {
+  "n": 0,
+  "buy": []
+ },
  "coin": {
   "BTC": {
-   "price": 80349.0,
-   "chg": -1.11,
+   "price": 80486.0,
+   "chg": -0.94,
    "state": "long",
    "new": true,
    "asof": "2026-09-20",
-   "turn": 967331213
+   "turn": 984657425
   },
   "ETH": {
-   "price": 2571.18,
-   "chg": -2.34,
+   "price": 2577.47,
+   "chg": -2.1,
    "state": "long",
    "new": true,
    "asof": "2026-09-20",
-   "turn": 491180820
+   "turn": 488819409
   },
   "ZEC": {
-   "price": 1437.8,
-   "chg": -2.25,
+   "price": 1445.26,
+   "chg": -1.75,
    "state": "long",
    "new": false,
    "asof": "2026-09-20",
-   "turn": 264602431
+   "turn": 264690995
   },
   "NEAR": {
-   "price": 3.582,
-   "chg": -0.17,
+   "price": 3.648,
+   "chg": 1.67,
    "state": "long",
    "new": false,
    "asof": "2026-09-20",
-   "turn": 239186402
+   "turn": 238486602
   },
   "SOL": {
-   "price": 108.02,
-   "chg": -2.74,
+   "price": 108.51,
+   "chg": -2.3,
    "state": "long",
    "new": false,
    "asof": "2026-09-20",
-   "turn": 232577344
+   "turn": 232627016
   },
   "XRP": {
-   "price": 1.3756,
-   "chg": -2.47,
+   "price": 1.3801,
+   "chg": -2.15,
    "state": "long",
    "new": false,
    "asof": "2026-09-20",
-   "turn": 227691674
+   "turn": 222810680
   },
   "SUI": {
-   "price": 0.8152,
-   "chg": -4.93,
+   "price": 0.8217,
+   "chg": -4.17,
    "state": "long",
    "new": true,
    "asof": "2026-09-20",
-   "turn": 104897711
+   "turn": 101776749
   }
  }
 }
