@@ -3867,4 +3867,30 @@ function vcSend(){
   lang(); var lb=document.getElementById("lng"); if(lb)lb.addEventListener("click",function(){setTimeout(lang,50);});
 })();
 </script>
+<script>
+// 고객의 소리 — 몇 자 썼는지 오른쪽 아래에 조그맣게 (사장님 2026-09-20)
+// 🔴 한도는 입력칸의 maxlength 를 그대로 읽는다 — 앱마다 달라도 알아서 맞는다.
+(function () {
+  function vcCount() {
+    var el = document.getElementById("vcTxt");
+    if (!el) return;
+    var max = +el.getAttribute("maxlength") || 200;
+    var c = document.getElementById("vcCnt");
+    if (!c) {
+      c = document.createElement("div");
+      c.id = "vcCnt";
+      c.setAttribute("style", "text-align:right;font-size:11px;color:var(--sub);margin-top:2px;line-height:1.2");
+      el.insertAdjacentElement("afterend", c);
+    }
+    var n = (el.value || "").length;
+    c.textContent = n + " / " + max;
+    c.style.color = (n >= max) ? "#e8590c" : "var(--sub)";
+  }
+  document.addEventListener("input", function (e) {
+    if (e.target && e.target.id === "vcTxt") vcCount();
+  });
+  setTimeout(vcCount, 1200);
+})();
+
+</script>
 </body></html>
