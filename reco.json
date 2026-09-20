@@ -1,5 +1,5 @@
 {
- "at": "2026-09-19 23:46",
+ "at": "2026-09-20 10:36",
  "rules": {
   "slots": 12,
   "tp": 15,
@@ -63,17 +63,10 @@
   "asof": "2026-09-18",
   "regime": {
    "good": false,
-   "vs_ma60": -1.55,
+   "vs_ma60": -1.65,
    "cycle_exit": false
   },
   "buy12": [
-   {
-    "code": "MSTR",
-    "name": "MSTR",
-    "close": 153.92,
-    "r20": 37.0,
-    "why": "정배열·얕은낙폭·벽없음 · 20일 +37.0%"
-   },
    {
     "code": "DELL",
     "name": "DELL",
@@ -101,9 +94,16 @@
     "close": 413.28,
     "r20": 21.0,
     "why": "정배열·얕은낙폭·벽없음 · 20일 +21.0%"
+   },
+   {
+    "code": "MPC",
+    "name": "MPC",
+    "close": 424.89,
+    "r20": 18.6,
+    "why": "정배열·얕은낙폭·벽없음 · 20일 +18.6%"
    }
   ],
-  "n12": 35,
+  "n12": 33,
   "oversold": [],
   "n_over": 0,
   "panic": {
@@ -113,20 +113,156 @@
  },
  "coin": {
   "BTC": {
-   "price": 81511.8,
-   "sma120": 68247.86,
+   "price": 81032.9,
+   "sma120": 68281.5,
    "hull_up": true,
-   "width": 0.7,
+   "width": 0.76,
    "state": "long",
-   "asof": "2026-09-19"
+   "asof": "2026-09-20"
   },
   "ETH": {
-   "price": 2638.34,
-   "sma120": 1991.24,
+   "price": 2616.58,
+   "sma120": 1995.35,
    "hull_up": true,
-   "width": 0.99,
+   "width": 1.05,
    "state": "long",
-   "asof": "2026-09-19"
+   "asof": "2026-09-20"
+  },
+  "ZEC": {
+   "price": 1459.96,
+   "sma120": 632.482,
+   "hull_up": true,
+   "width": 4.41,
+   "state": "long",
+   "asof": "2026-09-20"
+  },
+  "SOL": {
+   "price": 110.05,
+   "sma120": 81.9921,
+   "hull_up": true,
+   "width": 1.38,
+   "state": "long",
+   "asof": "2026-09-20"
+  },
+  "XRP": {
+   "price": 1.3975,
+   "sma120": 1.19096,
+   "hull_up": true,
+   "width": 0.86,
+   "state": "long",
+   "asof": "2026-09-20"
+  },
+  "DOGE": {
+   "price": 0.08679,
+   "sma120": 0.0804166,
+   "hull_up": true,
+   "width": 0.66,
+   "state": "long",
+   "asof": "2026-09-20"
+  },
+  "UNI": {
+   "price": 8.771,
+   "sma120": 4.01006,
+   "hull_up": true,
+   "width": 3.39,
+   "state": "long",
+   "asof": "2026-09-20"
+  },
+  "ONE": {
+   "price": 0.0034755,
+   "sma120": 0.00121671,
+   "hull_up": true,
+   "width": 3.35,
+   "state": "long",
+   "asof": "2026-09-20"
+  },
+  "PEPE": {
+   "price": 4.036e-06,
+   "sma120": 3.04036e-06,
+   "hull_up": true,
+   "width": 1.0,
+   "state": "long",
+   "asof": "2026-09-20"
+  },
+  "HYPE": {
+   "price": 91.568,
+   "sma120": 67.5212,
+   "hull_up": true,
+   "width": 1.77,
+   "state": "long",
+   "asof": "2026-09-20"
+  },
+  "FIL": {
+   "price": 0.9559,
+   "sma120": 0.776986,
+   "hull_up": true,
+   "width": 1.91,
+   "state": "long",
+   "asof": "2026-09-20"
+  },
+  "ENA": {
+   "price": 0.20736,
+   "sma120": 0.104248,
+   "hull_up": true,
+   "width": 1.95,
+   "state": "long",
+   "asof": "2026-09-20"
+  },
+  "NEAR": {
+   "price": 3.539,
+   "sma120": 2.04956,
+   "hull_up": true,
+   "width": 3.74,
+   "state": "long",
+   "asof": "2026-09-20"
+  },
+  "SUI": {
+   "price": 0.8529,
+   "sma120": 0.750577,
+   "hull_up": true,
+   "width": 0.57,
+   "state": "long",
+   "asof": "2026-09-20"
+  },
+  "TRUMP": {
+   "price": 2.077,
+   "sma120": 1.81553,
+   "hull_up": true,
+   "width": 0.5,
+   "state": "long",
+   "asof": "2026-09-20"
+  },
+  "AVAX": {
+   "price": 9.842,
+   "sma120": 7.06211,
+   "hull_up": true,
+   "width": 1.35,
+   "state": "long",
+   "asof": "2026-09-20"
+  },
+  "ZAMA": {
+   "price": 0.0819,
+   "sma120": 0.0425815,
+   "hull_up": true,
+   "width": 0.92,
+   "state": "long",
+   "asof": "2026-09-20"
+  },
+  "ARB": {
+   "price": 0.20533,
+   "sma120": 0.097775,
+   "hull_up": true,
+   "width": 4.03,
+   "state": "long",
+   "asof": "2026-09-20"
+  },
+  "WLD": {
+   "price": 0.4271,
+   "sma120": 0.405832,
+   "hull_up": true,
+   "width": 1.38,
+   "state": "long",
+   "asof": "2026-09-20"
   }
  }
 }
