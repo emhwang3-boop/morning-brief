@@ -109,6 +109,7 @@ body.light .mk img.lt{display:block}
 .c21ttl{font-weight:800;color:var(--nm)}
 .c21add{display:flex;align-items:center;gap:3px;font-weight:700;color:#1c7ed6;cursor:pointer}
 .c21hint{margin-left:auto;color:var(--sub);font-size:10.5px}
+.c21help{display:inline-block;margin-left:4px;color:#1c7ed6;font-weight:800;cursor:pointer;font-size:12px}
 .c21lbl{color:var(--sub);font-size:11px}
 .c21sel{padding:3px 6px;border:1px solid var(--bd);border-radius:7px;background:var(--bg);color:var(--nm);font-size:12px}
 .c21chip{background:#e7f0ff;color:#1558b0;border-radius:12px;padding:2px 8px;font-size:11px;cursor:pointer;white-space:nowrap}
@@ -972,7 +973,8 @@ function makeChart(cid,opt){
     bar.innerHTML='<div class="c21r1"><span class="c21ttl">'+(ST0.page+1)+'/'+(PAGES.length+1)+' · '
       +(p?p[en?2:1]:(en?"Base only":"기본판"))+'</span>'
       +(p?'<label class="c21add"><input type="checkbox"'+(on?" checked":"")+'> '+(en?"Keep on chart":"얹기")+'</label>':"")
-      +'<span class="c21hint">'+(en?"drag past the end ▶ next":"끝에서 한 번 더 밀면 다음 판")+'</span></div>'
+      +'<span class="c21hint">'+(en?"Swipe the chart left / right":"차트를 좌우로 밀어보세요")
+      +' <span class="c21help" onclick="c21Coach(1)">ⓘ</span></span></div>'
       +'<div class="c21r2"><span class="c21lbl">'+(en?"Base":"기본판")+'</span><select class="c21sel">'
       +C21_BASE.map((b,i)=>'<option value="'+i+'"'+(i===ST0.base?" selected":"")+'>'+b[en?1:0]+'</option>').join("")+'</select>'
       +ST0.ovs.map(k=>'<span class="c21chip" data-k="'+k+'">'+nm(k)+' <b>✕</b></span>').join("")
@@ -1178,6 +1180,53 @@ function makeChart(cid,opt){
   paintBar();
   return {setData,patchLast,flip,state:()=>ST0,meas:()=>MEAS,repaint:()=>{paintBar();draw();}};
 }
+
+
+// ── 쓰는 법 안내 (사장님 2026-09-20) ───────────────────────────────
+// 🔴 알려 주지 않으면 아무도 못 찾는 두 가지 — 판 넘기기와 두 손가락 구간 재기.
+//    처음 한 번은 저절로 덮어 보여 주고(코치마크), 잊으면 ⓘ 로 다시 본다. 본 기록은 이 폰에만 남는다.
+const C21_COACH_KEY = "c21_coach_v1";
+function c21Coach(force) {
+  if (!force) { try { if (localStorage.getItem(C21_COACH_KEY)) return; } catch (e) {} }
+  if (document.getElementById("c21Coach")) return;
+  const en = (typeof LANG !== "undefined" && LANG === "en");
+  const d = document.createElement("div");
+  d.id = "c21Coach";
+  d.setAttribute("style",
+    "position:fixed;inset:0;z-index:100001;background:rgba(0,0,0,.6);display:flex;align-items:center;"
+    + "justify-content:center;padding:18px");
+  const row = function (icon, ttl, txt) {
+    return '<div style="display:flex;gap:12px;margin:14px 0;align-items:flex-start">'
+      + '<div style="font-size:26px;line-height:1.1">' + icon + '</div>'
+      + '<div><div style="font-weight:800;font-size:14px;margin-bottom:2px">' + ttl + '</div>'
+      + '<div style="font-size:12.5px;color:var(--sub);line-height:1.6">' + txt + '</div></div></div>';
+  };
+  d.innerHTML =
+    '<div style="background:var(--card);color:var(--nm);border-radius:18px;max-width:420px;width:100%;'
+    + 'padding:22px 20px calc(18px + env(safe-area-inset-bottom));box-shadow:0 18px 50px rgba(0,0,0,.45);'
+    + 'max-height:86vh;overflow:auto">'
+    + '<div style="font-size:17px;font-weight:800;margin-bottom:12px">' + (en ? "Chart tips" : "차트 쓰는 법") + '</div>'
+    + row("👆", en ? "Swipe left / right" : "좌우로 밀기",
+          en ? "Drag the chart sideways to go back in time. Keep dragging past the end to flip to the next panel (Bollinger, RSI, …)."
+             : "차트를 옆으로 밀면 과거로 갑니다. 끝에 닿은 뒤 한 번 더 밀었다 놓으면 <b>다음 판</b>(볼린저밴드·RSI 등)으로 넘어갑니다.")
+    + row("✌️", en ? "Two fingers, hold 0.3s" : "두 손가락 0.3초",
+          en ? "Put two fingers on the chart and hold still for 0.3 seconds to measure between two bars — change, amount, bar count, angle. Spreading them zooms instead."
+             : "두 손가락을 차트에 대고 <b>움직이지 말고 0.3초</b> 두면 두 봉 사이를 잽니다 — 상승률·금액·봉 수·각도. 벌리면 확대·축소가 됩니다.")
+    + row("🧩", en ? "Keep on chart" : "얹기",
+          en ? "On a panel, tick “Keep on chart” to overlay it on the base chart (up to 4)."
+             : "판을 넘기다 <b>얹기</b>를 체크하면 기본 차트 위에 겹쳐 놓고 봅니다(최대 4개).")
+    + '<button onclick="c21CoachClose()" style="display:block;width:100%;margin-top:16px;padding:13px;border:0;'
+    + 'border-radius:12px;background:var(--tint,#1c7ed6);color:#fff;font-size:15px;font-weight:800;cursor:pointer">'
+    + (en ? "Got it" : "알겠습니다") + '</button></div>';
+  document.body.appendChild(d);
+}
+function c21CoachClose() {
+  try { localStorage.setItem(C21_COACH_KEY, "1"); } catch (e) {}
+  const d = document.getElementById("c21Coach");
+  if (d) d.remove();
+}
+// 그래프가 실제로 그려진 뒤에 한 번 — 너무 일찍 띄우면 무슨 소린지 모른다.
+setTimeout(function () { try { c21Coach(0); } catch (e) {} }, 4000);
 
 const coinFmt=v=>v>=1000?Math.round(v).toLocaleString():(v>=1?v.toFixed(2):(+v.toPrecision(4)).toString());
 const stkChart=makeChart("stkChart",{walls:true,fmt:v=>Math.abs(v)>=1000?Math.round(v).toLocaleString():(+v).toLocaleString(undefined,{maximumFractionDigits:2})});
