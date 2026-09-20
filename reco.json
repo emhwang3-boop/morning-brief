@@ -1,5 +1,5 @@
 {
- "at": "2026-09-20 11:27",
+ "at": "2026-09-20 12:01",
  "rules": {
   "slots": 12,
   "tp": 15,
@@ -113,58 +113,58 @@
  },
  "coin": {
   "BTC": {
-   "price": 80974.4,
-   "sma120": 68281.1,
+   "price": 80406.3,
+   "sma120": 68306.4,
    "hull_up": true,
-   "width": 0.76,
+   "width": 0.75,
    "state": "long",
    "asof": "2026-09-20"
   },
   "ETH": {
-   "price": 2613.91,
-   "sma120": 1995.33,
+   "price": 2576.29,
+   "sma120": 1995.92,
    "hull_up": true,
    "width": 1.05,
    "state": "long",
    "asof": "2026-09-20"
   },
   "ZEC": {
-   "price": 1460.83,
-   "sma120": 632.489,
+   "price": 1453.16,
+   "sma120": 632.671,
    "hull_up": true,
-   "width": 4.41,
-   "state": "long",
-   "asof": "2026-09-20"
-  },
-  "SOL": {
-   "price": 109.74,
-   "sma120": 81.9895,
-   "hull_up": true,
-   "width": 1.38,
+   "width": 4.43,
    "state": "long",
    "asof": "2026-09-20"
   },
   "XRP": {
-   "price": 1.3985,
-   "sma120": 1.19097,
+   "price": 1.3739,
+   "sma120": 1.19145,
    "hull_up": true,
-   "width": 0.86,
+   "width": 0.85,
    "state": "long",
    "asof": "2026-09-20"
   },
-  "DOGE": {
-   "price": 0.08701,
-   "sma120": 0.0804184,
+  "SOL": {
+   "price": 107.81,
+   "sma120": 82.0202,
    "hull_up": true,
-   "width": 0.66,
+   "width": 1.39,
    "state": "long",
    "asof": "2026-09-20"
   },
-  "UNI": {
-   "price": 8.81,
-   "sma120": 4.01038,
+  "NEAR": {
+   "price": 3.501,
+   "sma120": 2.05073,
    "hull_up": true,
-   "width": 3.38,
+   "width": 3.77,
+   "state": "long",
+   "asof": "2026-09-20"
+  },
+  "SUI": {
+   "price": 0.8227,
+   "sma120": 0.750781,
+   "hull_up": true,
+   "width": 0.56,
    "state": "long",
    "asof": "2026-09-20"
   }
