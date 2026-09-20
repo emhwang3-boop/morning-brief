@@ -3609,32 +3609,65 @@ function recoPie(parts){
   let small=0; const big=[];
   parts.forEach(function(p){ if(p[1]/tot<0.01)small+=p[1]; else big.push(p); });
   if(small>0)big.push([en?"Others":"기타",small,"etc"]);
-  const PAL=["#e8590c","#1c7ed6","#2f9e44","#ae3ec9","#f59f00","#0ca678","#d6336c","#4263eb","#74b816","#f76707",
-             "#1098ad","#9c36b5","#e03131","#5c940d","#3b5bdb","#c2255c"];
-  let ci=0; const CASH=["#adb5bd","#ced4da","#8f98a3"];
+  // 채도 낮춘 한 줄기 색띠 — 무지개로 흩뿌리지 않는다 (사장님 2026-09-20)
+  const PAL=["#3D6B8E","#4C93A6","#5AA189","#C9A03F","#C4764F","#A85A66","#7A6B93","#4E7A5E",
+             "#8E6E53","#5D7FA6","#B08A3E","#8F6A8C","#6B8F7A","#A9604E","#4B6E8A","#96884F"];
+  let ci=0; const CASH=["#9AA3AB","#B7BEC4","#848D96"];
   big.forEach(function(p){ if(p[2]==="cash")p[3]=CASH[(ci++)%3]; });
   const col=function(p,i){ return p[2]==="cash"?p[3]:(p[2]==="etc"?"#868e96":PAL[i%PAL.length]); };
-  const R=90, cx=100, cy=100; let a0=-Math.PI/2, svg='';
-  big.forEach(function(p,i){
-    const f=p[1]/tot, a1=a0+f*2*Math.PI;
-    if(f>0.9999){ svg+='<circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="'+col(p,i)+'"/>'; }
-    else{
-      const x0=cx+R*Math.cos(a0), y0=cy+R*Math.sin(a0), x1=cx+R*Math.cos(a1), y1=cy+R*Math.sin(a1);
-      svg+='<path d="M'+cx+','+cy+' L'+x0.toFixed(2)+','+y0.toFixed(2)+' A'+R+','+R+' 0 '+(f>0.5?1:0)+',1 '
-        +x1.toFixed(2)+','+y1.toFixed(2)+' Z" fill="'+col(p,i)+'" stroke="#fff" stroke-width="1"/>';
-      if(f>=0.03){ const am=(a0+a1)/2;
-        svg+='<text x="'+(cx+R*0.62*Math.cos(am)).toFixed(1)+'" y="'+(cy+R*0.62*Math.sin(am)+4).toFixed(1)
-          +'" font-size="'+(f>=0.06?11:9)+'" font-weight="700" fill="'+(p[2]==="cash"?"#333":"#fff")+'" text-anchor="middle">'+Math.round(f*100)+'%</text>'; }
-    }
-    a0=a1;
+  // 색 밝기 조절 — 겉면 그라데이션·옆면(그늘)
+  const sh=function(hex,f){ const n=parseInt(hex.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255;
+    const m=function(v){return Math.max(0,Math.min(255,Math.round(f<1?v*f:v+(255-v)*(f-1))));};
+    return "#"+((1<<24)+(m(r)<<16)+(m(g)<<8)+m(b)).toString(16).slice(1); };
+
+  // 입체 — 타원으로 눕히고 옆면을 겹쳐 쌓아 두께를 만든다
+  const cx=130, cy=92, rx=112, ry=64, dep=24;
+  const uid="dp"+(recoPie.n=(recoPie.n||0)+1)+"_";       // 같은 화면에 둘 이상이면 id 가 겹친다
+  const wedge=function(a0,a1,dy){
+    const x0=cx+rx*Math.cos(a0), y0=cy+ry*Math.sin(a0)+dy;
+    const x1=cx+rx*Math.cos(a1), y1=cy+ry*Math.sin(a1)+dy;
+    return 'M'+cx+','+(cy+dy)+' L'+x0.toFixed(2)+','+y0.toFixed(2)
+      +' A'+rx+','+ry+' 0 '+((a1-a0)>Math.PI?1:0)+',1 '+x1.toFixed(2)+','+y1.toFixed(2)+' Z'; };
+  const disc=function(dy){ return '<ellipse cx="'+cx+'" cy="'+(cy+dy)+'" rx="'+rx+'" ry="'+ry+'"'; };
+
+  const seg=[]; let a=-Math.PI/2;
+  big.forEach(function(p,i){ const f=p[1]/tot;
+    seg.push({c:col(p,i),f:f,a0:a,a1:a+f*2*Math.PI}); a+=f*2*Math.PI; });
+  const one=(seg.length===1||seg[0].f>0.9999);
+
+  let defs="",sides="",tops="",labels="";
+  seg.forEach(function(x,i){
+    defs+='<linearGradient id="'+uid+i+'" x1="0.1" y1="0" x2="0.5" y2="1">'
+      +'<stop offset="0" stop-color="'+sh(x.c,1.3)+'"/>'
+      +'<stop offset="0.5" stop-color="'+x.c+'"/>'
+      +'<stop offset="1" stop-color="'+sh(x.c,0.85)+'"/></linearGradient>'; });
+  for(let d=dep;d>=1;d--){ const t=1-d/dep;
+    seg.forEach(function(x){
+      sides+= one ? (disc(d)+' fill="'+sh(x.c,0.64+0.16*t)+'"/>')
+                  : ('<path d="'+wedge(x.a0,x.a1,d)+'" fill="'+sh(x.c,0.64+0.16*t)+'"/>'); }); }
+  seg.forEach(function(x,i){
+    tops+= one ? (disc(0)+' fill="url(#'+uid+i+')" stroke="rgba(255,255,255,.5)" stroke-width="0.9"/>')
+               : ('<path d="'+wedge(x.a0,x.a1,0)+'" fill="url(#'+uid+i+')" stroke="rgba(255,255,255,.5)" stroke-width="0.9"/>');
+    if(x.f>=0.04){ const am=one?-Math.PI/2:(x.a0+x.a1)/2, k=one?0:0.64;
+      labels+='<text x="'+(cx+rx*k*Math.cos(am)).toFixed(1)+'" y="'+(cy+ry*k*Math.sin(am)+4.5).toFixed(1)
+        +'" font-size="'+(x.f>=0.06?13:11)+'" font-weight="800" text-anchor="middle" fill="#fff"'
+        +' stroke="rgba(0,0,0,.30)" stroke-width="2.6" style="paint-order:stroke">'+Math.round(x.f*100)+'%</text>'; }
   });
+  const svg='<svg viewBox="0 0 260 186" width="100%" style="max-width:300px">'
+    +'<defs>'+defs
+    +'<radialGradient id="'+uid+'sh"><stop offset="0.35" stop-color="rgba(0,0,0,.26)"/>'
+    +'<stop offset="1" stop-color="rgba(0,0,0,0)"/></radialGradient></defs>'
+    +'<ellipse cx="'+cx+'" cy="'+(cy+dep+14)+'" rx="'+(rx*0.95)+'" ry="'+(ry*0.28)+'" fill="url(#'+uid+'sh)"/>'
+    +sides+tops+labels+'</svg>';
+
   let leg='<div style="display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:6px;font-size:11px">';
   big.forEach(function(p,i){
-    leg+='<span style="white-space:nowrap"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:'
-      +col(p,i)+';margin-right:4px"></span>'+dpEsc(p[0])+(p[2]==="new"?(en?" (new)":" (추천)"):"")+' '+(p[1]/tot*100).toFixed(1)+'%</span>';
+    leg+='<span style="white-space:nowrap"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:'
+      +'linear-gradient(145deg,'+sh(col(p,i),1.24)+','+sh(col(p,i),0.8)+');margin-right:5px"></span>'
+      +dpEsc(p[0])+(p[2]==="new"?(en?" (new)":" (추천)"):"")+' '+(p[1]/tot*100).toFixed(1)+'%</span>';
   });
   leg+='</div>';
-  return '<div style="text-align:center"><svg viewBox="0 0 200 200" width="200" height="200">'+svg+'</svg></div>'+leg
+  return '<div style="text-align:center;margin:2px 0 8px">'+svg+'</div>'+leg
     +'<div class="dpmsg" style="text-align:center">'+(en?"Total ":"합계 ")+Math.round(tot).toLocaleString()+(en?" KRW":"원")+'</div>';
 }
 function recoRender(){
