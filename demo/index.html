@@ -3800,9 +3800,11 @@ function recoRender(){
         const q=(mode!=="next"&&budget>0&&r.close>0)?Math.floor(budget/r.close):0;
         const go=mk==="kr"?("pickStock('"+r.code+"','"+String(r.name).replace(/'/g,"")+"')")
                           :("pickStockUS('"+r.code+".US','"+r.code+"')");
+        const add=mk==="kr"?("bkAdd('"+r.code+"','"+String(r.name).replace(/'/g,"")+"','kr')")
+                           :("bkAdd('"+r.code+".US','"+r.code+"','us')");
         t+='<tr'+(mode==="next"?' style="opacity:.55"':'')+'><td style="text-align:left">'+(mode==="today"?"① ":"")+dpEsc(r.name)+(r.name!==r.code?' <span class="dplbl">'+r.code+'</span>':'')
           +'<br><span class="dplbl">'+dpEsc(r.why)+'</span></td><td>'+(mk==="kr"?Math.round(r.close).toLocaleString():money(r.close))+'</td><td>'+(q?q.toLocaleString():"-")+'</td>'
-          +'<td><button class="dpb buy dpsm" onclick="'+go+';E(\'stock\').scrollIntoView({behavior:\'smooth\'})">'+(en?"View":"조회")+'</button></td></tr>';
+          +'<td style="white-space:nowrap"><button class="dpb dpsm" style="background:#2f9e44;border-color:#2b8a3e;margin-right:4px" onclick="'+add+'">'+(en?"+Cart":"담기")+'</button><button class="dpb buy dpsm" onclick="'+go+';E(\'stock\').scrollIntoView({behavior:\'smooth\'})">'+(en?"View":"조회")+'</button></td></tr>';
       });
       return t+'</table>';
     };
