@@ -2086,7 +2086,7 @@ async function rlOkxPost(path, body) {
     throw new Error(String(d0.sCode || j.code) + " " + (d0.sMsg || j.msg || ""));
   if (d0.sCode !== undefined && String(d0.sCode) !== "0")
     throw new Error(String(d0.sCode) + " " + (d0.sMsg || ""));
-  setTimeout(function () { try { rlOsoLoad(); } catch (e) {} }, 1500);
+  setTimeout(function () { try { rlOsoLoad(); } catch (e) {} }, 1500); [2500, 6000, 12000].forEach(function (ms) { setTimeout(function () { try { if (!RL.busy && typeof rlHas === "function" && rlHas()) rlLoad(true); } catch (e) {} }, ms); });
   return j;
 }
 // 헤지 모드면 주문에 posSide 가 필수다 — 한 번 받아 두고 쓴다
@@ -2230,7 +2230,7 @@ async function rlStockOrder(mk, side, code, qty, limitPx) {
   // 🔴 키움은 거부도 200 으로 준다 — return_code 를 봐야 한다
   if (j && String(j.return_code) !== "0")
     throw new Error(String(j.return_code) + " " + (j.return_msg || ""));
-  setTimeout(function () { try { rlOsoLoad(); } catch (e) {} }, 1500);   // 걸린 주문이면 미체결에 뜬다
+  setTimeout(function () { try { rlOsoLoad(); } catch (e) {} }, 1500); [2500, 6000, 12000].forEach(function (ms) { setTimeout(function () { try { if (!RL.busy && typeof rlHas === "function" && rlHas()) rlLoad(true); } catch (e) {} }, ms); });   // 걸린 주문이면 미체결에 뜬다
   return j;
 }
 // 미국 종목의 거래소 구분(ND 나스닥 · NY 뉴욕 · NA 아멕스) — 차트·호가가 찾아 둔 값이 있으면 그것, 없으면 현재가(usa20100)로 찾는다
@@ -2326,6 +2326,23 @@ function rlParseSpot(det) {
 }
 
 // ── 한 번에 불러오기 ──
+// ── 체결 딩동 (사장님 2026-09-21) ── 보유 수량이 바뀌면 소리. 파일 없이 Web Audio 합성 ──
+let _dingCtx = null;
+function _dingAC() { try { if (!_dingCtx) _dingCtx = new (window.AudioContext || window.webkitAudioContext)(); if (_dingCtx.state === "suspended") _dingCtx.resume(); return _dingCtx; } catch (e) { return null; } }
+try { document.addEventListener("click", function () { _dingAC(); }, false); } catch (e) {}   // 사용자 제스처로 오디오 잠금 해제
+function dingDong() {
+  const ctx = _dingAC(); if (!ctx) return;
+  const now = ctx.currentTime;
+  [[988, 0], [740, 0.20]].forEach(function (fr) {          // 딩(높은음) · 동(낮은음)
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = "sine"; o.frequency.value = fr[0];
+    g.gain.setValueAtTime(0.0001, now + fr[1]);
+    g.gain.exponentialRampToValueAtTime(0.30, now + fr[1] + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + fr[1] + 0.38);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(now + fr[1]); o.stop(now + fr[1] + 0.42);
+  });
+}
 async function rlLoad(auto) {
   if (RL.busy) return;
   RL.busy = true;
@@ -2436,6 +2453,12 @@ async function rlLoad(auto) {
     }
   } finally {
     RL.kr = out.kr; RL.us = out.us; RL.co = out.co;
+    // 🔴 체결 감지 — 보유 수량 묶음이 바뀌면 체결된 것 → 딩동 (첫 로드는 소리 안 냄) (사장님 2026-09-21)
+    try {
+      var _qsig = RL.kr.concat(RL.us).concat(RL.co).map(function (p) { return p.code + ":" + p.qty; }).sort().join("|");
+      if (RL.qtySig !== undefined && RL.qtySig !== _qsig) { try { dingDong(); } catch (e) {} }
+      RL.qtySig = _qsig;
+    } catch (e) {}
     // 🔴 재조회가 TR 한도 등으로 예수금을 못 받으면(null) 직전 값을 지킨다 — 추천이 0원으로 깜빡이지 않게 (2026-09-21)
     if (out.cash && RL.cash) {
       if (out.cash.krw == null && RL.cash.krw != null) out.cash.krw = RL.cash.krw;
