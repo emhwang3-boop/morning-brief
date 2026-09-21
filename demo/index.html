@@ -2342,6 +2342,16 @@ async function rlLoad(auto) {
           out.kr = rlParseKR(j);
           out.sum = rlSumKR(j);
           out.cash.krw = out.sum.cash;
+          // 🔴 예수금은 kt00001 의 entr (HTS 예수금 · 오늘 판 대금 포함). d2_entra = 인출가능(D+2).
+          //    kt00018 의 추정예탁자산·인출가능만 보면 오늘 판 매도대금이 빠진다(사장님 2026-09-21).
+          try {
+            const cd = await rlKiwoom(tok, "/api/dostk/acnt", "kt00001", {qry_tp: "3"});
+            if (cd && cd.return_code === 0) {
+              const e2 = rlNum(cd.entr);
+              if (e2) out.cash.krw = e2;
+              out.cashWd = rlNum(cd.d2_entra);   // 인출가능(D+2) — 참고
+            }
+          } catch (e) {}
         } catch (e) { out.err.push("국내 " + e.message); }
         // 🔴 해외 증권사가 한국투자면 그쪽으로 간다 — 키움은 건너뛴다
         if (ST.us && ST.us.broker === "korea_inv" && ST.us.key) { /* 아래에서 따로 */ }
@@ -2374,7 +2384,9 @@ async function rlLoad(auto) {
             + JSON.stringify(rows[0] || Object.keys(c)).slice(0, 300));
           out.cash.usd = rlNum(src[hit]);
           // 🔴 국내 예수금도 여기 있다. kt00018 의 추정예탁자산은 주식 평가금이 섞여 있어 못 쓴다.
-          if (c.krw_entra !== undefined && c.krw_entra !== null && c.krw_entra !== "")
+          // 🔴 kt00001 의 entr(예수금)를 이미 받았으면 그대로 둔다. 없을 때만 krw_entra(인출가능) 폴백.
+          if ((out.cash.krw == null || out.cash.krw === 0)
+              && c.krw_entra !== undefined && c.krw_entra !== null && c.krw_entra !== "")
             out.cash.krw = rlNum(c.krw_entra);
         } catch (e) { out.err.push("해외예수금 " + e.message); }
       } catch (e) { out.err.push("키움 " + e.message); }
