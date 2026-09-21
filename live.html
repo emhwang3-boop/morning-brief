@@ -48,6 +48,7 @@ body.light .mk img.lt{display:block}
 .clock{font-size:13px;color:var(--sub);font-variant-numeric:tabular-nums}
 .tgl{background:var(--card);border:1px solid var(--bd);color:var(--tx);border-radius:8px;padding:5px 9px;font-size:15px;cursor:pointer}
 .asof{font-size:11.5px;color:var(--soon);margin-bottom:2px}
+#feedDelay{display:none;background:#fff4e6;color:#9a5a00;border:1px solid #ffd8a8;border-radius:10px;padding:8px 11px;font-size:12.5px;font-weight:700;margin:2px 0 6px}#feedDelay.on{display:block}body.dark #feedDelay{background:#2b2010;color:#ffd8a8;border-color:#5a4420}
 /* 운영시간 — 안내일 뿐이라 더 흐리게 (사장님 2026-09-18) */
 .ophrs{font-size:10.5px;color:var(--soon);margin-bottom:8px}
 .gauges{display:flex;gap:10px;margin-bottom:4px}
@@ -179,6 +180,7 @@ body.light #installBar{background:#eaf3ff;border-color:#b9d5f5;color:#1a4b7a}
    <button class="tgl" id="tg" onclick="toggle()">🌙</button></div>
 </div>
 <div class="asof" id="asof">불러오는 중…</div>
+<div id="feedDelay" hidden></div>
 <div class="ophrs" id="ophrs">실시간 운영 05:00 ~ 익일 02:00 (KST) · 그 밖의 시간은 마지막 값</div>
 <div id="installBar" hidden><span id="installTxt">📲 홈 화면에 앱으로 추가하고 바로 여세요</span><button id="installBtn" onclick="doInstall()">앱설치</button><span class="ix" onclick="dismissInstall()">✕</span></div>
 
@@ -384,6 +386,12 @@ function render(d){
   window._lastD=d;
   {
     document.getElementById("asof").textContent=d.asof+L("asof")+(d.__snap?L("snap"):"");
+    // 🔴 Infoway 만료·중단 시 서버가 feed_delayed 를 켠다 → 지연 안내띠 (사장님 2026-09-21)
+    try{var fb=document.getElementById("feedDelay");
+      if(fb){var on=!!d.feed_delayed;fb.className=on?"on":"";fb.hidden=!on;
+        fb.textContent=(LANG==="en")
+          ?"⚠ Real-time feed unavailable — showing delayed quotes (Yahoo, ~15 min)."
+          :"⚠ 실시간 시세 연결이 중단되어 지연 시세(야후, 약 15분 지연)로 표시 중입니다.";}}catch(e){}
     // 게이지 (+ 시장온도)
     let g="";
     if(d.temp!=null){const t=d.temp,li=t<=25?0:t<=45?1:t<=60?2:t<=75?3:4,lab=TEMPW[LANG][li],
