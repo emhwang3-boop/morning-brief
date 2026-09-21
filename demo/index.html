@@ -3944,8 +3944,8 @@ async function openTower3D(list, title) {
   if (!list || !list.length) return;
   var old = document.getElementById("tower3dOv"); if (old) old.remove();
   var ov = document.createElement("div"); ov.id = "tower3dOv";
-  ov.style.cssText = "position:fixed;inset:0;z-index:99999;background:rgba(4,6,10,0.92);display:flex;align-items:center;justify-content:center;color:#cdd5e0;font:700 14px system-ui";
-  ov.innerHTML = '<div id="t3dmsg">3D \uc900\ube44 \uc911\u2026</div>';
+  ov.style.cssText = "position:fixed;inset:0;z-index:99999;background:transparent;display:flex;align-items:center;justify-content:center;color:#cdd5e0;font:700 14px system-ui";
+  ov.innerHTML = '<div id="t3dmsg" style="background:rgba(0,0,0,0.72);padding:10px 16px;border-radius:12px">3D \uc900\ube44 \uc911\u2026</div>';
   document.body.appendChild(ov);
   var data = [];
   for (var i = 0; i < list.length; i++) {
