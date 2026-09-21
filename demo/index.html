@@ -114,7 +114,7 @@ body.light .mk img.lt{display:block}
 .c21sel{padding:3px 6px;border:1px solid var(--bd);border-radius:7px;background:var(--bg);color:var(--nm);font-size:12px}
 .c21chip{background:#e7f0ff;color:#1558b0;border-radius:12px;padding:2px 8px;font-size:11px;cursor:pointer;white-space:nowrap}
 .c21chip b{margin-left:2px}
-.c21clr{background:transparent;border:1px solid var(--bd);color:var(--sub);border-radius:12px;padding:2px 8px;font-size:11px;cursor:pointer}
+.c21clr{background:#0d1017;border:1px solid var(--bd);color:var(--sub);border-radius:12px;padding:2px 8px;font-size:11px;cursor:pointer}
 .c21msg{color:#e8590c;font-size:11.5px;font-weight:700}
 @media(max-width:520px){#stkChart,#coinChart{width:calc(100% + 22px);margin-left:-11px;margin-right:-11px}}
 .rlbar{display:flex;align-items:center;gap:6px;margin:2px 0 6px;flex-wrap:wrap}
@@ -3945,13 +3945,13 @@ async function openTower3D(list, title) {
   var old = document.getElementById("tower3dOv"); if (old) old.remove();
   var ov = document.createElement("div"); ov.id = "tower3dOv";
   ov.style.cssText = "position:fixed;inset:0;z-index:99999;background:transparent;display:flex;align-items:center;justify-content:center;color:#cdd5e0;font:700 14px system-ui";
-  ov.innerHTML = '<div id="t3dmsg" style="background:rgba(0,0,0,0.72);padding:10px 16px;border-radius:12px">3D \uc900\ube44 \uc911\u2026</div>';
+  ov.innerHTML = (typeof mpWait === "function") ? mpWait("3D 준비 중…") : '<div id="t3dmsg" style="background:rgba(0,0,0,0.72);padding:10px 16px;border-radius:12px;color:#cdd5e0">3D 준비 중…</div>';
   document.body.appendChild(ov);
   var data = [];
   for (var i = 0; i < list.length; i++) {
     var it = list[i], cs = null;
     try { cs = await bkBars(it); } catch (e) { cs = null; }
-    var mm = document.getElementById("t3dmsg"); if (mm) mm.textContent = "3D \uc900\ube44 \uc911\u2026 " + (i + 1) + "/" + list.length;
+    var mm = document.querySelector("#tower3dOv .mpTxt") || document.getElementById("t3dmsg"); if (mm) mm.textContent = "3D 준비 중… " + (i + 1) + "/" + list.length;
     if (!cs || cs.length < 10) { data.push({ n: it.name, b: 100, r: 0, v: 1 }); continue; }
     var n = Math.min(60, cs.length - 1), from = cs[cs.length - 1 - n], to = cs[cs.length - 1];
     var r = (from > 0) ? (to / from - 1) : 0;
