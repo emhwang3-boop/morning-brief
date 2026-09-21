@@ -102,6 +102,11 @@ body.light .mk img.lt{display:block}
 .mhsum td{font-weight:700;border-top:2px solid var(--bd)}
 .mhx{color:var(--sub);cursor:pointer;font-weight:700;padding:0 2px}
 .mhempty{color:var(--sub);font-size:12px;padding:8px 2px}
+
+/* 투자 유의사항 카드 — 주식앱과 같은 문구 (사장님 2026-09-21 "본앱 하단에도") */
+.discCard .discList{margin:0;padding-left:16px}
+.discCard .discList li{font-size:12.5px;color:var(--sub);line-height:1.65;margin:6px 0}
+.ken{display:none} body.lang-en .kko{display:none} body.lang-en .ken{display:inline}
 /* 공유 (2026-09-16) */
 .shwrap{position:relative}
 .shbtn{border-radius:12px;font-weight:800;font-size:13.5px;padding:6px 13px;letter-spacing:.5px;box-shadow:0 3px 8px rgba(0,0,0,.30), 0 1px 0 rgba(255,255,255,.10) inset}
@@ -236,6 +241,16 @@ body.light #installBar{background:#eaf3ff;border-color:#b9d5f5;color:#1a4b7a}
 <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;gap:8px"><span id="vcMsg" style="font-size:12px;color:var(--sub)"></span>
 <button id="vcBtn" onclick="vcSend()" style="border:0;border-radius:9px;padding:7px 16px;background:#1c7ed6;color:#fff;font-weight:700;cursor:pointer">보내기</button></div></div>
 
+<div class="card discCard">
+  <h3><span class="kko">투자 유의사항</span><span class="ken">Investment Notice</span></h3>
+  <ul class="discList">
+    <li><span class="kko">본 서비스는 특정 종목의 매수·매도를 권유하지 않으며, 투자 판단의 책임은 본인에게 있습니다.</span><span class="ken">This service does not recommend buying or selling any specific security; responsibility for investment decisions rests with you.</span></li>
+    <li><span class="kko">과거의 실적이 미래의 수익을 보장하지 않으며, 본 서비스는 원금 손실의 가능성이 있습니다.</span><span class="ken">Past performance does not guarantee future returns, and this service carries the possibility of loss of principal.</span></li>
+    <li><span class="kko">본 서비스는 1:1 개별 투자 상담을 진행하지 않는 단방향 정보 제공 서비스입니다.</span><span class="ken">This service is a one-way information service and does not provide one-on-one individual investment consultation.</span></li>
+    <li><span class="kko">이 앱은 단기 트레이딩용으로 사용하기에는 적합하지 않으며, 일봉 기준으로 중장기 포트폴리오 투자를 지원하기 위해 설계되었습니다.</span><span class="ken">This app is not suitable for short-term trading; it is designed to support medium- to long-term portfolio investing based on daily charts.</span></li>
+    <li><span class="kko">가상포트폴리오 기능은 고객님이 선택한 종목의 과거 데이터 기반 단순 시뮬레이션 결과이며, 어떠한 투자 권유나 수익 보장도 하지 않습니다.</span><span class="ken">The virtual portfolio feature is a simple simulation based on past data for the securities you selected; it is neither an investment recommendation nor a guarantee of returns.</span></li>
+  </ul>
+</div>
 <div class="foot" id="foot"></div>
 
 <script>
@@ -1313,5 +1328,11 @@ function vcSend(){
     var t=document.getElementById("vcTxt"); if(t)t.placeholder=en?"Features you want, problems, or brokers you use":"바라는 기능, 불편한 점, 쓰고 싶은 증권사를 적어 주세요"; }
   lang(); var lb=document.getElementById("lng"); if(lb)lb.addEventListener("click",function(){setTimeout(lang,50);});
 })();
+</script>
+<script>
+/* 유의사항 카드 한/영 — applyLang 이 끝난 뒤 body.lang-en 을 맞춘다 (2026-09-21) */
+(function(){function ke(){try{document.body.classList.toggle("lang-en",typeof LANG!=="undefined"&&LANG==="en");}catch(e){}}
+ try{var o=window.applyLang;if(typeof o==="function"&&!o._ke){window.applyLang=function(){var r=o.apply(this,arguments);ke();return r;};window.applyLang._ke=1;}}catch(e){}
+ ke();})();
 </script>
 </body></html>
