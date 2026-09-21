@@ -239,9 +239,9 @@ body.light #installBar{background:#eaf3ff;border-color:#b9d5f5;color:#1a4b7a}
 <div id="news"></div>
 <!-- 고객의 소리 (사장님 2026-09-19) — 허브 /voice 로 보낸다. 본앱·데모를 app 으로 가른다. 개인정보 없음 -->
 <div class="card" id="voice"><h3 id="vcH">고객의 소리</h3>
-<textarea id="vcTxt" maxlength="300" rows="3" style="width:100%;box-sizing:border-box;background:var(--bg);color:var(--nm);border:1px solid var(--bd);border-radius:10px;padding:8px 10px;font:inherit;font-size:13px;resize:vertical" placeholder="바라는 기능, 불편한 점, 쓰고 싶은 증권사를 적어 주세요"></textarea>
+<textarea id="vcTxt" maxlength="300" rows="3" style="width:100%;box-sizing:border-box;background:var(--bg);color:var(--nm);border:1px solid var(--bd);border-radius:10px;padding:8px 10px;font:inherit;font-size:13px;resize:vertical" placeholder="시스템 오류 내용을 적어 주세요"></textarea>
 <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;gap:8px"><span id="vcMsg" style="font-size:12px;color:var(--sub)"></span>
-<button id="vcBtn" onclick="vcSend()" style="border:0;border-radius:9px;padding:7px 16px;background:#1c7ed6;color:#fff;font-weight:700;cursor:pointer">보내기</button></div></div>
+<button id="vcBtn" onclick="vcSend()" style="border:0;border-radius:9px;padding:7px 16px;background:#1c7ed6;color:#fff;font-weight:700;cursor:pointer">보내기</button></div><div class="discNote" style="margin-top:10px"><span class="kko">본 창구는 시스템 오류 제보 전용이며, 자본시장법에 따라 개별 종목 상담이나 투자 조언은 일체 답변하지 않습니다.</span><span class="ken">This channel is for reporting system errors only. Under the Financial Investment Services and Capital Markets Act, we do not respond to individual stock consultations or investment advice.</span></div></div>
 
 <div class="card discCard">
   <h3><span class="kko">투자 유의사항</span><span class="ken">Investment Notice</span></h3>
@@ -1333,7 +1333,7 @@ function vcSend(){
   function lang(){ var en=(typeof LANG!=="undefined"&&LANG==="en");
     var h=document.getElementById("vcH"); if(h)h.textContent=en?"Feedback":"고객의 소리";
     var b=document.getElementById("vcBtn"); if(b)b.textContent=en?"Send":"보내기";
-    var t=document.getElementById("vcTxt"); if(t)t.placeholder=en?"Features you want, problems, or brokers you use":"바라는 기능, 불편한 점, 쓰고 싶은 증권사를 적어 주세요"; }
+    var t=document.getElementById("vcTxt"); if(t)t.placeholder=en?"Describe the system error":"시스템 오류 내용을 적어 주세요"; }
   lang(); var lb=document.getElementById("lng"); if(lb)lb.addEventListener("click",function(){setTimeout(lang,50);});
 })();
 </script>
