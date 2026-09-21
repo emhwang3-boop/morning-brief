@@ -207,7 +207,7 @@ body.light #installBar{background:#eaf3ff;border-color:#b9d5f5;color:#1a4b7a}
   <div id="stkTf" class="stktf" hidden>
     <button data-tf="3">3분</button><button data-tf="5">5분</button>
     <button data-tf="15">15분</button><button data-tf="30">30분</button>
-    <button data-tf="60">60분</button><button data-tf="D" class="on">일</button>
+    <button data-tf="60">60분</button><button data-tf="D" class="on">일</button><button data-tf="W">주</button>
   </div>
   <canvas id="stkChart" class="stkchart" hidden></canvas>
   <div id="stkChartLbl" class="stkcl" hidden></div>
@@ -221,7 +221,7 @@ body.light #installBar{background:#eaf3ff;border-color:#b9d5f5;color:#1a4b7a}
   <div id="coinTf" class="stktf" hidden>
     <button data-tf="3">3분</button><button data-tf="5">5분</button>
     <button data-tf="15">15분</button><button data-tf="30">30분</button>
-    <button data-tf="60">60분</button><button data-tf="D" class="on">일</button>
+    <button data-tf="60">60분</button><button data-tf="D" class="on">일</button><button data-tf="W">주</button>
   </div>
   <canvas id="coinChart" class="stkchart" hidden></canvas>
   <div id="coinChartLbl" class="stkcl" hidden></div>
@@ -362,7 +362,7 @@ const T={title:{ko:"일일브리핑",en:"Daily Brief"},stockH:{ko:"종목 조회
  asof:{ko:" 기준",en:""},binance:{ko:"● 바이낸스",en:"● Binance"},snap:{ko:" · 스냅샷",en:" · snapshot"}};
 function L(k){const t=T[k];return t?(t[LANG]||t.ko):k;}
 const TEMPW={ko:["차가움","서늘","미지근","따뜻","뜨거움"],en:["Cold","Cool","Neutral","Warm","Hot"]};
-const TFW={"3":{ko:"3분",en:"3m"},"5":{ko:"5분",en:"5m"},"15":{ko:"15분",en:"15m"},"30":{ko:"30분",en:"30m"},"60":{ko:"60분",en:"60m"},"D":{ko:"일",en:"1D"}};
+const TFW={"3":{ko:"3분",en:"3m"},"5":{ko:"5분",en:"5m"},"15":{ko:"15분",en:"15m"},"30":{ko:"30분",en:"30m"},"60":{ko:"60분",en:"60m"},"D":{ko:"일",en:"1D"},"W":{ko:"주",en:"1W"}};
 function toggleLang(){LANG=LANG==="en"?"ko":"en";try{localStorage.setItem("brief_lang",LANG);}catch(e){}applyLang();}
 // 묶음이 지금 실시간인가 — 카드 머리와 주요자산 막대가 **같은 자를 쓴다**
 function grpLive(gr){
@@ -631,9 +631,9 @@ function usMoney(n){n=+n;const a=Math.abs(n);
   if(a>=1e9)return "$"+(n/1e9).toFixed(2)+"B"; if(a>=1e6)return "$"+(n/1e6).toFixed(1)+"M";
   return "$"+Math.round(n).toLocaleString();}
 function usPrice(n){return "$"+(+n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
-const US_KT={"D":8,"60":5,"30":4,"15":3,"5":2,"3":1};
+const US_KT={"D":8,"W":9,"60":5,"30":4,"15":3,"5":2,"3":1};
 function usFmtT(t,tf){const d=new Date(t*1000),p=n=>String(n).padStart(2,"0");
-  return tf==="D"?(p(d.getMonth()+1)+"/"+p(d.getDate())):(p(d.getMonth()+1)+"/"+p(d.getDate())+" "+p(d.getHours())+":"+p(d.getMinutes()));}
+  return (tf==="D"||tf==="W")?(p(d.getMonth()+1)+"/"+p(d.getDate())):(p(d.getMonth()+1)+"/"+p(d.getDate())+" "+p(d.getHours())+":"+p(d.getMinutes()));}
 function renderStkResults(){
   const en=LANG==="en";
   let h=(lastResults||[]).map(r=>{const dn=((en&&r.en)?r.en:r.name)||r.code;
@@ -871,7 +871,7 @@ const coinChart=makeChart("coinChart",{walls:true,liq:true,fmt:coinFmt});
 // ---- 코인 조회 (바이낸스, 클라이언트) ----
 let coinSym=null, coinTf="D", coinTimer=null, coinSearchTimer=null, coinList=null, coinLast=[];
 function coinFmtTime(ms,tf){const d=new Date(ms),p=n=>String(n).padStart(2,"0"),md=p(d.getMonth()+1)+"/"+p(d.getDate());
-  return tf==="D"?md:md+" "+p(d.getHours())+":"+p(d.getMinutes());}
+  return (tf==="D"||tf==="W")?md:md+" "+p(d.getHours())+":"+p(d.getMinutes());}
 async function coinSyms(){
   if(coinList)return coinList;
   try{const ei=await fetch("https://api.binance.com/api/v3/exchangeInfo").then(r=>r.json());
@@ -907,7 +907,7 @@ async function loadCoinDetail(){if(!coinSym)return;
 document.querySelectorAll("#coinTf button").forEach(b=>b.onclick=()=>{coinTf=b.dataset.tf;
   document.querySelectorAll("#coinTf button").forEach(x=>x.classList.toggle("on",x===b));loadCoin2Chart();});
 async function loadCoin2Chart(){if(!coinSym)return;E("coinChartLbl").textContent=L("chartLoading");
-  const iv={"3":"3m","5":"5m","15":"15m","30":"30m","60":"1h","D":"1d"}[coinTf]||"1d";
+  const iv={"3":"3m","5":"5m","15":"15m","30":"30m","60":"1h","D":"1d","W":"1w"}[coinTf]||"1d";
   let kl;try{kl=await fetch("https://api.binance.com/api/v3/klines?symbol="+coinSym+"&interval="+iv+"&limit=400").then(r=>r.json());}catch(e){E("coinChartLbl").textContent=L("chartNone");return;}
   if(!Array.isArray(kl)||!kl.length){E("coinChartLbl").textContent=L("chartNone");return;}
   const bars=kl.map(c=>[coinFmtTime(c[0],coinTf),+c[1],+c[2],+c[3],+c[4]]);
