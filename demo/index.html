@@ -3727,11 +3727,11 @@ function recoPie(parts){
   big.forEach(function(p,i){
     leg+='<span style="white-space:nowrap"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:'
       +'linear-gradient(145deg,'+sh(col(p,i),1.24)+','+sh(col(p,i),0.8)+');margin-right:5px"></span>'
-      +dpEsc(p[0])+(p[2]==="new"?(en?" (new)":" (추천)"):"")+' '+(p[1]/tot*100).toFixed(1)+'%'+((p[4]==="kr"&&Number.isFinite(+p[3]))?' <b style="color:var(--nm)">'+Math.round(p[3]).toLocaleString()+(en?" KRW":"원")+'</b>':(p[4]==="us"&&Number.isFinite(+p[3]))?' <b style="color:var(--nm)">$'+(+p[3]).toLocaleString(undefined,{maximumFractionDigits:2})+'</b>':'')+'</span>';
+      +dpEsc(p[0])+(p[2]==="new"?(en?" (new)":" (추천)"):"")+' '+(p[1]/tot*100).toFixed(1)+'%'+((p[4]==="kr"&&Number.isFinite(+p[5]))?' <b style="color:var(--nm)">'+Math.round(p[5]).toLocaleString()+(en?" KRW":"원")+'</b>':(p[4]==="us"&&Number.isFinite(+p[5]))?' <b style="color:var(--nm)">$'+(+p[5]).toLocaleString(undefined,{maximumFractionDigits:2})+'</b>':'')+'</span>';
   });
   leg+='</div>';
   return '<div style="text-align:center;margin:2px 0 8px">'+svg+'</div>'+leg
-    +(function(){var kw=0,ud=0;parts.forEach(function(p){var v=+p[3];if(!Number.isFinite(v))return;if(p[4]==="kr")kw+=v;else if(p[4]==="us")ud+=v;});var rows=[];if(kw>0)rows.push((en?"KRW total ":"원화 합계 ")+Math.round(kw).toLocaleString()+(en?"":"원"));if(ud>0)rows.push((en?"USD total $":"달러 합계 $")+ud.toLocaleString(undefined,{maximumFractionDigits:2}));if(!rows.length)rows.push((en?"Total ":"합계 ")+Math.round(tot).toLocaleString()+(en?" KRW":"원"));return '<div class="dpmsg" style="text-align:center;line-height:1.7">'+rows.join("<br>")+'</div>';})();
+    +(function(){var kw=0,ud=0;parts.forEach(function(p){var v=+p[5];if(!Number.isFinite(v))return;if(p[4]==="kr")kw+=v;else if(p[4]==="us")ud+=v;});var rows=[];if(kw>0)rows.push((en?"KRW total ":"원화 합계 ")+Math.round(kw).toLocaleString()+(en?"":"원"));if(ud>0)rows.push((en?"USD total $":"달러 합계 $")+ud.toLocaleString(undefined,{maximumFractionDigits:2}));if(!rows.length)rows.push((en?"Total ":"합계 ")+Math.round(tot).toLocaleString()+(en?" KRW":"원"));return '<div class="dpmsg" style="text-align:center;line-height:1.7">'+rows.join("<br>")+'</div>';})();
 }
 function recoRender(){
   let card=E("recoCard");
@@ -3824,13 +3824,13 @@ function recoRender(){
     if(has){
       const k=(mk==="kr")?1:fx;
       if(k>0){
-        held.forEach(function(p){ PIEP.push([p.name,(p.evl||0)*k,"held",(p.evl||0),mk]); });
+        held.forEach(function(p){ PIEP.push([p.name,(p.evl||0)*k,"held",(p.evl||0),mk,(p.evl||0)]); });
         let left=cashM;                               // 지금 현금으로 살 수 있는 만큼만 — 1칸씩, 모자라면 남은 만큼
         buys.slice(0,empty).forEach(function(r){
           const amt=Math.min(slot,left);
-          if(amt>=r.close&&amt>0){ PIEP.push([r.name,amt*k,"new",amt,mk]); left-=amt; }
+          if(amt>=r.close&&amt>0){ PIEP.push([r.name,amt*k,"new",amt,mk,amt]); left-=amt; }
         });
-        if(left>0)PIEP.push([(mk==="kr")?(en?"KRW cash":"원화 현금"):(en?"USD cash":"달러 현금"),left*k,"cash",left,mk]);
+        if(left>0)PIEP.push([(mk==="kr")?(en?"KRW cash":"원화 현금"):(en?"USD cash":"달러 현금"),left*k,"cash",left,mk,left]);
       }
     }
     if(has&&empty===0)s+='<div class="dpmsg">'+(en?"All 12 slots full — wait for exits.":"12칸이 다 찼습니다 — 익절·만기로 빈 칸이 나면 삽니다.")+'</div>';
@@ -3841,9 +3841,9 @@ function recoRender(){
   const body=sec("kr",R.kr,totKR,kr)+sec("us",R.us,totUS,us);
   if(has){
     if(fx>0){
-      (RL.co||[]).filter(function(p){return !p.spot;}).forEach(function(p){ PIEP.push([String(p.code).split("-")[0]+(en?" perp":" 선물"),(p.evl||0)*fx,"held",(p.evl||0),"us"]); });
-      (RL.co||[]).filter(function(p){return p.spot;}).forEach(function(p){ PIEP.push([String(p.code).split("-")[0]+(en?" spot":" 현물"),(p.qty||0)*(p.cur||0)*fx,"held",(p.qty||0)*(p.cur||0),"us"]); });
-      if(cash.usdt>0)PIEP.push(["USDT",cash.usdt*fx,"cash",cash.usdt,"us"]);
+      (RL.co||[]).filter(function(p){return !p.spot;}).forEach(function(p){ PIEP.push([String(p.code).split("-")[0]+(en?" perp":" 선물"),(p.evl||0)*fx,"held",(p.evl||0),"us",(p.evl||0)]); });
+      (RL.co||[]).filter(function(p){return p.spot;}).forEach(function(p){ PIEP.push([String(p.code).split("-")[0]+(en?" spot":" 현물"),(p.qty||0)*(p.cur||0)*fx,"held",(p.qty||0)*(p.cur||0),"us",(p.qty||0)*(p.cur||0)]); });
+      if(cash.usdt>0)PIEP.push(["USDT",cash.usdt*fx,"cash",cash.usdt,"us",cash.usdt]);
     }
     h+='<div class="dphd" style="margin-top:4px">'+(en?"Recommended portfolio":"추천 포트폴리오")+'</div>'+recoPie(PIEP)
       +(fx>0?"":'<div class="dpmsg">'+(en?"USD rate not loaded yet — KR only.":"환율을 아직 못 받아 국내만 그렸습니다.")+'</div>');
