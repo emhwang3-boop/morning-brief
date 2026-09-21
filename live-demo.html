@@ -3937,6 +3937,36 @@ async function bkBars(x){
   if(!d||!d.bars||d.bars.length<5)return null;
   return d.bars.map(function(b){ return +b[4]; });
 }
+
+// ── 3D 큐빅 타워 — 사이트 페이지를 전체화면 iframe 으로 (앱 스크립트와 격리) (사장님 2026-09-21) ──
+var TOWER_URL = "https://emhwang3-boop.github.io/tower/";
+async function openTower3D(list, title) {
+  if (!list || !list.length) return;
+  var old = document.getElementById("tower3dOv"); if (old) old.remove();
+  var ov = document.createElement("div"); ov.id = "tower3dOv";
+  ov.style.cssText = "position:fixed;inset:0;z-index:99999;background:rgba(4,6,10,0.92);display:flex;align-items:center;justify-content:center;color:#cdd5e0;font:700 14px system-ui";
+  ov.innerHTML = '<div id="t3dmsg">3D \uc900\ube44 \uc911\u2026</div>';
+  document.body.appendChild(ov);
+  var data = [];
+  for (var i = 0; i < list.length; i++) {
+    var it = list[i], cs = null;
+    try { cs = await bkBars(it); } catch (e) { cs = null; }
+    var mm = document.getElementById("t3dmsg"); if (mm) mm.textContent = "3D \uc900\ube44 \uc911\u2026 " + (i + 1) + "/" + list.length;
+    if (!cs || cs.length < 10) { data.push({ n: it.name, b: 100, r: 0, v: 1 }); continue; }
+    var n = Math.min(60, cs.length - 1), from = cs[cs.length - 1 - n], to = cs[cs.length - 1];
+    var r = (from > 0) ? (to / from - 1) : 0;
+    var seg = cs.slice(cs.length - 1 - n), dd = [];
+    for (var k = 1; k < seg.length; k++) dd.push(seg[k] / seg[k - 1] - 1);
+    var m = dd.reduce(function (s, x) { return s + x; }, 0) / (dd.length || 1);
+    var sd = Math.sqrt(dd.reduce(function (s, x) { return s + (x - m) * (x - m); }, 0) / (dd.length || 1)) * 100;
+    data.push({ n: it.name, b: 100, r: +r.toFixed(4), v: +Math.max(0.05, sd).toFixed(2) });
+  }
+  if (!document.getElementById("tower3dOv")) return;
+  var enc = ""; try { enc = encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(data))))); } catch (e) {}
+  var tt = encodeURIComponent(title || ("\ub2f4\uae34 " + data.length + "\uc885\ubaa9"));
+  ov.innerHTML = '<iframe src="' + TOWER_URL + '#items=' + enc + '&t=' + tt + '" style="position:absolute;inset:0;width:100%;height:100%;border:0;background:transparent" allow="gyroscope;accelerometer;magnetometer"></iframe>'
+    + '<button onclick="var o=document.getElementById(\'tower3dOv\');if(o)o.remove()" style="position:absolute;top:14px;right:14px;z-index:2;background:rgba(0,0,0,0.6);color:#fff;border:1px solid #666;border-radius:20px;width:42px;height:42px;font-size:20px;font-weight:800;cursor:pointer">\u2715</button>';
+}
 function bkRender(){
   var card=E("bkCard");
   if(!card){ var rc=E("recoCard"); if(!rc)return; card=document.createElement("div"); card.className="card"; card.id="bkCard"; rc.parentNode.insertBefore(card,rc.nextSibling); }
@@ -3951,7 +3981,7 @@ function bkRender(){
       +'</td><td>'+w.toFixed(1)+'%</td><td><span class="mhx" onclick="bkDel('+i+')">\u2715</span></td></tr>';
   });
   h+='</table>';
-  h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">'+BK_SPANS.map(function(s){ return '<button class="dppct" style="flex:1" onclick="bkRun('+s[0]+')">'+KE(s[1],s[2])+'</button>'; }).join("")+'<button class="dppct" onclick="bkClear()">'+KE("비우기","Clear")+'</button></div>';
+  h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">'+BK_SPANS.map(function(s){ return '<button class="dppct" style="flex:1" onclick="bkRun('+s[0]+')">'+KE(s[1],s[2])+'</button>'; }).join("")+'<button class="dppct" style="border-color:#2bd4c0;color:#2bd4c0" onclick="openTower3D(bkGet(),\'가상 바스켓\')">3D</button>'+'<button class="dppct" onclick="bkClear()">'+KE("비우기","Clear")+'</button></div>';
   h+='<div id="bkMsg" class="c21msg" hidden></div><div id="bkOut"></div>';
   h+='<div class="dpmsg" style="margin-top:6px">'+KE("과거 수익률이며 미래 수익을 보장하지 않습니다. 배당·세금·수수료는 뺀 값입니다.","Past returns; no guarantee of future returns. Excludes dividends, taxes and fees.")+'</div>';
   card.innerHTML=h;
