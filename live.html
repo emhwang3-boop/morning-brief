@@ -671,7 +671,7 @@ function pickStock(code,name){
   rememberPick("kr",code,name);
   stkCode=code; stkMarket="kr"; E("stkResults").innerHTML=""; E("stkq").value=name+" ("+code+")";
   E("stkTf").hidden=false; E("stkChart").hidden=false; E("stkChartLbl").hidden=false;
-  E("stkDetail").innerHTML='<div class="soonrow">'+L("loading")+'</div>';
+  E("stkDetail").innerHTML=(typeof mpWait==="function"?mpWait(L("loading")):'<div class="soonrow">'+L("loading")+'</div>');
   loadStock(); loadChart();
   clearInterval(stkTimer); stkTimer=setInterval(loadStock,3000);
 }
@@ -679,7 +679,7 @@ function pickStockUS(code,name){
   rememberPick("us",code,name);
   stkCode=code; stkMarket="us"; usDaily=null; E("stkResults").innerHTML=""; E("stkq").value=name+" ("+code.replace(/\.US$/,"")+")";
   E("stkTf").hidden=false; E("stkChart").hidden=false; E("stkChartLbl").hidden=false;
-  E("stkDetail").innerHTML='<div class="soonrow">'+L("loading")+'</div>';
+  E("stkDetail").innerHTML=(typeof mpWait==="function"?mpWait(L("loading")):'<div class="soonrow">'+L("loading")+'</div>');
   loadChartUS(); loadStockUS();
   clearInterval(stkTimer); stkTimer=setInterval(loadStockUS,3000);
 }
@@ -889,7 +889,7 @@ E("coinq").addEventListener("keydown",function(e){if(e.key==="Enter"&&coinLast.l
 function pickCoin(sym,name){
   try{ rememberPick("co",sym,name); }catch(e){}coinSym=sym;E("coinResults").innerHTML="";E("coinq").value=name+" ("+sym+")";
   E("coinTf").hidden=false;E("coinChart").hidden=false;E("coinChartLbl").hidden=false;
-  E("coinDetail").innerHTML='<div class="soonrow">'+L("loading")+'</div>';
+  E("coinDetail").innerHTML=(typeof mpWait==="function"?mpWait(L("loading")):'<div class="soonrow">'+L("loading")+'</div>');
   loadCoinDetail();loadCoin2Chart();clearInterval(coinTimer);coinTimer=setInterval(loadCoinDetail,3000);}
 async function loadCoinDetail(){if(!coinSym)return;
   try{const d=await fetch("https://api.binance.com/api/v3/ticker/24hr?symbol="+coinSym).then(r=>r.json());
