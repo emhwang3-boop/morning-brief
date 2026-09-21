@@ -112,6 +112,15 @@ body{background:linear-gradient(160deg,#fff7e6,#e9f6ff 60%,#fdeef6);color:var(--
 .pot .pn .pnicon{display:inline-flex;vertical-align:middle;width:21px;height:21px;margin-right:1px}
 .pot .pn .pnicon svg{width:100%;height:100%;display:block}
 .pot .pp{font-size:12px;font-weight:900}
+.pz{width:0.86em;height:0.96em;display:inline-block;vertical-align:-0.1em;margin-right:1px}
+.wallet{border:3px solid var(--line);border-radius:16px;background:#FFF7E0;padding:9px 12px;font-size:13px;font-weight:800;margin-bottom:10px;text-align:center;box-shadow:0 4px 0 rgba(35,50,74,.14)}
+.wallet b{color:#8a5a00;white-space:nowrap}
+.cnote{font-weight:700;color:var(--sub);font-size:10.5px;margin-top:3px;line-height:1.4}
+.pot.sell{cursor:pointer}.pot.sell:active{transform:translateY(2px)}
+.pot .qty{font-size:11px;font-weight:800;color:var(--sub)}
+.pot .fx{font-size:10px;font-weight:700;color:#3AA6F0}
+.pot .gain{font-size:10.5px;font-weight:900;margin-top:1px}
+.pot .pp{font-size:12.5px;font-weight:900;margin-top:1px;white-space:nowrap}
 .grow{animation:grow .6s ease}
 @keyframes grow{0%{transform:scale(.4) translateY(10px);opacity:.2}100%{transform:none;opacity:1}}
 
@@ -165,6 +174,7 @@ body{background:linear-gradient(160deg,#fff7e6,#e9f6ff 60%,#fdeef6);color:var(--
   <section class="screen" id="scGarden">
     <div class="hd">🪴 나의 정원</div>
     <div class="hdsub">회사가 잘되면 무럭무럭 자라 꽃이 피고, 못되면 시들어요.</div>
+    <div class="wallet" id="walletBar"></div>
     <div class="mlbl">🔮 빨리 키워보기 <span>시간을 빨리 감아 봐요</span></div>
     <div class="modes" id="modes">
       <button data-m="3">3개월</button>
@@ -184,9 +194,9 @@ body{background:linear-gradient(160deg,#fff7e6,#e9f6ff 60%,#fdeef6);color:var(--
   <button class="plant" id="plantBtn" onclick="goGarden()" disabled>🌱 심기</button>
 </div>
 <div class="bar" id="barGarden" style="display:none">
-  <button class="reset" onclick="resetAll()">↺ 처음부터</button>
-  <button class="reset" onclick="care()" id="careBtn">🌿 정원 돌보기</button>
-  <button class="plant" id="bloomBtn" onclick="askFlower()" disabled>🌸 꽃 피우기</button>
+  <button class="reset" onclick="resetAll()">↺ 새 게임</button>
+  <button class="reset" onclick="withdrawAll()">🏧 전부 인출</button>
+  <button class="plant" id="bloomBtn" onclick="askFlower()" disabled>🌸 꽃</button>
 </div>
 
 <div id="ghost" style="position:fixed;z-index:100;width:74px;height:74px;border-radius:16px;border:3px solid var(--line);background:#fff;display:none;align-items:center;justify-content:center;font-size:40px;pointer-events:none;box-shadow:0 8px 16px rgba(0,0,0,.28);transform:translate(-50%,-50%)"></div>
@@ -225,21 +235,27 @@ const GRADE=[
 ];
 // 회사 — 그림 + 1년 성적(r). 3·6개월은 r에서 만든다.
 const SAFE=[
- {nm:"코카콜라",em:"🥤",hint:"음료를 만들어요",r:7},{nm:"맥도날드",em:"🍔",hint:"햄버거 가게",r:12},
- {nm:"삼성전자",em:"💾",hint:"반도체를 만들어요",r:-6},{nm:"현대차",em:"🚗",hint:"자동차를 만들어요",r:9},
- {nm:"KODEX200",em:"🧺",hint:"여러 회사를 한 바구니에",r:5},{nm:"네이버",em:"🔎",hint:"검색·인터넷",r:-3},
- {nm:"나이키",em:"👟",hint:"운동화를 만들어요",r:-14},{nm:"카카오",em:"💬",hint:"메신저를 만들어요",r:-11},
- {nm:"은행",em:"🏦",hint:"맡기면 이자가 붙어요",r:6},
+ {nm:"코카콜라",em:"🥤",hint:"음료를 만들어요",r:32.8,r3:11.2,r6:16.8,r12:32.8}, {nm:"맥도날드",em:"🍔",hint:"햄버거 가게",r:-17.9,r3:-10.9,r6:-19.8,r12:-17.9}, {nm:"삼성전자",em:"💾",hint:"반도체를 만들어요",r:288.7,r3:-22.9,r6:35.9,r12:288.7}, {nm:"현대차",em:"🚗",hint:"자동차를 만들어요",r:65.0,r3:-38.0,r6:-30.9,r12:65.0}, {nm:"KODEX200",em:"🧺",hint:"여러 회사를 한 바구니에",r:158.5,r3:-24.6,r6:29.6,r12:158.5}, {nm:"네이버",em:"🔎",hint:"검색·인터넷",r:-13.1,r3:-10.8,r6:-10.2,r12:-13.1}, {nm:"나이키",em:"👟",hint:"운동화를 만들어요",r:-49.9,r3:-21.4,r6:-33.6,r12:-49.9}, {nm:"카카오",em:"💬",hint:"메신저를 만들어요",r:-43.8,r3:-9.6,r6:-33.5,r12:-43.8}, {nm:"은행",em:"🏦",hint:"맡기면 이자가 붙어요",r:3.2,r3:0.8,r6:1.6,r12:3.2}
 ];
 const GROWTH=[
- {nm:"엔비디아",em:"🎮",hint:"게임·AI 칩",r:85},{nm:"테슬라",em:"⚡",hint:"전기차를 만들어요",r:40},
- {nm:"애플",em:"📱",hint:"휴대폰을 만들어요",r:22},{nm:"쿠팡",em:"📦",hint:"온라인 쇼핑·배송",r:30},
- {nm:"넷플릭스",em:"🎬",hint:"영화·드라마",r:25},{nm:"삼성전자",em:"💾",hint:"반도체를 만들어요",r:-6},
- {nm:"카카오",em:"💬",hint:"메신저를 만들어요",r:-11},{nm:"팔란티어",em:"🛰️",hint:"데이터 분석",r:120},
- {nm:"레모네이드",em:"🍋",hint:"보험을 파는 새 회사",r:-22},
+ {nm:"엔비디아",em:"🎮",hint:"게임·AI 칩",r:25.8,r3:5.5,r6:24.5,r12:25.8}, {nm:"테슬라",em:"⚡",hint:"전기차를 만들어요",r:-14.5,r3:-9.0,r6:-4.2,r12:-14.5}, {nm:"애플",em:"📱",hint:"휴대폰을 만들어요",r:36.9,r3:12.8,r6:35.0,r12:36.9}, {nm:"쿠팡",em:"📦",hint:"온라인 쇼핑·배송",r:-56.5,r3:-20.6,r6:-25.9,r12:-56.5}, {nm:"넷플릭스",em:"🎬",hint:"영화·드라마",r:-41.5,r3:-7.2,r6:-21.7,r12:-41.5}, {nm:"삼성전자",em:"💾",hint:"반도체를 만들어요",r:288.7,r3:-22.9,r6:35.9,r12:288.7}, {nm:"카카오",em:"💬",hint:"메신저를 만들어요",r:-43.8,r3:-9.6,r6:-33.5,r12:-43.8}, {nm:"팔란티어",em:"🛰️",hint:"데이터 분석",r:-2.6,r3:38.3,r6:14.1,r12:-2.6}, {nm:"레모네이드",em:"🍋",hint:"보험을 파는 새 회사",r:-22.8,r3:-20.0,r6:-27.0,r12:-22.8}
 ];
 const PAL=["#FF8A5B","#3AA6F0","#37D67A","#FFC93C","#FF6BB3","#9B7BFF","#20C4B8","#F7A600","#5B8DEF"];
 const FLOWERS=[["🌹","장미"],["🌻","해바라기"],["🌷","튤립"],["🌸","벚꽃"],["🏵️","금잔화"]];
+// 게임머니 "퍼즐원" — 게임 전용, 실제 현금 교환 불가 (사장님 2026-09-21). 기호: P에 가로줄 둘.
+const PZSYM='<svg class="pz" viewBox="0 0 24 26" aria-label="퍼즐원"><g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4 V22"/><path d="M7 4 H15 a5 5 0 0 1 0 10 H7"/><path d="M2.5 10 H15.5"/><path d="M2.5 14.5 H15.5"/></g></svg>';
+const FX=1375;                 // 원/달러(야후 실측) — 미국주식은 이 환율로 퍼즐원 환산
+const CUR="퍼즐원";
+const START=10000000;          // 시작 1,000만 퍼즐원
+const PRICE={"삼성전자":272500,"현대차":360500,"카카오":33250,"네이버":198100,"KODEX200":111700,
+ "코카콜라":121344,"맥도날드":341330,"나이키":48826,"애플":462179,"엔비디아":305621,"테슬라":500871,
+ "쿠팡":19649,"넷플릭스":98711,"팔란티어":244255,"레모네이드":64749,"은행":null};
+const USSTK={"코카콜라":1,"맥도날드":1,"나이키":1,"애플":1,"엔비디아":1,"테슬라":1,"쿠팡":1,"넷플릭스":1,"팔란티어":1,"레모네이드":1};
+function loadWallet(){try{var w=+localStorage.getItem("kids_wallet_v2");return w>0?w:START;}catch(e){return START;}}
+function saveWallet(){try{localStorage.setItem("kids_wallet_v2",String(Math.round(wallet)));}catch(e){}}
+function won(n){return Math.round(n).toLocaleString();}
+function fmtCur(n){return PZSYM+won(n);}          // 기호+숫자 (innerHTML 자리에서만)
+let wallet=loadWallet(), plots=[];
 
 // 직접 그린 제품 그림(SVG) — 회사이름 → 만화풍 아이콘. 로고·상표 없이 '평범한 물건'만.
 // 톤: viewBox 0 0 100 100 · 테두리 #23324a · stroke 3 · 둥근 모서리 · PAL 색.
@@ -379,7 +395,7 @@ function mix(hex,f){const n=parseInt(hex.slice(1),16),r=(n>>16)&255,g=(n>>8)&255
   m=v=>Math.max(0,Math.min(255,Math.round(f<1?v*f:v+(255-v)*(f-1))));
   return "#"+((1<<24)+(m(r)<<16)+(m(g)<<8)+m(b)).toString(16).slice(1);}
 // 기간별 성적 — 3·6개월은 1년 성적을 줄여서(짧을수록 폭이 작다)
-function ret(comp){return period==="3"?comp.r*0.35:period==="6"?comp.r*0.6:comp.r;}
+function ret(comp){var v=period==="3"?comp.r3:period==="6"?comp.r6:comp.r12;return (v==null?comp.r:v);}  // 실제 3·6·12개월 성적(키움·야후·한국은행)
 // 식물 모습 (성적 = 건강)
 function plant(v){
   if(v>=40) return {em:"🌸",lb:"활짝!"};
@@ -477,79 +493,81 @@ function updateBag(){const c=$("bagCnt");c.textContent=bag.length;c.style.displa
 // ── 정원 ──
 function goGarden(){
   planted=bag.slice(); period="12";
+  var budget=Math.floor(wallet/planted.length); plots=[];
+  planted.forEach(function(i){var c=pool[i],pr=PRICE[c.nm];
+    if(pr==null){plots.push({i:i,shares:null,price:null,amt:budget});}
+    else{var sh=Math.floor(budget/pr); plots.push({i:i,shares:sh,price:pr,amt:sh*pr});}});
+  var spent=plots.reduce(function(s2,q){return s2+q.amt;},0);
+  wallet-=spent; if(wallet<0)wallet=0; saveWallet();
+  document.querySelectorAll("#modes button").forEach(function(bb){bb.classList.toggle("on",bb.dataset.m==="12");});
   $("bag").style.display="none"; $("barPlay").style.display="none"; $("barGarden").style.display="flex";
-  document.querySelectorAll("#modes button").forEach(b=>b.classList.toggle("on",b.dataset.m==="12"));
   renderGarden(); show("scGarden");
 }
-$("modes").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
-  period=b.dataset.m; document.querySelectorAll("#modes button").forEach(x=>x.classList.remove("on")); b.classList.add("on");
-  if(period==="real"){realGrow();return;} renderGarden(); fan();});
+$("modes").addEventListener("click",function(e){var bb=e.target.closest("button");if(!bb)return;
+  period=bb.dataset.m; document.querySelectorAll("#modes button").forEach(function(x){x.classList.remove("on");}); bb.classList.add("on");
+  renderGarden(); fan();});
+function plotVal(q){var r=ret(pool[q.i]); return Math.round(q.amt*(1+r/100));}
 function renderGarden(){
-  const comps=planted.map(i=>pool[i]);
-  const rs=comps.map(ret), avg=rs.reduce((a,b)=>a+b,0)/(rs.length||1);
-  const P=plant(avg);
+  var gval=plots.reduce(function(s2,q){return s2+plotVal(q);},0);
+  var rs=plots.map(function(q){return ret(pool[q.i]);});
+  var avg=rs.length?rs.reduce(function(x,y){return x+y;},0)/rs.length:0;
+  $("walletBar").innerHTML='💰 지갑 <b>'+fmtCur(wallet)+'</b> · 🪴 정원 <b>'+fmtCur(gval)+'</b> · 합계 <b>'+fmtCur(wallet+gval)+'</b>'
+    +'<div class="cnote">퍼즐원은 게임 전용 화폐 · 실제 돈으로 바꿀 수 없어요 · 미국주식은 환율 '+FX+'원으로 환전</div>';
   $("total").innerHTML='<div class="bigplant grow">'+plantSVG(avg)+'</div>'
     +'<div class="pct" style="color:'+(avg>=0?"#16a34a":"#e5484d")+'">'+(avg>=0?"+":"")+avg.toFixed(1)+'%</div>'
-    +'<div class="msg">'+gardenMsg(avg)+'</div>';
-  $("pots").innerHTML=comps.map((c,k)=>{const v=rs[k];
-    return '<div class="pot"><div class="peplant grow" style="animation-delay:'+(k*0.06)+'s">'+plantSVG(v)+'</div>'
-      +'<div class="pn">'+labelIcon(c)+c.nm+'</div>'
-      +'<div class="pp" style="color:'+(v>=0?"#16a34a":"#e5484d")+'">'+(v>=0?"+":"")+v.toFixed(0)+'%</div></div>';}).join("");
-  $("bloomBtn").disabled = avg<20;                    // 잘 자라야 꽃을 피운다
-  $("careBtn").style.display = (avg<3 && planted.length>1)?"block":"none";  // 시들면 돌보기
-  // 빨리 키워본 뒤 → "이대로 계속 키울래?"(진짜로 키우기 B)
-  $("keepBox").innerHTML='<button class="keep" onclick="realGrow()">🌱 이대로 계속 키울래?'
-    +'<small>진짜로 심어 두고 날마다 키워요</small></button>';
+    +'<div class="msg">'+gardenMsg(avg)+' · 화분을 누르면 팔아서 지갑에 담아요</div>';
+  $("keepBox").innerHTML="";
+  $("pots").innerHTML=plots.map(function(q,k){
+    var c=pool[q.i], r=ret(pool[q.i]), val=plotVal(q), gain=val-q.amt;
+    var qty=q.shares==null?"예금":(q.shares+"주");
+    var us=USSTK[c.nm]?'<div class="fx">🔁 $'+won(q.amt/FX)+'</div>':'';
+    return '<div class="pot sell" onclick="sellPlot('+k+')"><div class="peplant grow" style="animation-delay:'+(k*0.05)+'s">'+plantSVG(r)+'</div>'
+      +'<div class="pn">'+labelIcon(c)+c.nm+'</div><div class="qty">'+qty+'</div>'+us
+      +'<div class="pp" style="color:'+(r>=0?"#16a34a":"#e5484d")+'">'+fmtCur(val)+'</div>'
+      +'<div class="gain" style="color:'+(gain>=0?"#16a34a":"#e5484d")+'">'+(gain>=0?"▲익절 +":"▼손절 ")+won(gain)+'</div></div>';
+  }).join("");
+  $("bloomBtn").disabled = avg<20 || plots.length===0;
 }
 function gardenMsg(avg){
-  if(avg>=40)return "우와! 정원이 활짝 폈어요. 꽃을 피워 볼까요? 🌸";
-  if(avg>=20)return "무럭무럭! 이제 꽃을 피울 수 있어요 🌳";
+  if(avg>=40)return "우와! 정원이 활짝 폈어요 🌸";
+  if(avg>=20)return "무럭무럭! 꽃도 피울 수 있어요 🌳";
   if(avg>=3) return "잘 자라고 있어요 🌿";
-  if(avg>-3) return "이제 막 새싹이에요 🌱 기다려 볼까요?";
-  if(avg>-15)return "조금 시들었어요. 정원을 돌봐 줄까요? 🥀";
-  return "많이 시들었어요 😢 돌보거나, 다시 심어도 돼요.";
+  if(avg>-3) return "이제 막 새싹이에요 🌱";
+  if(avg>-15)return "조금 시들었어요 🥀";
+  return "많이 시들었어요 😢";
 }
-// 돌보기 = 리밸런싱: 제일 시든 화분 뽑고 잘 자라는 데 물 주기
-function care(){
-  if(planted.length<=1)return;
-  let worst=0; planted.forEach((idx,k)=>{if(ret(pool[idx])<ret(pool[planted[worst]]))worst=k;});
-  const gone=pool[planted[worst]];
-  planted.splice(worst,1);
-  renderGarden();
-  $("total").querySelector(".msg").textContent="🪓 제일 시든 "+gone.nm+"를 뽑고 ☀️💧 잘 자라는 데 물을 줬어요! (리밸런싱)";
-  fan();
+function sellPlot(k){
+  var q=plots[k], val=plotVal(q), gain=val-q.amt, c=pool[q.i];
+  wallet+=val; plots.splice(k,1); saveWallet(); renderGarden(); fan();
+  var m=$("total").querySelector(".msg");
+  if(m) m.textContent=(gain>=0?"✂️ "+c.nm+" 익절! +"+won(gain)+" "+CUR+" 벌었어요 🎉":"🪓 "+c.nm+" 손절… "+won(gain)+" "+CUR)+" · 지갑에 담았어요";
+  if(plots.length===0) setTimeout(finishRound,350);
 }
-// 꽃 고르기 → 개화
+function withdrawAll(){
+  var val=plots.reduce(function(s2,q){return s2+plotVal(q);},0);
+  wallet+=val; plots=[]; saveWallet(); renderGarden(); finishRound();
+}
+function finishRound(){
+  $("bloomEmoji").textContent="💰"; $("bloomTtl").textContent="인출 완료!";
+  $("bloomMsg").textContent="지금 지갑에 "+won(wallet)+" "+CUR+" 있어요. 이 돈으로 또 도전할 수 있어요!";
+  $("ovBloom").classList.add("on"); fanfare(); confetti("💰");
+}
 function askFlower(){
-  $("flowers").innerHTML=FLOWERS.map((f,i)=>'<button onclick="bloom('+i+')" title="'+f[1]+'">'+f[0]+'</button>').join("");
+  $("flowers").innerHTML=FLOWERS.map(function(f,i){return '<button onclick="bloom('+i+')" title="'+f[1]+'">'+f[0]+'</button>';}).join("");
   $("ovFlower").classList.add("on");
 }
 function bloom(i){
-  hide("ovFlower");
-  const f=FLOWERS[i];
-  const comps=planted.map(k=>pool[k]), avg=comps.map(ret).reduce((a,b)=>a+b,0)/(comps.length||1);
-  $("bloomEmoji").textContent=f[0];
-  $("bloomTtl").textContent="우리 정원에 "+f[1]+"이 활짝! 🎉";
-  $("bloomMsg").textContent="만 원이 "+Math.round(10000*(1+avg/100)).toLocaleString()+"원이 됐어요. 오래 잘 키운 덕분이에요!";
+  hide("ovFlower"); var f=FLOWERS[i];
+  var gval=plots.reduce(function(s2,q){return s2+plotVal(q);},0);
+  $("bloomEmoji").textContent=f[0]; $("bloomTtl").textContent="우리 정원에 "+f[1]+"이 활짝! 🎉";
+  $("bloomMsg").textContent="정원이 "+won(gval)+" "+CUR+"까지 자랐어요! 팔아서 지갑에 담아 볼까요?";
   $("ovBloom").classList.add("on"); fanfare(); confetti(f[0]);
 }
-// 실전 키우기 — 진짜로 심어 두고 날마다 자란다(프로토타입: 저장 + 안내)
-function realGrow(){
-  try{localStorage.setItem("kids_garden",JSON.stringify({names:planted.map(i=>pool[i].nm),at:new Date().toISOString().slice(0,10)}));}catch(_){}
-  const comps=planted.map(i=>pool[i]);
-  $("total").innerHTML='<div class="bigplant grow">'+plantSVG(0)+'</div><div class="pct" style="color:#3AA6F0">키우는 중…</div>'
-    +'<div class="msg">진짜로 심었어요! <b>날마다 앱을 열면</b> 그날 회사 성적으로 정원이 자라거나 시들어요 🌤️<br>물도 주고 햇빛도 쬐어 주며 오래오래 키워 보세요.</div>';
-  $("pots").innerHTML=comps.map((c,k)=>'<div class="pot"><div class="peplant grow" style="animation-delay:'+(k*0.06)+'s">'+plantSVG(0)+'</div>'
-    +'<div class="pn">'+labelIcon(c)+c.nm+'</div><div class="pp" style="color:#3AA6F0">심음</div></div>').join("");
-  $("keepBox").innerHTML=""; document.querySelectorAll("#modes button").forEach(b=>b.classList.remove("on"));
-  $("bloomBtn").disabled=true; $("careBtn").style.display="none"; fan();
-}
-
 function resetAll(){
   hide("ovFlower");hide("ovBloom");
-  bag=[];planted=[]; $("bag").style.display="none";
+  bag=[];plots=[];planted=[]; $("bag").style.display="none";
   $("barPlay").style.display="none";$("barGarden").style.display="none";updateBag();
-  document.querySelectorAll("#grid .cell").forEach(c=>c.classList.remove("open","inbag"));
+  document.querySelectorAll("#grid .cell").forEach(function(c){c.classList.remove("open","inbag");});
   show("scQuiz");
 }
 
