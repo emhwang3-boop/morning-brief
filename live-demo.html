@@ -2436,8 +2436,15 @@ async function rlLoad(auto) {
     }
   } finally {
     RL.kr = out.kr; RL.us = out.us; RL.co = out.co;
+    // 🔴 재조회가 TR 한도 등으로 예수금을 못 받으면(null) 직전 값을 지킨다 — 추천이 0원으로 깜빡이지 않게 (2026-09-21)
+    if (out.cash && RL.cash) {
+      if (out.cash.krw == null && RL.cash.krw != null) out.cash.krw = RL.cash.krw;
+      if (out.cash.usd == null && RL.cash.usd != null) out.cash.usd = RL.cash.usd;
+      if (out.cash.usdt == null && RL.cash.usdt != null) out.cash.usdt = RL.cash.usdt;
+    }
     RL.cash = out.cash; RL.sum = out.sum;
     RL.at = Date.now(); RL.busy = false;
+    try { recoRender(); } catch (e) {}
     const n = out.kr.length + out.us.length + out.co.length;
     const hm = new Date().toTimeString().slice(0, 5);
     rlSay(hm + (en ? " · " : " 갱신 · ") + n + (en ? " positions" : "건")
