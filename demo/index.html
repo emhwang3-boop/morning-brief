@@ -283,6 +283,7 @@ body.light #installBar{background:#eaf3ff;border-color:#b9d5f5;color:#1a4b7a}
   </div>
   <canvas id="stkChart" class="stkchart" hidden></canvas>
   <div id="stkChartLbl" class="stkcl" hidden></div>
+  <button id="bkAddBtn" class="dppct" style="width:100%;margin-top:8px" hidden onclick="bkAddCurrent()"></button>
 </div>
 
 <div class="card" id="coin2">
@@ -733,7 +734,7 @@ function lastPick(kind){
 function pickStock(code,name){
   rememberPick("kr",code,name);
   stkCode=code; stkMarket="kr"; E("stkResults").innerHTML=""; E("stkq").value=name+" ("+code+")";
-  E("stkTf").hidden=false; E("stkChart").hidden=false; E("stkChartLbl").hidden=false;
+  E("stkTf").hidden=false; E("stkChart").hidden=false; E("stkChartLbl").hidden=false; var _bb=E("bkAddBtn"); if(_bb)_bb.hidden=false;
   E("stkDetail").innerHTML='<div class="soonrow">'+L("loading")+'</div>';
   loadStock(); loadChart();
   clearInterval(stkTimer); stkTimer=setInterval(loadStock,3000);
@@ -741,7 +742,7 @@ function pickStock(code,name){
 function pickStockUS(code,name){
   rememberPick("us",code,name);
   stkCode=code; stkMarket="us"; usDaily=null; E("stkResults").innerHTML=""; E("stkq").value=name+" ("+code.replace(/\.US$/,"")+")";
-  E("stkTf").hidden=false; E("stkChart").hidden=false; E("stkChartLbl").hidden=false;
+  E("stkTf").hidden=false; E("stkChart").hidden=false; E("stkChartLbl").hidden=false; var _bb=E("bkAddBtn"); if(_bb)_bb.hidden=false;
   E("stkDetail").innerHTML='<div class="soonrow">'+L("loading")+'</div>';
   loadChartUS(); loadStockUS();
   clearInterval(stkTimer); stkTimer=setInterval(loadStockUS,3000);
@@ -3862,10 +3863,100 @@ function recoRender(){
   h+=c+'</table>';
   h+='<div class="dpmsg" style="margin-top:6px">'+(en?"Measured rules only. Tap View to open the stock and order.":"잰 규칙만 씁니다. [조회]를 누르면 종목이 열리고 바로 주문할 수 있습니다.")+'</div>';
   card.innerHTML=h;
+  try{ bkRender(); }catch(e){}
 }
 setTimeout(recoLoad,2500);
 setInterval(recoLoad,30*60000);
 setInterval(function(){ try{ recoRender(); }catch(e){} },15000);   // 실계좌가 바뀌면 칸·팔 것을 다시
+
+// ── 가상 바스켓 백테스트 — 데모 (사장님 2026-09-21) ─────────────────────────
+//   주식앱과 같은 방식: 균등비중 · 63/126/252 거래일(3·6·12개월) 과거 수익률.
+//   추천이 아니다. 사장님이 [담기]로 고른 것의 과거 성적만 낸다. 이 폰에만 저장한다.
+function KE(ko,en){ return LANG==="en"?en:ko; }
+const BK_KEY="bk_basket_demo_v1";
+const BK_SPANS=[[63,"3개월","3 months"],[126,"6개월","6 months"],[252,"1년","1 year"]];
+function bkGet(){ try{ return JSON.parse(localStorage.getItem(BK_KEY)||"[]")||[]; }catch(e){ return []; } }
+function bkSave(a){ try{ localStorage.setItem(BK_KEY,JSON.stringify(a)); }catch(e){} }
+function bkMsg(t){ var m=E("bkMsg"); if(m){ m.textContent=t||""; m.hidden=!t; } }
+function bkAdd(code,name,mk){
+  if(!code)return;
+  var a=bkGet();
+  if(a.some(function(x){return x.code===code;})){ bkRender(); bkMsg(KE("이미 담겨 있습니다.","Already added.")); return; }
+  if(a.length>=10){ bkMsg(KE("한 번에 열 개까지 담을 수 있습니다.","You can add up to 10 at a time.")); return; }
+  a.push({code:code,name:name||code,mk:mk||"kr"});
+  bkSave(a); bkRender();
+}
+function bkDel(i){ var a=bkGet(); a.splice(i,1); bkSave(a); bkRender(); }
+function bkClear(){ bkSave([]); bkRender(); }
+function bkAddCurrent(){
+  if(typeof stkCode==="undefined"||!stkCode){ bkMsg(KE("먼저 종목을 [조회]해 주세요.","Look up a stock first.")); return; }
+  var nm=((E("stkq")||{}).value||stkCode).replace(/\s*\(.*\)\s*$/,"");
+  bkAdd(stkCode,nm,(typeof stkMarket!=="undefined"&&stkMarket==="us")?"us":"kr");
+  var c=E("bkCard"); if(c&&c.scrollIntoView)c.scrollIntoView({behavior:"smooth",block:"start"});
+}
+async function bkBars(x){
+  if(x.mk==="us"){
+    var k=await usFetch("kline","code="+encodeURIComponent(x.code)+"&type=8&num=300");
+    var rl=(k&&k.data&&k.data[0]&&k.data[0].respList)||[];
+    if(rl.length<5)return null;
+    return rl.slice().reverse().map(function(b){ return +b.c; });
+  }
+  var d=await krFetch("chart","code="+x.code+"&tf=D",25);   // 국내는 허브를 거쳐 늦다 — 넉넉히 기다린다
+  if(!d||!d.bars||d.bars.length<5)return null;
+  return d.bars.map(function(b){ return +b[4]; });
+}
+function bkRender(){
+  var card=E("bkCard");
+  if(!card){ var rc=E("recoCard"); if(!rc)return; card=document.createElement("div"); card.className="card"; card.id="bkCard"; rc.parentNode.insertBefore(card,rc.nextSibling); }
+  var a=bkGet();
+  var h='<h3>'+KE("가상 바스켓","Virtual basket")+(a.length?' <span style="color:var(--nm);font-weight:800">'+a.length+'</span>':'')+'</h3>';
+  h+='<div class="dpmsg">'+KE("추천 종목을 [조회]한 뒤 [＋ 가상 바스켓에 담기]를 누르면, 담긴 종목 전체의 3·6·12개월 과거 수익률을 함께 계산합니다.","Look up a pick, tap Add to virtual basket, then we compute the whole basket's past 3/6/12-month return.")+'</div>';
+  if(!a.length){ h+='<div class="mhempty">'+KE("아직 담긴 종목이 없습니다.","No items yet.")+'</div>'; card.innerHTML=h; return; }
+  var w=100/a.length;
+  h+='<table class="mhtab"><tr><th>'+KE("종목","Item")+'</th><th>'+KE("비중","Weight")+'</th><th></th></tr>';
+  a.forEach(function(x,i){
+    h+='<tr><td style="text-align:left">'+dpEsc(x.name)+(/^\d/.test(x.code)?' <span class="dplbl">'+x.code+'</span>':'')+(x.mk==="us"?' <span class="dplbl">US</span>':'')
+      +'</td><td>'+w.toFixed(1)+'%</td><td><span class="mhx" onclick="bkDel('+i+')">\u2715</span></td></tr>';
+  });
+  h+='</table>';
+  h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">'+BK_SPANS.map(function(s){ return '<button class="dppct" style="flex:1" onclick="bkRun('+s[0]+')">'+KE(s[1],s[2])+'</button>'; }).join("")+'<button class="dppct" onclick="bkClear()">'+KE("비우기","Clear")+'</button></div>';
+  h+='<div id="bkMsg" class="c21msg" hidden></div><div id="bkOut"></div>';
+  h+='<div class="dpmsg" style="margin-top:6px">'+KE("과거 수익률이며 미래 수익을 보장하지 않습니다. 배당·세금·수수료는 뺀 값입니다.","Past returns; no guarantee of future returns. Excludes dividends, taxes and fees.")+'</div>';
+  card.innerHTML=h;
+}
+async function bkRun(days){
+  var a=bkGet(); if(!a.length)return;
+  bkMsg(KE("받는 중\u2026 종목마다 몇 초 걸립니다","Loading\u2026 a few seconds per item"));
+  E("bkOut").innerHTML="";
+  var rows=[];
+  for(var i=0;i<a.length;i++){
+    var cs=null; try{ cs=await bkBars(a[i]); }catch(e){ cs=null; }
+    if(!cs||cs.length<5){ rows.push({nm:a[i].name,err:true}); continue; }
+    var n=Math.min(days,cs.length-1);
+    var from=cs[cs.length-1-n], to=cs[cs.length-1];
+    if(!(from>0)){ rows.push({nm:a[i].name,err:true}); continue; }
+    rows.push({nm:a[i].name,r:to/from-1,n:n,cs:cs.slice(cs.length-1-n)});
+  }
+  var ok=rows.filter(function(x){ return !x.err; });
+  if(!ok.length){ bkMsg(KE("자료를 못 받았습니다. 잠시 뒤 다시 눌러 주세요.","Could not load data. Please try again shortly.")); return; }
+  bkMsg("");
+  var L2=Math.min.apply(null,ok.map(function(x){ return x.cs.length; }));
+  var daily=[];
+  for(var t=1;t<L2;t++){ var s=0; ok.forEach(function(x){ var c=x.cs.slice(x.cs.length-L2); s+=c[t]/c[t-1]-1; }); daily.push(s/ok.length); }
+  var eq=1; daily.forEach(function(r){ eq*=(1+r); });
+  var worst=ok.slice().sort(function(p,q){ return p.r-q.r; })[0];
+  var best=ok.slice().sort(function(p,q){ return q.r-p.r; })[0];
+  var pc=function(v){ return (v>=0?"+":"")+(v*100).toFixed(1)+"%"; };
+  var cls=function(v){ return v>0?"up":(v<0?"dn":"fl"); };
+  var h='<table class="mhtab"><tr><th>'+KE("종목","Item")+'</th><th>'+(L2-1)+KE("일 수익률","-day return")+'</th></tr>';
+  h+='<tr class="mhsum"><td style="text-align:left"><b>'+KE("바스켓(균등)","Basket (equal)")+'</b></td><td class="'+cls(eq-1)+'"><b>'+pc(eq-1)+'</b></td></tr>';
+  ok.slice().sort(function(p,q){ return q.r-p.r; }).forEach(function(x){ h+='<tr><td style="text-align:left">'+dpEsc(x.nm)+'</td><td class="'+cls(x.r)+'">'+pc(x.r)+'</td></tr>'; });
+  rows.filter(function(x){ return x.err; }).forEach(function(x){ h+='<tr><td style="text-align:left">'+dpEsc(x.nm)+'</td><td class="fl">'+KE("자료 없음","No data")+'</td></tr>'; });
+  h+='</table>';
+  h+='<div class="dpmsg">'+KE("제일 좋았던 것 ","Best: ")+dpEsc(best.nm)+' '+pc(best.r)+KE(' \u00b7 제일 나빴던 것 '," \u00b7 Worst: ")+dpEsc(worst.nm)+' '+pc(worst.r)+'</div>';
+  E("bkOut").innerHTML=h;
+}
+
 
 function applyLang(){
   var b=E("lng");if(b)b.textContent=LANG==="en"?"한":"EN";
@@ -3889,6 +3980,8 @@ function applyLang(){
   updStkTag();
   if(window._lastD)render(window._lastD);
   if(stkCode)loadStock();
+  var _ba=E("bkAddBtn"); if(_ba)_ba.textContent=KE("＋ 가상 바스켓에 담기","＋ Add to virtual basket");
+  try{ bkRender(); }catch(e){}
   if(coinSym)loadCoinDetail();
 }
 applyLang();
