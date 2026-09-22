@@ -1,5 +1,11 @@
 {
  "at": "2026-09-22 20:17",
+ "rules": {
+  "slots": 12,
+  "tp": 15,
+  "hold_days": 60,
+  "panic_stop": -10
+ },
  "kr": {
   "asof": "2026-09-22",
   "regime": {
@@ -107,6 +113,7 @@
     "code": "442580",
     "name": "PLUS 글로벌HBM반도체",
     "close": 105455.0,
+    "width": 0.63,
     "r20": 6.3,
     "en": "PLUS Global HBM"
    },
@@ -114,6 +121,7 @@
     "code": "381170",
     "name": "TIGER 미국테크TOP10 INDXX",
     "close": 31880.0,
+    "width": 0.51,
     "r20": 5.2,
     "en": "TIGER US Tech Top10 INDXX"
    }
@@ -126,6 +134,7 @@
     "code": "ARKK",
     "name": "ARKK (혁신테마)",
     "close": 90.72,
+    "width": 0.34,
     "r20": 5.2,
     "en": "ARKK (Innovation)"
    }
@@ -138,6 +147,7 @@
     "code": "494310",
     "name": "KODEX 반도체레버리지",
     "close": 88040.0,
+    "width": 2.13,
     "r20": 17.6,
     "en": "KODEX Semiconductor Leverage"
    },
@@ -145,6 +155,7 @@
     "code": "465610",
     "name": "ACE 미국빅테크TOP7 Plus레버리지(합성)",
     "close": 43400.0,
+    "width": 0.31,
     "r20": 4.6,
     "en": "ACE US Big Tech 7 Plus Leverage"
    }
@@ -157,6 +168,7 @@
     "code": "BRZU",
     "name": "BRZU (브라질3x)",
     "close": 105.72,
+    "width": 1.66,
     "r20": 16.9,
     "en": "BRZU (Brazil 3x)"
    },
@@ -164,6 +176,7 @@
     "code": "BULZ",
     "name": "BULZ (빅테크3x)",
     "close": 46.13,
+    "width": 0.94,
     "r20": 25.7,
     "en": "BULZ (Big Tech 3x)"
    }
