@@ -48,6 +48,7 @@ body.light .mk img.lt{display:block}
 .clock{font-size:13px;color:var(--sub);font-variant-numeric:tabular-nums}
 .tgl{background:var(--card);border:1px solid var(--bd);color:var(--tx);border-radius:8px;padding:5px 9px;font-size:15px;cursor:pointer}
 .asof{font-size:11.5px;color:var(--soon);margin-bottom:2px}
+#feedDelay{display:none;background:#fff4e6;color:#9a5a00;border:1px solid #ffd8a8;border-radius:10px;padding:8px 11px;font-size:12.5px;font-weight:700;margin:2px 0 6px}#feedDelay.on{display:block}body.dark #feedDelay{background:#2b2010;color:#ffd8a8;border-color:#5a4420}
 /* 운영시간 — 안내일 뿐이라 더 흐리게 (사장님 2026-09-18) */
 .ophrs{font-size:10.5px;color:var(--soon);margin-bottom:8px}
 .gauges{display:flex;gap:10px;margin-bottom:4px}
@@ -181,6 +182,11 @@ body.light .dpnote.liveon{background:#ffe3e3;border-color:#e03131;color:#a01010}
 .dprng{width:100%;margin:8px 0 2px;accent-color:#1c7ed6}
 .dppct{padding:5px 10px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--nm);font-size:12px;font-weight:700;cursor:pointer}
 .dphd{font-size:12px;color:var(--sub);font-weight:700;margin:2px 0 5px}
+
+/* 투자 유의사항 카드 — 주식앱과 같은 문구 (사장님 2026-09-21 "본앱 하단에도") */
+.discCard .discList{margin:0;padding-left:16px}
+.discCard .discList li{font-size:12.5px;color:var(--sub);line-height:1.65;margin:6px 0}
+.ken{display:none} body.lang-en .kko{display:none} body.lang-en .ken{display:inline}
 /* 공유 (2026-09-16) */
 .shwrap{position:relative}
 .shbtn{border-radius:12px;font-weight:800;font-size:13.5px;padding:6px 13px;letter-spacing:.5px;box-shadow:0 3px 8px rgba(0,0,0,.30), 0 1px 0 rgba(255,255,255,.10) inset}
@@ -256,6 +262,7 @@ body.light #installBar{background:#eaf3ff;border-color:#b9d5f5;color:#1a4b7a}
 </div>
 <div class="dpnote" id="dpNote"><span id="dpNoteTxt">⚠모의(시늉) 주문 판 — 실제 주문은 나가지 않습니다 · 심사·시연용</span><label class="dplive"><input type="checkbox" id="dpLiveCb" onchange="dpLiveTgl(this.checked)"> 실주문</label><button class="dpreset" onclick="dpReset()">초기화</button></div>
 <div class="asof" id="asof">불러오는 중…</div>
+<div id="feedDelay" hidden></div>
 <div class="ophrs" id="ophrs">실시간 운영 05:00 ~ 익일 02:00 (KST) · 그 밖의 시간은 마지막 값</div>
 <div id="installBar" hidden><span id="installTxt">📲 홈 화면에 앱으로 추가하고 바로 여세요</span><button id="installBtn" onclick="doInstall()">앱설치</button><span class="ix" onclick="dismissInstall()">✕</span></div>
 
@@ -283,7 +290,6 @@ body.light #installBar{background:#eaf3ff;border-color:#b9d5f5;color:#1a4b7a}
   </div>
   <canvas id="stkChart" class="stkchart" hidden></canvas>
   <div id="stkChartLbl" class="stkcl" hidden></div>
-  <button id="bkAddBtn" class="dppct" style="width:100%;margin-top:8px" hidden onclick="bkAddCurrent()"></button>
 </div>
 
 <div class="card" id="coin2">
@@ -313,10 +319,20 @@ body.light #installBar{background:#eaf3ff;border-color:#b9d5f5;color:#1a4b7a}
 <div id="news"></div>
 <!-- 고객의 소리 (사장님 2026-09-19) — 허브 /voice 로 보낸다. 본앱·데모를 app 으로 가른다. 개인정보 없음 -->
 <div class="card" id="voice"><h3 id="vcH">고객의 소리</h3>
-<textarea id="vcTxt" maxlength="300" rows="3" style="width:100%;box-sizing:border-box;background:var(--bg);color:var(--nm);border:1px solid var(--bd);border-radius:10px;padding:8px 10px;font:inherit;font-size:13px;resize:vertical" placeholder="바라는 기능, 불편한 점을 적어 주세요"></textarea>
+<textarea id="vcTxt" maxlength="300" rows="3" style="width:100%;box-sizing:border-box;background:var(--bg);color:var(--nm);border:1px solid var(--bd);border-radius:10px;padding:8px 10px;font:inherit;font-size:13px;resize:vertical" placeholder="시스템 오류 내용을 적어 주세요"></textarea>
 <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;gap:8px"><span id="vcMsg" style="font-size:12px;color:var(--sub)"></span>
-<button id="vcBtn" onclick="vcSend()" style="border:0;border-radius:9px;padding:7px 16px;background:#1c7ed6;color:#fff;font-weight:700;cursor:pointer">보내기</button></div></div>
+<button id="vcBtn" onclick="vcSend()" style="border:0;border-radius:9px;padding:7px 16px;background:#1c7ed6;color:#fff;font-weight:700;cursor:pointer">보내기</button></div><div class="discNote" style="margin-top:10px"><span class="kko">본 창구는 시스템 오류 제보 전용이며, 자본시장법에 따라 개별 종목 상담이나 투자 조언은 일체 답변하지 않습니다.</span><span class="ken">This channel is for reporting system errors only. Under the Financial Investment Services and Capital Markets Act, we do not respond to individual stock consultations or investment advice.</span></div></div>
 
+<div class="card discCard">
+  <h3><span class="kko">투자 유의사항</span><span class="ken">Investment Notice</span></h3>
+  <ul class="discList">
+    <li><span class="kko">본 서비스는 특정 종목의 매수·매도를 권유하지 않으며, 투자 판단의 책임은 본인에게 있습니다.</span><span class="ken">This service does not recommend buying or selling any specific security; responsibility for investment decisions rests with you.</span></li>
+    <li><span class="kko">과거의 실적이 미래의 수익을 보장하지 않으며, 본 서비스는 원금 손실의 가능성이 있습니다.</span><span class="ken">Past performance does not guarantee future returns, and this service carries the possibility of loss of principal.</span></li>
+    <li><span class="kko">본 서비스는 1:1 개별 투자 상담을 진행하지 않는 단방향 정보 제공 서비스입니다.</span><span class="ken">This service is a one-way information service and does not provide one-on-one individual investment consultation.</span></li>
+    <li><span class="kko">이 앱은 단기 트레이딩용으로 사용하기에는 적합하지 않으며, 일봉 기준으로 중장기 포트폴리오 투자를 지원하기 위해 설계되었습니다.</span><span class="ken">This app is not suitable for short-term trading; it is designed to support medium- to long-term portfolio investing based on daily charts.</span></li>
+    <li><span class="kko">가상포트폴리오 기능은 고객님이 선택한 종목의 과거 데이터 기반 단순 시뮬레이션 결과이며, 어떠한 투자 권유나 수익 보장도 하지 않습니다.</span><span class="ken">The virtual portfolio feature is a simple simulation based on past data for the securities you selected; it is neither an investment recommendation nor a guarantee of returns.</span></li>
+  </ul>
+</div>
 <div class="foot" id="foot"></div>
 
 <script>
@@ -452,6 +468,12 @@ function render(d){
   window._lastD=d;
   {
     document.getElementById("asof").textContent=d.asof+L("asof")+(d.__snap?L("snap"):"");
+    // 🔴 Infoway 만료·중단 시 서버가 feed_delayed 를 켠다 → 지연 안내띠 (사장님 2026-09-21)
+    try{var fb=document.getElementById("feedDelay");
+      if(fb){var on=!!d.feed_delayed;fb.className=on?"on":"";fb.hidden=!on;
+        fb.textContent=(LANG==="en")
+          ?"⚠ Real-time feed unavailable — showing delayed quotes (Yahoo, ~15 min)."
+          :"⚠ 실시간 시세 연결이 중단되어 지연 시세(야후, 약 15분 지연)로 표시 중입니다.";}}catch(e){}
     // 게이지 (+ 시장온도)
     let g="";
     if(d.temp!=null){const t=d.temp,li=t<=25?0:t<=45?1:t<=60?2:t<=75?3:4,lab=TEMPW[LANG][li],
@@ -734,16 +756,16 @@ function lastPick(kind){
 function pickStock(code,name){
   rememberPick("kr",code,name);
   stkCode=code; stkMarket="kr"; E("stkResults").innerHTML=""; E("stkq").value=name+" ("+code+")";
-  E("stkTf").hidden=false; E("stkChart").hidden=false; E("stkChartLbl").hidden=false; var _bb=E("bkAddBtn"); if(_bb)_bb.hidden=false;
-  E("stkDetail").innerHTML='<div class="soonrow">'+L("loading")+'</div>';
+  E("stkTf").hidden=false; E("stkChart").hidden=false; E("stkChartLbl").hidden=false;
+  E("stkDetail").innerHTML=(typeof mpWait==="function"?mpWait(L("loading")):'<div class="soonrow">'+L("loading")+'</div>');
   loadStock(); loadChart();
   clearInterval(stkTimer); stkTimer=setInterval(loadStock,3000);
 }
 function pickStockUS(code,name){
   rememberPick("us",code,name);
   stkCode=code; stkMarket="us"; usDaily=null; E("stkResults").innerHTML=""; E("stkq").value=name+" ("+code.replace(/\.US$/,"")+")";
-  E("stkTf").hidden=false; E("stkChart").hidden=false; E("stkChartLbl").hidden=false; var _bb=E("bkAddBtn"); if(_bb)_bb.hidden=false;
-  E("stkDetail").innerHTML='<div class="soonrow">'+L("loading")+'</div>';
+  E("stkTf").hidden=false; E("stkChart").hidden=false; E("stkChartLbl").hidden=false;
+  E("stkDetail").innerHTML=(typeof mpWait==="function"?mpWait(L("loading")):'<div class="soonrow">'+L("loading")+'</div>');
   loadChartUS(); loadStockUS();
   clearInterval(stkTimer); stkTimer=setInterval(loadStockUS,3000);
 }
@@ -903,7 +925,11 @@ function c21Calc(key,B,CH){
   if(key==="ich"){const tk=c.map((_,i)=>i<8?null:(c21Rng(h,i,9,1)+c21Rng(l,i,9,0))/2),kj=c.map((_,i)=>i<25?null:(c21Rng(h,i,26,1)+c21Rng(l,i,26,0))/2),
       sb=c.map((_,i)=>i<51?null:(c21Rng(h,i,52,1)+c21Rng(l,i,52,0))/2),A=c.map((_,i)=>i>=26&&tk[i-26]!=null&&kj[i-26]!=null?(tk[i-26]+kj[i-26])/2:null),
       S=c.map((_,i)=>i>=26?sb[i-26]:null),lag=c.map((_,i)=>i+26<N?c[i+26]:null);
-    R.lines=[[tk,C21_COL.red,1.2],[kj,C21_COL.blue,1.2],[A,C21_COL.grn,1],[S,C21_COL.brn,1],[lag,C21_COL.pur,1]];R.fill=[A,S];}
+    // 🔴 선을 다섯에서 넷으로 줄이고 색을 죽였다 (사장님 2026-09-20 "선이 너무 많고 선색이 너무 자극적이야").
+    //    · 후행스팬(보라)은 뺀다 — 26칸 뒤 종가라 봉과 나란히 붙어 다녀 좁은 화면에서 제일 어지럽다.
+    //    · 봉 색(오름 초록 #00a868 · 내림 빨강 #ff433d)과 안 겹치는 색만 쓴다.
+    //    · 기준선만 또렷하게, 나머지는 뒤로 물린다.
+    R.lines=[[tk,"#8fa0b5",1],[kj,"#5b8def",1.4],[A,"#7fb3a3",0.9],[S,"#b09a7a",0.9]];R.fill=[A,S];R.hatch=1;}
   if(key==="env"){const m=c21Sma(c,20);band(m,m.map(x=>x==null?null:x*1.05),m.map(x=>x==null?null:x*0.95),C21_COL.org,C21_COL.blue);}
   if(key==="kel"){const m=c21Ema(c,20),a=c21Atr(B,10);band(m,m.map((x,i)=>x==null||a[i]==null?null:x+2*a[i]),m.map((x,i)=>x==null||a[i]==null?null:x-2*a[i]),C21_COL.org,C21_COL.pur);}
   if(key==="vwap"||key==="vwma"){const n=key==="vwap"?20:100,o=new Array(N).fill(null);
@@ -957,7 +983,10 @@ function c21Calc(key,B,CH){
 
 function makeChart(cid,opt){
   opt=opt||{};const cv=E(cid);const NF=opt.fmt||(v=>Math.round(v).toLocaleString());
-  const PAGES=C21_PAGES.filter(p=>!p[4]||opt.liq);
+  // 🔴 청산맵 판은 **선물일 때만** 보인다 (사장님 2026-09-20 "현물이면 청산맵을 보여주면 안 되는 거로").
+  //    현물에는 청산이 없으므로 그 판 자체를 목록에서 뺀다. setLiq() 로 오가며 바꾼다.
+  let LIQ=!!opt.liq;
+  let PAGES=C21_PAGES.filter(p=>!p[4]||LIQ);
   let CH=null,VIEW={start:0,count:80},CROSS=null,GEO=null,CALC={},OVER=0,ODIR=0,MEAS=null,rdown=false,mTimer=null;
   const CCY=()=>cid==="coinChart"?"USDT":((typeof stkMarket!=="undefined"&&stkMarket==="us")?"$":"원");
   const SK="c21_"+cid;let ST0={base:0,ovs:[],page:0};
@@ -1044,7 +1073,27 @@ function makeChart(cid,opt){
     // 청산맵(코인) · 띠 채우기 · 매물대 — 봉보다 먼저(뒤에 깔린다)
     if(act.indexOf("liq")>=0&&CH.liq)for(const lv of CH.liq){const y=Y(lv[0]);if(y<y0||y>yP)continue;
       const a=0.9*Math.pow(clamp(lv[1],0,1),1.7);if(a<0.09)continue;ctx.fillStyle="rgba(255,214,0,"+a.toFixed(3)+")";for(let x=x0;x<x1;x+=7)ctx.fillRect(x,y-3,6,6);}
-    for(const k of act){const R=calc(k);if(!R.fill)continue;const A=R.fill[0],Bl=R.fill[1];ctx.fillStyle="rgba(93,180,255,.10)";ctx.beginPath();let st=false;
+    for(const k of act){const R=calc(k);if(!R.fill)continue;const A=R.fill[0],Bl=R.fill[1];
+      // 🔴 구름은 칠하지 않고 **사선**을 긋는다 (사장님 2026-09-20). 어두운 바탕에서 반투명 칠은 뿌옇게 뭉갠다.
+      //    A가 위면 ///, B가 위면 \\\ — 색을 쓰지 않고도 구름이 뒤집힌 자리가 눈에 들어온다.
+      if(R.hatch){let i=start;
+        while(i<end){
+          while(i<end&&(A[i]==null||Bl[i]==null))i++;
+          if(i>=end)break;
+          const up=A[i]>=Bl[i];let j=i;
+          while(j<end&&A[j]!=null&&Bl[j]!=null&&((A[j]>=Bl[j])===up))j++;
+          ctx.save();ctx.beginPath();
+          for(let t=i;t<j;t++)t===i?ctx.moveTo(X(t),Y(A[t])):ctx.lineTo(X(t),Y(A[t]));
+          for(let t=j-1;t>=i;t--)ctx.lineTo(X(t),Y(Bl[t]));
+          ctx.closePath();ctx.clip();
+          const H=yP-y0;
+          ctx.strokeStyle=up?"rgba(127,179,163,.5)":"rgba(176,154,122,.5)";ctx.lineWidth=1;ctx.beginPath();
+          for(let x=X(i)-H;x<=X(j-1)+H;x+=7){
+            if(up){ctx.moveTo(x,yP);ctx.lineTo(x+H,y0);}else{ctx.moveTo(x,y0);ctx.lineTo(x+H,yP);}}
+          ctx.stroke();ctx.restore();
+          i=j;}
+        continue;}
+      ctx.fillStyle="rgba(93,180,255,.10)";ctx.beginPath();let st=false;
       for(let i=start;i<end;i++){if(A[i]==null)continue;if(!st){ctx.moveTo(X(i),Y(A[i]));st=true;}else ctx.lineTo(X(i),Y(A[i]));}
       for(let i=end-1;i>=start;i--){if(Bl[i]==null)continue;ctx.lineTo(X(i),Y(Bl[i]));}if(st){ctx.closePath();ctx.fill();}}
     if(act.indexOf("vp")>=0){if(calc("vp").hasVol){const bins=26,vol=new Array(bins).fill(0),st=(hi-lo)/bins;
@@ -1179,7 +1228,15 @@ function makeChart(cid,opt){
   cv.addEventListener("touchend",()=>{const w=down;down=false;pinch=null;clearTimeout(mTimer);if(w&&CH)release();});
   function patchLast(price){if(!CH||!CH.bars.length||!(price>0))return;const b=CH.bars[CH.bars.length-1];b[4]=price;if(price>b[2])b[2]=price;if(price<b[3])b[3]=price;CALC={};draw();}
   paintBar();
-  return {setData,patchLast,flip,state:()=>ST0,meas:()=>MEAS,repaint:()=>{paintBar();draw();}};
+  function setLiq(on){
+    on=!!on; if(on===LIQ)return;
+    LIQ=on; PAGES=C21_PAGES.filter(p=>!p[4]||LIQ);
+    // 켜 두었던 청산맵은 현물로 오면 내린다. 보던 판 번호도 범위 안으로 당긴다.
+    ST0.ovs=(ST0.ovs||[]).filter(k=>PAGES.some(p=>p[0]===k));
+    ST0.page=Math.max(0,Math.min(PAGES.length,ST0.page|0));
+    save(); paintBar(); draw();
+  }
+  return {setData,patchLast,flip,setLiq,state:()=>ST0,meas:()=>MEAS,repaint:()=>{paintBar();draw();}};
 }
 
 
@@ -1263,7 +1320,7 @@ E("coinq").addEventListener("keydown",function(e){if(e.key==="Enter"&&coinLast.l
 function pickCoin(sym,name,kind){coinSym=sym;coinKind=(kind==="S")?"S":"F";
   try{ rememberPick("co",sym,name,coinKind); }catch(e){}E("coinResults").innerHTML="";E("coinq").value=name+" ("+sym+") "+(coinKind==="S"?(LANG==="en"?"SPOT":"현물"):(LANG==="en"?"PERP":"선물"));
   E("coinTf").hidden=false;E("coinChart").hidden=false;E("coinChartLbl").hidden=false;
-  E("coinDetail").innerHTML='<div class="soonrow">'+L("loading")+'</div>';
+  E("coinDetail").innerHTML=(typeof mpWait==="function"?mpWait(L("loading")):'<div class="soonrow">'+L("loading")+'</div>');
   loadCoinDetail();loadCoin2Chart();clearInterval(coinTimer);coinTimer=setInterval(loadCoinDetail,3000);}
 async function loadCoinDetail(){if(!coinSym)return;
   try{const d=await okxTicker(coinSym,coinKind);
@@ -2086,7 +2143,7 @@ async function rlOkxPost(path, body) {
     throw new Error(String(d0.sCode || j.code) + " " + (d0.sMsg || j.msg || ""));
   if (d0.sCode !== undefined && String(d0.sCode) !== "0")
     throw new Error(String(d0.sCode) + " " + (d0.sMsg || ""));
-  setTimeout(function () { try { rlOsoLoad(); } catch (e) {} }, 1500); [2500, 6000, 12000].forEach(function (ms) { setTimeout(function () { try { if (!RL.busy && typeof rlHas === "function" && rlHas()) rlLoad(true); } catch (e) {} }, ms); });
+  setTimeout(function () { try { rlOsoLoad(); } catch (e) {} }, 1500);
   return j;
 }
 // 헤지 모드면 주문에 posSide 가 필수다 — 한 번 받아 두고 쓴다
@@ -2230,7 +2287,7 @@ async function rlStockOrder(mk, side, code, qty, limitPx) {
   // 🔴 키움은 거부도 200 으로 준다 — return_code 를 봐야 한다
   if (j && String(j.return_code) !== "0")
     throw new Error(String(j.return_code) + " " + (j.return_msg || ""));
-  setTimeout(function () { try { rlOsoLoad(); } catch (e) {} }, 1500); [2500, 6000, 12000].forEach(function (ms) { setTimeout(function () { try { if (!RL.busy && typeof rlHas === "function" && rlHas()) rlLoad(true); } catch (e) {} }, ms); });   // 걸린 주문이면 미체결에 뜬다
+  setTimeout(function () { try { rlOsoLoad(); } catch (e) {} }, 1500);   // 걸린 주문이면 미체결에 뜬다
   return j;
 }
 // 미국 종목의 거래소 구분(ND 나스닥 · NY 뉴욕 · NA 아멕스) — 차트·호가가 찾아 둔 값이 있으면 그것, 없으면 현재가(usa20100)로 찾는다
@@ -2326,23 +2383,6 @@ function rlParseSpot(det) {
 }
 
 // ── 한 번에 불러오기 ──
-// ── 체결 딩동 (사장님 2026-09-21) ── 보유 수량이 바뀌면 소리. 파일 없이 Web Audio 합성 ──
-let _dingCtx = null;
-function _dingAC() { try { if (!_dingCtx) _dingCtx = new (window.AudioContext || window.webkitAudioContext)(); if (_dingCtx.state === "suspended") _dingCtx.resume(); return _dingCtx; } catch (e) { return null; } }
-try { document.addEventListener("click", function () { _dingAC(); }, false); } catch (e) {}   // 사용자 제스처로 오디오 잠금 해제
-function dingDong() {
-  const ctx = _dingAC(); if (!ctx) return;
-  const now = ctx.currentTime;
-  [[988, 0], [740, 0.20]].forEach(function (fr) {          // 딩(높은음) · 동(낮은음)
-    const o = ctx.createOscillator(), g = ctx.createGain();
-    o.type = "sine"; o.frequency.value = fr[0];
-    g.gain.setValueAtTime(0.0001, now + fr[1]);
-    g.gain.exponentialRampToValueAtTime(0.30, now + fr[1] + 0.02);
-    g.gain.exponentialRampToValueAtTime(0.0001, now + fr[1] + 0.38);
-    o.connect(g); g.connect(ctx.destination);
-    o.start(now + fr[1]); o.stop(now + fr[1] + 0.42);
-  });
-}
 async function rlLoad(auto) {
   if (RL.busy) return;
   RL.busy = true;
@@ -2360,18 +2400,6 @@ async function rlLoad(auto) {
           out.kr = rlParseKR(j);
           out.sum = rlSumKR(j);
           out.cash.krw = out.sum.cash;
-          // 🔴 예수금은 kt00001 의 entr (HTS 예수금 · 오늘 판 대금 포함). d2_entra = 인출가능(D+2).
-          //    kt00018 의 추정예탁자산·인출가능만 보면 오늘 판 매도대금이 빠진다(사장님 2026-09-21).
-          try {
-            const cd = await rlKiwoom(tok, "/api/dostk/acnt", "kt00001", {qry_tp: "3"});
-            if (cd && cd.return_code === 0) {
-              // 🔴 오늘 판 ETF 대금은 D+2 정산 → 당일 예수금(entr)엔 안 잡히고 D+2 예수금(d2_entra)에 잡힌다.
-              //    사장님 실측: entr 144,591 · d2_entra 8,039,676. 총 예수금은 d2_entra 다 (2026-09-21).
-              const d2 = rlNum(cd.d2_entra), e2 = rlNum(cd.entr);
-              if (d2) out.cash.krw = d2; else if (e2) out.cash.krw = e2;
-              out.cashWd = rlNum(cd.d2_entra);   // 인출가능(D+2) — 참고
-            }
-          } catch (e) {}
         } catch (e) { out.err.push("국내 " + e.message); }
         // 🔴 해외 증권사가 한국투자면 그쪽으로 간다 — 키움은 건너뛴다
         if (ST.us && ST.us.broker === "korea_inv" && ST.us.key) { /* 아래에서 따로 */ }
@@ -2404,9 +2432,7 @@ async function rlLoad(auto) {
             + JSON.stringify(rows[0] || Object.keys(c)).slice(0, 300));
           out.cash.usd = rlNum(src[hit]);
           // 🔴 국내 예수금도 여기 있다. kt00018 의 추정예탁자산은 주식 평가금이 섞여 있어 못 쓴다.
-          // 🔴 kt00001 의 entr(예수금)를 이미 받았으면 그대로 둔다. 없을 때만 krw_entra(인출가능) 폴백.
-          if ((out.cash.krw == null || out.cash.krw === 0)
-              && c.krw_entra !== undefined && c.krw_entra !== null && c.krw_entra !== "")
+          if (c.krw_entra !== undefined && c.krw_entra !== null && c.krw_entra !== "")
             out.cash.krw = rlNum(c.krw_entra);
         } catch (e) { out.err.push("해외예수금 " + e.message); }
       } catch (e) { out.err.push("키움 " + e.message); }
@@ -2453,21 +2479,8 @@ async function rlLoad(auto) {
     }
   } finally {
     RL.kr = out.kr; RL.us = out.us; RL.co = out.co;
-    // 🔴 체결 감지 — 보유 수량 묶음이 바뀌면 체결된 것 → 딩동 (첫 로드는 소리 안 냄) (사장님 2026-09-21)
-    try {
-      var _qsig = RL.kr.concat(RL.us).concat(RL.co).map(function (p) { return p.code + ":" + p.qty; }).sort().join("|");
-      if (RL.qtySig !== undefined && RL.qtySig !== _qsig) { try { dingDong(); } catch (e) {} }
-      RL.qtySig = _qsig;
-    } catch (e) {}
-    // 🔴 재조회가 TR 한도 등으로 예수금을 못 받으면(null) 직전 값을 지킨다 — 추천이 0원으로 깜빡이지 않게 (2026-09-21)
-    if (out.cash && RL.cash) {
-      if (out.cash.krw == null && RL.cash.krw != null) out.cash.krw = RL.cash.krw;
-      if (out.cash.usd == null && RL.cash.usd != null) out.cash.usd = RL.cash.usd;
-      if (out.cash.usdt == null && RL.cash.usdt != null) out.cash.usdt = RL.cash.usdt;
-    }
     RL.cash = out.cash; RL.sum = out.sum;
     RL.at = Date.now(); RL.busy = false;
-    try { recoRender(); } catch (e) {}
     const n = out.kr.length + out.us.length + out.co.length;
     const hm = new Date().toTimeString().slice(0, 5);
     rlSay(hm + (en ? " · " : " 갱신 · ") + n + (en ? " positions" : "건")
@@ -2687,7 +2700,7 @@ async function okxTicker(sym,kind){
           volume:base, quoteVolume:(kind==="F")?base*last:+t.volCcy24h};
 }
 async function okxKlines(sym,kind,iv,limit){
-  const bar={"3m":"3m","5m":"5m","15m":"15m","30m":"30m","1h":"1H","1d":"1Dutc","1w":"1Wutc"}[iv]||"1Dutc";   // 일봉은 UTC 경계(한국 09:00)
+  const bar={"3m":"3m","5m":"5m","15m":"15m","30m":"30m","1h":"1H","1d":"1Dutc"}[iv]||"1Dutc";   // 일봉은 UTC 경계(한국 09:00)
   const id=okxId(sym,kind); let out=[];
   let j=await fetch("https://www.okx.com/api/v5/market/candles?instId="+id+"&bar="+bar+"&limit="+Math.min(300,limit)).then(function(r){return r.json();});
   out=(j&&j.data)||[];
@@ -3754,16 +3767,155 @@ function recoPie(parts){
     +'<ellipse cx="'+cx+'" cy="'+(cy+dep+14)+'" rx="'+(rx*0.95)+'" ry="'+(ry*0.28)+'" fill="url(#'+uid+'sh)"/>'
     +sides+tops+labels+'</svg>';
 
-  let leg='<div style="display:flex;flex-direction:column;gap:3px;align-items:flex-start;margin-top:6px;font-size:12px">';
+  let leg='<div style="display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:6px;font-size:11px">';
   big.forEach(function(p,i){
     leg+='<span style="white-space:nowrap"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:'
       +'linear-gradient(145deg,'+sh(col(p,i),1.24)+','+sh(col(p,i),0.8)+');margin-right:5px"></span>'
-      +dpEsc(p[0])+(p[2]==="new"?(en?" (new)":" (추천)"):"")+' '+(p[1]/tot*100).toFixed(1)+'%'+((p[4]==="kr"&&Number.isFinite(+p[5]))?' <b style="color:var(--nm)">'+Math.round(p[5]).toLocaleString()+(en?" KRW":"원")+'</b>':(p[4]==="us"&&Number.isFinite(+p[5]))?' <b style="color:var(--nm)">$'+(+p[5]).toLocaleString(undefined,{maximumFractionDigits:2})+'</b>':'')+'</span>';
+      +dpEsc(p[0])+(p[2]==="new"?(en?" (new)":" (추천)"):"")+' '+(p[1]/tot*100).toFixed(1)+'%</span>';
   });
   leg+='</div>';
   return '<div style="text-align:center;margin:2px 0 8px">'+svg+'</div>'+leg
-    +(function(){var kw=0,ud=0;parts.forEach(function(p){var v=+p[5];if(!Number.isFinite(v))return;if(p[4]==="kr")kw+=v;else if(p[4]==="us")ud+=v;});var rows=[];if(kw>0)rows.push((en?"KRW total ":"원화 합계 ")+Math.round(kw).toLocaleString()+(en?"":"원"));if(ud>0)rows.push((en?"USD total $":"달러 합계 $")+ud.toLocaleString(undefined,{maximumFractionDigits:2}));if(!rows.length)rows.push((en?"Total ":"합계 ")+Math.round(tot).toLocaleString()+(en?" KRW":"원"));return '<div class="dpmsg" style="text-align:center;line-height:1.7">'+rows.join("<br>")+'</div>';})();
+    +'<div class="dpmsg" style="text-align:center">'+(en?"Total ":"합계 ")+Math.round(tot).toLocaleString()+(en?" KRW":"원")+'</div>';
 }
+// ── 퍼즐 히트맵 — 파이 대신 (사장님 2026-09-23) ─────────────────────────────
+//   조각 크기 = 비중 · 색 = 보유의 수익률(오르면 초록·내리면 빨강, 클수록 진하게)
+//   아직 안 산 추천 칸·현금은 무채색. 밑에 붙던 종목별 % 글은 안 쓴다 — 조각이 다 말해 준다.
+// 작은 조각은 글자가 다 안 들어간다 — 눌러 보면 이름·수익률을 통째로 띄운다 (사장님 2026-09-23)
+function puzTip(ev,txt){
+  ev.stopPropagation();
+  var d=document.getElementById("puzTipBox");
+  if(!d){
+    d=document.createElement("div"); d.id="puzTipBox";
+    d.style.cssText="position:fixed;z-index:99999;max-width:70vw;padding:7px 11px;border-radius:9px;"
+      +"background:#111826;color:#fff;border:1px solid #3a4658;font-size:13px;font-weight:800;"
+      +"box-shadow:0 6px 18px rgba(0,0,0,.45);pointer-events:none;white-space:nowrap";
+    document.body.appendChild(d);
+    document.addEventListener("click",function(){ d.style.display="none"; });
+  }
+  d.textContent=txt; d.style.display="block"; d.style.left="0px"; d.style.top="0px";
+  var r=d.getBoundingClientRect();
+  d.style.left=Math.max(6,Math.min(window.innerWidth-r.width-6,ev.clientX-r.width/2))+"px";
+  d.style.top=Math.max(6,ev.clientY-r.height-12)+"px";
+  clearTimeout(puzTip.t); puzTip.t=setTimeout(function(){ d.style.display="none"; },3000);
+}
+function recoPuz(parts){
+  const en=LANG==="en";
+  parts=parts.filter(function(p){return p[1]>0;}).sort(function(a,b){return b[1]-a[1];});
+  const tot=parts.reduce(function(s,p){return s+p[1];},0); if(!(tot>0))return "";
+  let small=0; const big=[];
+  parts.forEach(function(p){ if(p[1]/tot<0.012)small+=p[1]; else big.push(p); });
+  if(small>0)big.push([en?"Others":"기타",small,"etc",null]);
+
+  const hx=function(c){ const n=parseInt(c.slice(1),16); return [(n>>16)&255,(n>>8)&255,n&255]; };
+  const mix=function(a,b,t){ const A=hx(a),B=hx(b),o=[0,1,2].map(function(i){return Math.round(A[i]+(B[i]-A[i])*t);});
+    return "#"+((1<<24)+(o[0]<<16)+(o[1]<<8)+o[2]).toString(16).slice(1); };
+  // 색 — 오름 로빈후드 그린 #00C805 · 내림 #FF433D. 많이 움직일수록 밝다 (사장님 2026-09-23 세 후보 중 고르심)
+  //   바탕(검정·흰색)에 따라 색을 바꾸지 않는다 — 한 벌만 쓴다.
+  const UP0="#0E3A2C", UP1="#00C805", DN0="#451412", DN1="#FF433D";
+  const col=function(p){
+    if(p[2]!=="held")return p[2]==="cash"?"#5E656E":(p[2]==="etc"?"#6C737C":"#7D858F");
+    const r=+p[3]; if(!Number.isFinite(r)||r===0)return "#7D858F";
+    const t=Math.min(1,Math.max(.14,Math.abs(r)/10));
+    return r>0?mix(UP0,UP1,t):mix(DN0,DN1,t); };
+
+  // 네모를 둘로 갈라 내려가는 트리맵 — 조각이 너무 길쭉해지지 않는다
+  const box=[]; const W=320, H=300;
+  (function cut(list,x,y,w,h){
+    if(!list.length||w<=0||h<=0)return;
+    if(list.length===1){ box.push({p:list[0],x:x,y:y,w:w,h:h}); return; }
+    const t=list.reduce(function(s,i){return s+i[1];},0); let acc=0,i=0;
+    for(;i<list.length-1;i++){ if(i>0&&acc+list[i][1]>t/2)break; acc+=list[i][1]; }
+    const f=acc/t;
+    if(w>=h){ cut(list.slice(0,i),x,y,w*f,h); cut(list.slice(i),x+w*f,y,w*(1-f),h); }
+    else { cut(list.slice(0,i),x,y,w,h*f); cut(list.slice(i),x,y+h*f,w,h*(1-f)); }
+  })(big,0,0,W,H);
+
+  // 퍼즐 조각 — 위·왼쪽은 파이고, 오른쪽·아래는 튀어나온다
+  const piece=function(x,y,w,h){
+    const r=Math.max(3,Math.min(w,h)*0.15), mx=x+w/2, my=y+h/2;
+    if(Math.min(w,h)<22)return 'M'+x+','+y+' h'+w+' v'+h+' h'+(-w)+' Z';
+    return 'M'+x.toFixed(1)+','+y.toFixed(1)
+      +' H'+(mx-r).toFixed(1)+' A'+r.toFixed(1)+','+r.toFixed(1)+' 0 0,0 '+(mx+r).toFixed(1)+','+y.toFixed(1)+' H'+(x+w).toFixed(1)
+      +' V'+(my-r).toFixed(1)+' A'+r.toFixed(1)+','+r.toFixed(1)+' 0 0,1 '+(x+w).toFixed(1)+','+(my+r).toFixed(1)+' V'+(y+h).toFixed(1)
+      +' H'+(mx+r).toFixed(1)+' A'+r.toFixed(1)+','+r.toFixed(1)+' 0 0,1 '+(mx-r).toFixed(1)+','+(y+h).toFixed(1)+' H'+x.toFixed(1)
+      +' V'+(my+r).toFixed(1)+' A'+r.toFixed(1)+','+r.toFixed(1)+' 0 0,0 '+x.toFixed(1)+','+(my-r).toFixed(1)+' Z'; };
+
+  const wide=function(c){ return /[가-힣㄰-㆏]/.test(c)?1:0.56; };
+  // 조각 너비에 맞춰 이름을 두 줄까지 나눈다 (사장님 2026-09-23)
+  //   · 띄어쓰기가 있으면 낱말에서 가른다 · 한 낱말뿐이면 가운데서 가른다
+  //   · 한 줄에 한 글자만 떨어지게 두지 않는다 · 두 줄에도 안 들어가면 끝을 … 로 줄인다
+  const wrap=function(t,w,fs,maxLines){
+    const lim=(w-7)/fs;
+    const uw=function(s){ let u=0; for(let i=0;i<s.length;i++)u+=wide(s[i]); return u; };
+    const cut=function(s){ let u=0,o="";
+      for(let i=0;i<s.length;i++){ const d=wide(s[i]); if(u+d>lim)return o.length>1?o.slice(0,-1)+"…":(o||s[0]); u+=d; o+=s[i]; }
+      return o; };
+    t=String(t).trim();
+    if(uw(t)<=lim)return [t];
+    if(maxLines<2)return [cut(t)];
+    const score=function(i){
+      const a=t.slice(0,i).trim(), b=t.slice(i).trim();
+      if(!a||!b)return null;
+      if((a.length===1&&b.length>1)||(b.length===1&&a.length>1))return null;   // 외톨이 한 글자 금지
+      const ua=uw(a), ub=uw(b);
+      return {a:a,b:b,fit:(ua<=lim&&ub<=lim),bal:Math.abs(ua-ub)}; };
+    const pick=function(list){ let b=null;
+      list.map(score).filter(Boolean).forEach(function(c){
+        if(!b||(c.fit&&!b.fit)||(c.fit===b.fit&&c.bal<b.bal))b=c; });
+      return b; };
+    let idx=[]; for(let i=1;i<t.length;i++)if(t[i-1]===" ")idx.push(i);
+    let best=pick(idx);                       // 낱말에서 갈라 둘 다 들어가면 그것으로 — 낱말을 쪼개지 않는다
+    if(!best||!best.fit){ const all=[]; for(let i=1;i<t.length;i++)all.push(i);
+      const c=pick(all); if(c&&(!best||c.fit))best=c; }
+    if(!best)return [cut(t)];
+    return [cut(best.a),cut(best.b)]; };
+  // 입체감 — 조각마다 왼쪽 위는 밝고 오른쪽 아래는 어두운 결, 밑에 그림자 (사장님 2026-09-23)
+  const uid="pz"+(recoPuz.n=(recoPuz.n||0)+1)+"_";
+  const grad={}; let defs='<filter id="'+uid+'sh" x="-20%" y="-20%" width="150%" height="150%">'
+    +'<feDropShadow dx="0.9" dy="1.6" stdDeviation="1.3" flood-color="#000" flood-opacity="0.55"/></filter>';
+  const gid=function(c){
+    if(!grad[c]){ const id=uid+"g"+Object.keys(grad).length; grad[c]=id;
+      defs+='<linearGradient id="'+id+'" x1="0" y1="0" x2="0.65" y2="1">'
+        +'<stop offset="0" stop-color="'+mix(c,"#ffffff",0.26)+'"/>'
+        +'<stop offset="0.55" stop-color="'+c+'"/>'
+        +'<stop offset="1" stop-color="'+mix(c,"#000000",0.30)+'"/></linearGradient>'; }
+    return grad[c]; };
+
+  let g="";
+  box.forEach(function(b){
+    const p=b.p, c=col(p), pad=1.6;
+    const x=b.x+pad, y=b.y+pad, w=Math.max(2,b.w-pad*2), hh=Math.max(2,b.h-pad*2);
+    const pct=(p[1]/tot*100), rt=(p[2]==="held"&&Number.isFinite(+p[3]))?(+p[3]):null;
+    const full=(p[2]==="new"?(en?"[Pick] ":"[추천] "):"")+String(p[0])+' '+pct.toFixed(1)+'%'
+      +(rt===null?"":' · '+(rt>0?"+":"")+rt.toFixed(1)+'%');
+    const dpth=piece(x,y,w,hh);
+    g+='<path d="'+dpth+'" fill="'+mix(c,"#000000",0.55)+'" transform="translate(0.8,1.4)" opacity=".85"/>';
+    g+='<path d="'+dpth+'" fill="url(#'+gid(c)+')" filter="url(#'+uid+'sh)" stroke="rgba(255,255,255,.22)" stroke-width="0.9" style="cursor:pointer"'
+      +' onclick="puzTip(event,\''+dpEsc(String(full).replace(/\\/g,"").replace(/'/g,""))+'\')"><title>'
+      +dpEsc(full)+'</title></path>';
+    if(w>34&&hh>24){
+      // 글자는 조각 크기를 따라간다 — 커도 12.5 를 넘지 않는다(크면 촌스럽다, 사장님 2026-09-23)
+      const fs=Math.max(7.5,Math.min(12.5,Math.min(w/5.4,hh/4.0)));
+      const tagS=fs*0.72, pctS=fs*0.86;                      // 추천 딱지는 본글자보다 작게
+      const tag=(p[2]==="new")?(en?"Pick":"추천"):null;
+      const lh=fs*1.12, showPct=hh>40;
+      const extra=(showPct?pctS*1.1:0)+(tag?tagS*1.25:0);
+      const maxL=Math.max(1,Math.floor((hh-6-extra)/lh));
+      const L=wrap(p[0],w,fs,Math.min(2,maxL));
+      const blockH=L.length*lh+extra;
+      let ty=y+hh/2-blockH/2+lh*0.62;
+      const T=function(s,size,fill,op,yy){ return '<text x="'+(x+w/2).toFixed(1)+'" y="'+yy.toFixed(1)+'" text-anchor="middle" '
+        +'font-size="'+size.toFixed(1)+'" font-weight="800" fill="'+fill+'"'+(op?' opacity="'+op+'"':'')
+        +' stroke="rgba(0,0,0,.35)" stroke-width="2.2" paint-order="stroke">'+dpEsc(s)+'</text>'; };
+      if(tag){ g+=T(tag,tagS,"#FFD43B",0,ty-lh*0.18); ty+=tagS*1.25; }
+      L.forEach(function(s){ g+=T(s,fs,"#fff",0,ty); ty+=lh; });
+      if(showPct)g+=T((rt===null?pct.toFixed(1)+'%':((rt>0?"+":"")+rt.toFixed(1)+'%')),pctS,"#fff",".92",ty-lh*0.08);
+    }
+  });
+  return '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block;margin:2px 0 6px">'
+    +'<defs>'+defs+'</defs>'+g+'</svg>';
+}
+
 function recoRender(){
   let card=E("recoCard");
   if(!card){
@@ -3774,12 +3926,10 @@ function recoRender(){
   const en=LANG==="en", R=RECO;
   let h='<h3>'+(en?"Portfolio picks":"포트폴리오 추천")+(R&&R.at?' <span class="dplbl">'+dpEsc(R.at)+(en?" calc":" 계산")+'</span>':'')+'</h3>';
   if(!R){ card.innerHTML=h+'<div class="soonrow">'+(en?"Loading…":"불러오는 중…")+'</div>'; return; }
-  // 🔴 장세는 실시간 — 어제 마감 vs_MA60 에 오늘 지수 등락률을 더해 "지금 60일선 대비"를 낸다 (사장님 2026-09-21).
-  const liveP=function(nm){ var d=window._lastD; if(d&&d.changes){ for(var i=0;i<d.changes.length;i++){ if(d.changes[i].nm===nm && typeof d.changes[i].pct==="number") return d.changes[i].pct; } } return null; };
-  const reg=function(x,nm){ if(!(x&&x.regime))return "-"; var lp=liveP(nm); var v=(+x.regime.vs_ma60||0)+(lp||0); var g=v>=0; var t=(g?(en?"good":"좋음"):(en?"weak":"나쁨"))+" ("+(v>0?"+":"")+v.toFixed(1)+"%)"; return '<b style="color:'+(g?"#2f9e44":"#e03131")+'">'+t+'</b>'; };
+  const reg=function(x){ return x&&x.regime?((x.regime.good?(en?"good":"좋음"):(en?"weak":"나쁨"))+" ("+(x.regime.vs_ma60>0?"+":"")+x.regime.vs_ma60+"%)"):"-"; };
   const cs=function(c){ return c&&c.state?({long:(en?"LONG":"롱"),short:(en?"SHORT":"숏"),cash:(en?"CASH":"현금")}[c.state]):"-"; };
-  h+='<div class="dpmsg" style="margin:4px 0 8px">'+(en?"Regime · ":"장세 · ")+(en?"KR ":"국내 ")+reg(R.kr,"코스피")+" · "+(en?"US ":"미국 ")+reg(R.us,"S&P500")
-    +" · BTC "+cs(R.coin&&R.coin.BTC)+" · ETH "+cs(R.coin&&R.coin.ETH)+(function(){var d=window._lastD; return (d&&d.asof)?' <span class="dplbl">'+dpEsc(String(d.asof).slice(11,16)||String(d.asof))+(en?" live":" 실시간")+'</span>':'';})()+'</div>';
+  h+='<div class="dpmsg" style="margin:4px 0 8px">'+(en?"Regime · ":"장세 · ")+(en?"KR ":"국내 ")+reg(R.kr)+" · "+(en?"US ":"미국 ")+reg(R.us)
+    +" · BTC "+cs(R.coin&&R.coin.BTC)+" · ETH "+cs(R.coin&&R.coin.ETH)+'</div>';
   // 실계좌 → 시장별 총자산 · 보유 수
   const has=(typeof RL!=="undefined")&&RL.at;
   const kr=has?RL.kr:[], us=has?RL.us:[], cash=has&&RL.cash?RL.cash:{};
@@ -3830,11 +3980,9 @@ function recoRender(){
         const q=(mode!=="next"&&budget>0&&r.close>0)?Math.floor(budget/r.close):0;
         const go=mk==="kr"?("pickStock('"+r.code+"','"+String(r.name).replace(/'/g,"")+"')")
                           :("pickStockUS('"+r.code+".US','"+r.code+"')");
-        const add=mk==="kr"?("bkAdd('"+r.code+"','"+String(r.name).replace(/'/g,"")+"','kr')")
-                           :("bkAdd('"+r.code+".US','"+r.code+"','us')");
         t+='<tr'+(mode==="next"?' style="opacity:.55"':'')+'><td style="text-align:left">'+(mode==="today"?"① ":"")+dpEsc(r.name)+(r.name!==r.code?' <span class="dplbl">'+r.code+'</span>':'')
           +'<br><span class="dplbl">'+dpEsc(r.why)+'</span></td><td>'+(mk==="kr"?Math.round(r.close).toLocaleString():money(r.close))+'</td><td>'+(q?q.toLocaleString():"-")+'</td>'
-          +'<td style="white-space:nowrap"><button class="dpb dpsm" style="background:#2f9e44;border-color:#2b8a3e;margin-right:4px" onclick="'+add+'">'+(en?"+Cart":"담기")+'</button><button class="dpb buy dpsm" onclick="'+go+';E(\'stock\').scrollIntoView({behavior:\'smooth\'})">'+(en?"View":"조회")+'</button></td></tr>';
+          +'<td><button class="dpb buy dpsm" onclick="'+go+';E(\'stock\').scrollIntoView({behavior:\'smooth\'})">'+(en?"View":"조회")+'</button></td></tr>';
       });
       return t+'</table>';
     };
@@ -3857,13 +4005,13 @@ function recoRender(){
     if(has){
       const k=(mk==="kr")?1:fx;
       if(k>0){
-        held.forEach(function(p){ PIEP.push([p.name,(p.evl||0)*k,"held",(p.evl||0),mk,(p.evl||0)]); });
+        held.forEach(function(p){ PIEP.push([p.name,(p.evl||0)*k,"held",(typeof p.rt==="number"?p.rt:null)]); });
         let left=cashM;                               // 지금 현금으로 살 수 있는 만큼만 — 1칸씩, 모자라면 남은 만큼
         buys.slice(0,empty).forEach(function(r){
           const amt=Math.min(slot,left);
-          if(amt>=r.close&&amt>0){ PIEP.push([r.name,amt*k,"new",amt,mk,amt]); left-=amt; }
+          if(amt>=r.close&&amt>0){ PIEP.push([r.name,amt*k,"new",null]); left-=amt; }
         });
-        if(left>0)PIEP.push([(mk==="kr")?(en?"KRW cash":"원화 현금"):(en?"USD cash":"달러 현금"),left*k,"cash",left,mk,left]);
+        if(left>0)PIEP.push([(mk==="kr")?(en?"KRW cash":"원화 현금"):(en?"USD cash":"달러 현금"),left*k,"cash",null]);
       }
     }
     if(has&&empty===0)s+='<div class="dpmsg">'+(en?"All 12 slots full — wait for exits.":"12칸이 다 찼습니다 — 익절·만기로 빈 칸이 나면 삽니다.")+'</div>';
@@ -3874,11 +4022,11 @@ function recoRender(){
   const body=sec("kr",R.kr,totKR,kr)+sec("us",R.us,totUS,us);
   if(has){
     if(fx>0){
-      (RL.co||[]).filter(function(p){return !p.spot;}).forEach(function(p){ PIEP.push([String(p.code).split("-")[0]+(en?" perp":" 선물"),(p.evl||0)*fx,"held",(p.evl||0),"us",(p.evl||0)]); });
-      (RL.co||[]).filter(function(p){return p.spot;}).forEach(function(p){ PIEP.push([String(p.code).split("-")[0]+(en?" spot":" 현물"),(p.qty||0)*(p.cur||0)*fx,"held",(p.qty||0)*(p.cur||0),"us",(p.qty||0)*(p.cur||0)]); });
-      if(cash.usdt>0)PIEP.push(["USDT",cash.usdt*fx,"cash",cash.usdt,"us",cash.usdt]);
+      (RL.co||[]).filter(function(p){return !p.spot;}).forEach(function(p){ PIEP.push([String(p.code).split("-")[0]+(en?" perp":" 선물"),(p.evl||0)*fx,"held",(typeof p.rt==="number"?p.rt:null)]); });
+      (RL.co||[]).filter(function(p){return p.spot;}).forEach(function(p){ PIEP.push([String(p.code).split("-")[0]+(en?" spot":" 현물"),(p.qty||0)*(p.cur||0)*fx,"held",(typeof p.rt==="number"?p.rt:null)]); });
+      if(cash.usdt>0)PIEP.push(["USDT",cash.usdt*fx,"cash",null]);
     }
-    h+='<div class="dphd" style="margin-top:4px">'+(en?"Recommended portfolio":"추천 포트폴리오")+'</div>'+recoPie(PIEP)
+    h+='<div class="dphd" style="margin-top:4px">'+(en?"Recommended portfolio":"추천 포트폴리오")+'</div>'+recoPuz(PIEP)
       +(fx>0?"":'<div class="dpmsg">'+(en?"USD rate not loaded yet — KR only.":"환율을 아직 못 받아 국내만 그렸습니다.")+'</div>');
   }
   h+=body;
@@ -3895,130 +4043,10 @@ function recoRender(){
   h+=c+'</table>';
   h+='<div class="dpmsg" style="margin-top:6px">'+(en?"Measured rules only. Tap View to open the stock and order.":"잰 규칙만 씁니다. [조회]를 누르면 종목이 열리고 바로 주문할 수 있습니다.")+'</div>';
   card.innerHTML=h;
-  try{ bkRender(); }catch(e){}
 }
 setTimeout(recoLoad,2500);
 setInterval(recoLoad,30*60000);
 setInterval(function(){ try{ recoRender(); }catch(e){} },15000);   // 실계좌가 바뀌면 칸·팔 것을 다시
-
-// ── 가상 바스켓 백테스트 — 데모 (사장님 2026-09-21) ─────────────────────────
-//   주식앱과 같은 방식: 균등비중 · 63/126/252 거래일(3·6·12개월) 과거 수익률.
-//   추천이 아니다. 사장님이 [담기]로 고른 것의 과거 성적만 낸다. 이 폰에만 저장한다.
-function KE(ko,en){ return LANG==="en"?en:ko; }
-const BK_KEY="bk_basket_demo_v1";
-const BK_SPANS=[[63,"3개월","3 months"],[126,"6개월","6 months"],[252,"1년","1 year"]];
-function bkGet(){ try{ return JSON.parse(localStorage.getItem(BK_KEY)||"[]")||[]; }catch(e){ return []; } }
-function bkSave(a){ try{ localStorage.setItem(BK_KEY,JSON.stringify(a)); }catch(e){} }
-function bkMsg(t){ var m=E("bkMsg"); if(m){ m.textContent=t||""; m.hidden=!t; } }
-function bkAdd(code,name,mk){
-  if(!code)return;
-  var a=bkGet();
-  if(a.some(function(x){return x.code===code;})){ bkRender(); bkMsg(KE("이미 담겨 있습니다.","Already added.")); return; }
-  if(a.length>=10){ bkMsg(KE("한 번에 열 개까지 담을 수 있습니다.","You can add up to 10 at a time.")); return; }
-  a.push({code:code,name:name||code,mk:mk||"kr"});
-  bkSave(a); bkRender();
-}
-function bkDel(i){ var a=bkGet(); a.splice(i,1); bkSave(a); bkRender(); }
-function bkClear(){ bkSave([]); bkRender(); }
-function bkAddCurrent(){
-  if(typeof stkCode==="undefined"||!stkCode){ bkMsg(KE("먼저 종목을 [조회]해 주세요.","Look up a stock first.")); return; }
-  var nm=((E("stkq")||{}).value||stkCode).replace(/\s*\(.*\)\s*$/,"");
-  bkAdd(stkCode,nm,(typeof stkMarket!=="undefined"&&stkMarket==="us")?"us":"kr");
-  var c=E("bkCard"); if(c&&c.scrollIntoView)c.scrollIntoView({behavior:"smooth",block:"start"});
-}
-async function bkBars(x){
-  if(x.mk==="us"){
-    var k=await usFetch("kline","code="+encodeURIComponent(x.code)+"&type=8&num=300");
-    var rl=(k&&k.data&&k.data[0]&&k.data[0].respList)||[];
-    if(rl.length<5)return null;
-    return rl.slice().reverse().map(function(b){ return +b.c; });
-  }
-  var d=await krFetch("chart","code="+x.code+"&tf=D",25);   // 국내는 허브를 거쳐 늦다 — 넉넉히 기다린다
-  if(!d||!d.bars||d.bars.length<5)return null;
-  return d.bars.map(function(b){ return +b[4]; });
-}
-
-// ── 3D 큐빅 타워 — 사이트 페이지를 전체화면 iframe 으로 (앱 스크립트와 격리) (사장님 2026-09-21) ──
-var TOWER_URL = "https://emhwang3-boop.github.io/tower/";
-async function openTower3D(list, title) {
-  if (!list || !list.length) return;
-  var old = document.getElementById("tower3dOv"); if (old) old.remove();
-  var ov = document.createElement("div"); ov.id = "tower3dOv";
-  ov.style.cssText = "position:fixed;inset:0;z-index:99999;background:transparent;display:flex;align-items:center;justify-content:center;color:#cdd5e0;font:700 14px system-ui";
-  ov.innerHTML = (typeof mpWait === "function") ? mpWait("3D 준비 중…") : '<div id="t3dmsg" style="background:rgba(0,0,0,0.72);padding:10px 16px;border-radius:12px;color:#cdd5e0">3D 준비 중…</div>';
-  document.body.appendChild(ov);
-  var data = [];
-  for (var i = 0; i < list.length; i++) {
-    var it = list[i], cs = null;
-    try { cs = await bkBars(it); } catch (e) { cs = null; }
-    var mm = document.querySelector("#tower3dOv .mpTxt") || document.getElementById("t3dmsg"); if (mm) mm.textContent = "3D 준비 중… " + (i + 1) + "/" + list.length;
-    if (!cs || cs.length < 10) { data.push({ n: it.name, b: 100, r: 0, v: 1 }); continue; }
-    var n = Math.min(60, cs.length - 1), from = cs[cs.length - 1 - n], to = cs[cs.length - 1];
-    var r = (from > 0) ? (to / from - 1) : 0;
-    var seg = cs.slice(cs.length - 1 - n), dd = [];
-    for (var k = 1; k < seg.length; k++) dd.push(seg[k] / seg[k - 1] - 1);
-    var m = dd.reduce(function (s, x) { return s + x; }, 0) / (dd.length || 1);
-    var sd = Math.sqrt(dd.reduce(function (s, x) { return s + (x - m) * (x - m); }, 0) / (dd.length || 1)) * 100;
-    data.push({ n: it.name, b: 100, r: +r.toFixed(4), v: +Math.max(0.05, sd).toFixed(2) });
-  }
-  if (!document.getElementById("tower3dOv")) return;
-  var enc = ""; try { enc = encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(data))))); } catch (e) {}
-  var tt = encodeURIComponent(title || ("\ub2f4\uae34 " + data.length + "\uc885\ubaa9"));
-  ov.innerHTML = '<iframe src="' + TOWER_URL + '#items=' + enc + '&t=' + tt + '" style="position:absolute;inset:0;width:100%;height:100%;border:0;background:transparent" allow="gyroscope;accelerometer;magnetometer"></iframe>'
-    + '<button onclick="var o=document.getElementById(\'tower3dOv\');if(o)o.remove()" style="position:absolute;top:14px;right:14px;z-index:2;background:rgba(0,0,0,0.6);color:#fff;border:1px solid #666;border-radius:20px;width:42px;height:42px;font-size:20px;font-weight:800;cursor:pointer">\u2715</button>';
-}
-function bkRender(){
-  var card=E("bkCard");
-  if(!card){ var rc=E("recoCard"); if(!rc)return; card=document.createElement("div"); card.className="card"; card.id="bkCard"; rc.parentNode.insertBefore(card,rc.nextSibling); }
-  var a=bkGet();
-  var h='<h3>'+KE("가상 바스켓","Virtual basket")+(a.length?' <span style="color:var(--nm);font-weight:800">'+a.length+'</span>':'')+'</h3>';
-  h+='<div class="dpmsg">'+KE("추천 종목을 [조회]한 뒤 [＋ 가상 바스켓에 담기]를 누르면, 담긴 종목 전체의 3·6·12개월 과거 수익률을 함께 계산합니다.","Look up a pick, tap Add to virtual basket, then we compute the whole basket's past 3/6/12-month return.")+'</div>';
-  if(!a.length){ h+='<div class="mhempty">'+KE("아직 담긴 종목이 없습니다.","No items yet.")+'</div>'; card.innerHTML=h; return; }
-  var w=100/a.length;
-  h+='<table class="mhtab"><tr><th>'+KE("종목","Item")+'</th><th>'+KE("비중","Weight")+'</th><th></th></tr>';
-  a.forEach(function(x,i){
-    h+='<tr><td style="text-align:left">'+dpEsc(x.name)+(/^\d/.test(x.code)?' <span class="dplbl">'+x.code+'</span>':'')+(x.mk==="us"?' <span class="dplbl">US</span>':'')
-      +'</td><td>'+w.toFixed(1)+'%</td><td><span class="mhx" onclick="bkDel('+i+')">\u2715</span></td></tr>';
-  });
-  h+='</table>';
-  h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">'+BK_SPANS.map(function(s){ return '<button class="dppct" style="flex:1" onclick="bkRun('+s[0]+')">'+KE(s[1],s[2])+'</button>'; }).join("")+'<button class="dppct" style="border-color:#2bd4c0;color:#2bd4c0" onclick="openTower3D(bkGet(),\'가상 바스켓\')">3D</button>'+'<button class="dppct" onclick="bkClear()">'+KE("비우기","Clear")+'</button></div>';
-  h+='<div id="bkMsg" class="c21msg" hidden></div><div id="bkOut"></div>';
-  h+='<div class="dpmsg" style="margin-top:6px">'+KE("과거 수익률이며 미래 수익을 보장하지 않습니다. 배당·세금·수수료는 뺀 값입니다.","Past returns; no guarantee of future returns. Excludes dividends, taxes and fees.")+'</div>';
-  card.innerHTML=h;
-}
-async function bkRun(days){
-  var a=bkGet(); if(!a.length)return;
-  bkMsg(KE("받는 중\u2026 종목마다 몇 초 걸립니다","Loading\u2026 a few seconds per item"));
-  E("bkOut").innerHTML="";
-  var rows=[];
-  for(var i=0;i<a.length;i++){
-    var cs=null; try{ cs=await bkBars(a[i]); }catch(e){ cs=null; }
-    if(!cs||cs.length<5){ rows.push({nm:a[i].name,err:true}); continue; }
-    var n=Math.min(days,cs.length-1);
-    var from=cs[cs.length-1-n], to=cs[cs.length-1];
-    if(!(from>0)){ rows.push({nm:a[i].name,err:true}); continue; }
-    rows.push({nm:a[i].name,r:to/from-1,n:n,cs:cs.slice(cs.length-1-n)});
-  }
-  var ok=rows.filter(function(x){ return !x.err; });
-  if(!ok.length){ bkMsg(KE("자료를 못 받았습니다. 잠시 뒤 다시 눌러 주세요.","Could not load data. Please try again shortly.")); return; }
-  bkMsg("");
-  var L2=Math.min.apply(null,ok.map(function(x){ return x.cs.length; }));
-  var daily=[];
-  for(var t=1;t<L2;t++){ var s=0; ok.forEach(function(x){ var c=x.cs.slice(x.cs.length-L2); s+=c[t]/c[t-1]-1; }); daily.push(s/ok.length); }
-  var eq=1; daily.forEach(function(r){ eq*=(1+r); });
-  var worst=ok.slice().sort(function(p,q){ return p.r-q.r; })[0];
-  var best=ok.slice().sort(function(p,q){ return q.r-p.r; })[0];
-  var pc=function(v){ return (v>=0?"+":"")+(v*100).toFixed(1)+"%"; };
-  var cls=function(v){ return v>0?"up":(v<0?"dn":"fl"); };
-  var h='<table class="mhtab"><tr><th>'+KE("종목","Item")+'</th><th>'+(L2-1)+KE("일 수익률","-day return")+'</th></tr>';
-  h+='<tr class="mhsum"><td style="text-align:left"><b>'+KE("바스켓(균등)","Basket (equal)")+'</b></td><td class="'+cls(eq-1)+'"><b>'+pc(eq-1)+'</b></td></tr>';
-  ok.slice().sort(function(p,q){ return q.r-p.r; }).forEach(function(x){ h+='<tr><td style="text-align:left">'+dpEsc(x.nm)+'</td><td class="'+cls(x.r)+'">'+pc(x.r)+'</td></tr>'; });
-  rows.filter(function(x){ return x.err; }).forEach(function(x){ h+='<tr><td style="text-align:left">'+dpEsc(x.nm)+'</td><td class="fl">'+KE("자료 없음","No data")+'</td></tr>'; });
-  h+='</table>';
-  h+='<div class="dpmsg">'+KE("제일 좋았던 것 ","Best: ")+dpEsc(best.nm)+' '+pc(best.r)+KE(' \u00b7 제일 나빴던 것 '," \u00b7 Worst: ")+dpEsc(worst.nm)+' '+pc(worst.r)+'</div>';
-  E("bkOut").innerHTML=h;
-}
-
 
 function applyLang(){
   var b=E("lng");if(b)b.textContent=LANG==="en"?"한":"EN";
@@ -4042,8 +4070,6 @@ function applyLang(){
   updStkTag();
   if(window._lastD)render(window._lastD);
   if(stkCode)loadStock();
-  var _ba=E("bkAddBtn"); if(_ba)_ba.textContent=KE("＋ 가상 바스켓에 담기","＋ Add to virtual basket");
-  try{ bkRender(); }catch(e){}
   if(coinSym)loadCoinDetail();
 }
 applyLang();
@@ -4083,9 +4109,15 @@ function vcSend(){
   function lang(){ var en=(typeof LANG!=="undefined"&&LANG==="en");
     var h=document.getElementById("vcH"); if(h)h.textContent=en?"Feedback":"고객의 소리";
     var b=document.getElementById("vcBtn"); if(b)b.textContent=en?"Send":"보내기";
-    var t=document.getElementById("vcTxt"); if(t)t.placeholder=en?"Features you want, problems, or brokers you use":"바라는 기능, 불편한 점을 적어 주세요"; }
+    var t=document.getElementById("vcTxt"); if(t)t.placeholder=en?"Describe the system error":"시스템 오류 내용을 적어 주세요"; }
   lang(); var lb=document.getElementById("lng"); if(lb)lb.addEventListener("click",function(){setTimeout(lang,50);});
 })();
+</script>
+<script>
+/* 유의사항 카드 한/영 — applyLang 이 끝난 뒤 body.lang-en 을 맞춘다 (2026-09-21) */
+(function(){function ke(){try{document.body.classList.toggle("lang-en",typeof LANG!=="undefined"&&LANG==="en");}catch(e){}}
+ try{var o=window.applyLang;if(typeof o==="function"&&!o._ke){window.applyLang=function(){var r=o.apply(this,arguments);ke();return r;};window.applyLang._ke=1;}}catch(e){}
+ ke();})();
 </script>
 <script>
 // 고객의 소리 — 몇 자 썼는지 오른쪽 아래에 조그맣게 (사장님 2026-09-20)
