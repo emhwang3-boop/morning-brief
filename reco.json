@@ -1,5 +1,5 @@
 {
- "at": "2026-09-23 20:18",
+ "at": "2026-09-24 07:31",
  "rules": {
   "slots": 12,
   "tp": 15,
@@ -60,45 +60,27 @@
   }
  },
  "us": {
-  "asof": "2026-09-22",
+  "asof": "2026-09-23",
   "regime": {
    "good": false,
-   "vs_ma60": -0.98,
+   "vs_ma60": -2.01,
    "cycle_exit": false
   },
   "buy12": [
    {
     "code": "MU",
     "name": "MU",
-    "close": 1096.16,
-    "r20": 20.4
+    "close": 1071.88,
+    "r20": 14.9
    },
    {
-    "code": "DDOG",
-    "name": "DDOG",
-    "close": 247.475,
-    "r20": 9.6
-   },
-   {
-    "code": "ISRG",
-    "name": "ISRG",
-    "close": 402.09,
-    "r20": 7.6
-   },
-   {
-    "code": "COHR",
-    "name": "COHR",
-    "close": 310.39,
-    "r20": 12.7
-   },
-   {
-    "code": "A",
-    "name": "A",
-    "close": 167.26,
-    "r20": 9.0
+    "code": "SMCI",
+    "name": "SMCI",
+    "close": 41.44,
+    "r20": 7.7
    }
   ],
-  "n12": 11,
+  "n12": 2,
   "oversold": [],
   "n_over": 0,
   "panic": {
@@ -136,15 +118,23 @@
   ]
  },
  "etfu": {
-  "n": 1,
+  "n": 5,
   "buy": [
    {
-    "code": "ARKK",
-    "name": "ARKK (혁신테마)",
-    "close": 90.72,
-    "width": 0.34,
-    "r20": 5.2,
-    "en": "ARKK (Innovation)"
+    "code": "SOXX",
+    "name": "SOXX (반도체)",
+    "close": 565.72,
+    "width": 0.99,
+    "r20": 10.0,
+    "en": "SOXX (Semiconductors)"
+   },
+   {
+    "code": "SMH",
+    "name": "SMH (반도체)",
+    "close": 601.41,
+    "width": 0.74,
+    "r20": 8.2,
+    "en": "SMH (Semiconductors)"
    }
   ]
  },
@@ -170,82 +160,82 @@
   ]
  },
  "levu": {
-  "n": 4,
+  "n": 8,
   "buy": [
    {
-    "code": "BRZU",
-    "name": "BRZU (브라질3x)",
-    "close": 105.72,
-    "width": 1.66,
-    "r20": 16.9,
-    "en": "BRZU (Brazil 3x)"
+    "code": "SOXL",
+    "name": "SOXL (반도체3x)",
+    "close": 146.25,
+    "width": 2.45,
+    "r20": 26.4,
+    "en": "SOXL (Semiconductors 3x)"
    },
    {
     "code": "BULZ",
     "name": "BULZ (빅테크3x)",
-    "close": 46.13,
-    "width": 0.94,
-    "r20": 25.7,
+    "close": 45.6,
+    "width": 1.63,
+    "r20": 31.8,
     "en": "BULZ (Big Tech 3x)"
    }
   ]
  },
  "coin": {
   "BTC": {
-   "price": 85693.2,
-   "chg": -0.6,
+   "price": 84418.0,
+   "chg": -2.08,
    "state": "long",
    "new": true,
    "asof": "2026-09-23",
-   "turn": 1684431161
+   "turn": 1929742651
   },
   "ETH": {
-   "price": 2730.04,
-   "chg": -0.86,
+   "price": 2683.84,
+   "chg": -2.53,
    "state": "long",
    "new": true,
    "asof": "2026-09-23",
-   "turn": 794835301
+   "turn": 941308364
   },
   "ZEC": {
-   "price": 1641.76,
-   "chg": 0.72,
+   "price": 1485.61,
+   "chg": -8.86,
    "state": "long",
    "new": false,
    "asof": "2026-09-23",
-   "turn": 706859901
-  },
-  "XRP": {
-   "price": 1.5882,
-   "chg": 0.99,
-   "state": "long",
-   "new": false,
-   "asof": "2026-09-23",
-   "turn": 549035298
+   "turn": 721132248
   },
   "NEAR": {
-   "price": 4.582,
-   "chg": 3.52,
+   "price": 4.311,
+   "chg": -2.6,
    "state": "long",
    "new": false,
    "asof": "2026-09-23",
-   "turn": 448522891
+   "turn": 546081180
+  },
+  "XRP": {
+   "price": 1.4988,
+   "chg": -4.7,
+   "state": "long",
+   "new": false,
+   "asof": "2026-09-23",
+   "turn": 513430368
   },
   "SOL": {
-   "price": 117.13,
-   "chg": -1.21,
+   "price": 114.72,
+   "chg": -3.25,
    "state": "long",
    "new": false,
    "asof": "2026-09-23",
-   "turn": 358086606
+   "turn": 429348939
   },
   "UNI": {
-   "price": 9.831,
-   "chg": -3.86,
+   "price": 9.158,
+   "chg": -10.44,
    "state": "long",
    "new": false,
    "asof": "2026-09-23",
-   "turn": 268391541
+   "turn": 229512412
   }
  }
 }
