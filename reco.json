@@ -1,5 +1,5 @@
 {
- "at": "2026-09-24 13:47",
+ "at": "2026-09-24 20:17",
  "rules": {
   "slots": 12,
   "tp": 15,
@@ -182,72 +182,72 @@
  },
  "coin": {
   "BTC": {
-   "price": 83794.0,
-   "chg": -0.72,
-   "mom20": 5.19,
+   "price": 83550.0,
+   "chg": -1.0,
+   "mom20": 4.88,
    "state": "long",
    "new": true,
    "asof": "2026-09-24",
-   "turn": 1808759376
+   "turn": 1932093618
   },
   "ETH": {
-   "price": 2674.22,
-   "chg": -0.39,
-   "mom20": 8.89,
+   "price": 2649.89,
+   "chg": -1.3,
+   "mom20": 7.9,
    "state": "long",
    "new": true,
    "asof": "2026-09-24",
-   "turn": 827865172
+   "turn": 846513152
   },
   "ZEC": {
-   "price": 1513.4,
-   "chg": 1.01,
-   "mom20": 47.95,
+   "price": 1490.99,
+   "chg": -0.49,
+   "mom20": 45.76,
    "state": "long",
    "new": false,
    "asof": "2026-09-24",
-   "turn": 590130818,
+   "turn": 370823326,
    "rank": 2
   },
-  "NEAR": {
-   "price": 4.434,
-   "chg": 2.35,
-   "mom20": 104.14,
+  "SOL": {
+   "price": 113.39,
+   "chg": -1.39,
+   "mom20": 11.24,
    "state": "long",
    "new": false,
    "asof": "2026-09-24",
-   "turn": 527036430,
-   "rank": 1
-  },
-  "XRP": {
-   "price": 1.4936,
-   "chg": -0.49,
-   "mom20": 6.8,
-   "state": "long",
-   "new": false,
-   "asof": "2026-09-24",
-   "turn": 431071943,
+   "turn": 359351315,
    "rank": 4
   },
-  "SOL": {
-   "price": 114.86,
-   "chg": -0.11,
-   "mom20": 12.69,
+  "XRP": {
+   "price": 1.4709,
+   "chg": -2.01,
+   "mom20": 5.18,
    "state": "long",
    "new": false,
    "asof": "2026-09-24",
-   "turn": 402503607,
-   "rank": 3
-  },
-  "DOGE": {
-   "price": 0.09348,
-   "chg": 0.82,
-   "mom20": 10.27,
-   "state": "long",
-   "new": false,
-   "asof": "2026-09-24",
-   "turn": 169384328,
+   "turn": 353842754,
    "rank": 5
+  },
+  "NEAR": {
+   "price": 4.284,
+   "chg": -1.11,
+   "mom20": 97.24,
+   "state": "long",
+   "new": false,
+   "asof": "2026-09-24",
+   "turn": 336360549,
+   "rank": 1
+  },
+  "PROVE": {
+   "price": 0.2237,
+   "chg": -3.45,
+   "mom20": 25.6,
+   "state": "long",
+   "new": false,
+   "asof": "2026-09-24",
+   "turn": 191481229,
+   "rank": 3
   }
  }
 }
