@@ -1,5 +1,5 @@
 {
- "at": "2026-09-25 20:17",
+ "at": "2026-09-26 07:31",
  "rules": {
   "slots": 12,
   "tp": 15,
@@ -60,23 +60,54 @@
   }
  },
  "us": {
-  "asof": "2026-09-24",
+  "asof": "2026-09-25",
   "regime": {
    "good": false,
-   "vs_ma60": -2.55,
+   "vs_ma60": -1.82,
    "cycle_exit": false
   },
   "buy12": [
    {
-    "code": "SMCI",
-    "name": "SMCI",
-    "close": 41.51,
-    "r20": 11.0
+    "code": "MTD",
+    "name": "MTD",
+    "close": 1511.64,
+    "r20": 7.4
+   },
+   {
+    "code": "P",
+    "name": "P",
+    "close": 126.0,
+    "r20": 27.0
+   },
+   {
+    "code": "KEYS",
+    "name": "KEYS",
+    "close": 362.15,
+    "r20": 11.2
+   },
+   {
+    "code": "MPWR",
+    "name": "MPWR",
+    "close": 1367.4301,
+    "r20": 4.3
+   },
+   {
+    "code": "STX",
+    "name": "STX",
+    "close": 916.83,
+    "r20": 8.3
    }
   ],
-  "n12": 1,
-  "oversold": [],
-  "n_over": 0,
+  "n12": 25,
+  "oversold": [
+   {
+    "code": "O",
+    "name": "O",
+    "close": 55.54,
+    "r20": -9.7
+   }
+  ],
+  "n_over": 1,
   "panic": {
    "on": false,
    "list": []
@@ -112,22 +143,22 @@
   ]
  },
  "etfu": {
-  "n": 7,
+  "n": 8,
   "buy": [
    {
     "code": "SOXX",
     "name": "SOXX (반도체)",
-    "close": 566.07,
-    "width": 1.31,
-    "r20": 9.8,
+    "close": 572.68,
+    "width": 1.55,
+    "r20": 9.0,
     "en": "SOXX (Semiconductors)"
    },
    {
     "code": "SMH",
     "name": "SMH (반도체)",
-    "close": 600.52,
-    "width": 1.0,
-    "r20": 8.1,
+    "close": 606.56,
+    "width": 1.19,
+    "r20": 5.9,
     "en": "SMH (Semiconductors)"
    }
   ]
@@ -154,95 +185,25 @@
   ]
  },
  "levu": {
-  "n": 7,
+  "n": 9,
   "buy": [
    {
     "code": "SOXL",
     "name": "SOXL (반도체3x)",
-    "close": 146.33,
-    "width": 3.28,
-    "r20": 25.5,
+    "close": 151.45,
+    "width": 3.83,
+    "r20": 23.1,
     "en": "SOXL (Semiconductors 3x)"
    },
    {
     "code": "BULZ",
     "name": "BULZ (빅테크3x)",
-    "close": 45.94,
-    "width": 2.13,
-    "r20": 29.4,
+    "close": 45.48,
+    "width": 2.89,
+    "r20": 21.7,
     "en": "BULZ (Big Tech 3x)"
    }
   ]
- },
- "coin": {
-  "BTC": {
-   "price": 85075.2,
-   "chg": 0.79,
-   "mom20": 6.57,
-   "state": "long",
-   "new": true,
-   "asof": "2026-09-25",
-   "turn": 1507236147
-  },
-  "ETH": {
-   "price": 2733.0,
-   "chg": 1.67,
-   "mom20": 10.19,
-   "state": "long",
-   "new": true,
-   "asof": "2026-09-25",
-   "turn": 710049009
-  },
-  "SOL": {
-   "price": 121.34,
-   "chg": 3.67,
-   "mom20": 17.6,
-   "state": "long",
-   "new": false,
-   "asof": "2026-09-25",
-   "turn": 363560617,
-   "rank": 4
-  },
-  "XRP": {
-   "price": 1.588,
-   "chg": 3.47,
-   "mom20": 12.43,
-   "state": "long",
-   "new": false,
-   "asof": "2026-09-25",
-   "turn": 325701906,
-   "rank": 5
-  },
-  "ZEC": {
-   "price": 1610.0,
-   "chg": 4.1,
-   "mom20": 56.93,
-   "state": "long",
-   "new": false,
-   "asof": "2026-09-25",
-   "turn": 308615236,
-   "rank": 2
-  },
-  "NEAR": {
-   "price": 5.023,
-   "chg": 9.41,
-   "mom20": 129.15,
-   "state": "long",
-   "new": false,
-   "asof": "2026-09-25",
-   "turn": 262289343,
-   "rank": 1
-  },
-  "ONDO": {
-   "price": 0.5563,
-   "chg": 6.57,
-   "mom20": 50.31,
-   "state": "long",
-   "new": false,
-   "asof": "2026-09-25",
-   "turn": 155160120,
-   "rank": 3
-  }
  },
  "rep": {
   "069500": {
@@ -274,6 +235,76 @@
    "name": "TLT",
    "close": 79.32,
    "r20": -4.6
+  }
+ },
+ "coin": {
+  "BTC": {
+   "price": 83979.8,
+   "chg": -0.51,
+   "mom20": 5.2,
+   "state": "long",
+   "new": true,
+   "asof": "2026-09-25",
+   "turn": 1506560409
+  },
+  "ETH": {
+   "price": 2690.42,
+   "chg": 0.09,
+   "mom20": 8.47,
+   "state": "long",
+   "new": true,
+   "asof": "2026-09-25",
+   "turn": 640862772
+  },
+  "XRP": {
+   "price": 1.5659,
+   "chg": 2.03,
+   "mom20": 10.87,
+   "state": "long",
+   "new": false,
+   "asof": "2026-09-25",
+   "turn": 539245210,
+   "rank": 5
+  },
+  "SOL": {
+   "price": 121.96,
+   "chg": 4.2,
+   "mom20": 18.2,
+   "state": "long",
+   "new": false,
+   "asof": "2026-09-25",
+   "turn": 486019636,
+   "rank": 4
+  },
+  "ZEC": {
+   "price": 1539.91,
+   "chg": -0.43,
+   "mom20": 50.1,
+   "state": "long",
+   "new": false,
+   "asof": "2026-09-25",
+   "turn": 318042539,
+   "rank": 2
+  },
+  "NEAR": {
+   "price": 4.956,
+   "chg": 7.95,
+   "mom20": 126.09,
+   "state": "long",
+   "new": false,
+   "asof": "2026-09-25",
+   "turn": 261055185,
+   "rank": 1
+  },
+  "SUI": {
+   "price": 1.1943,
+   "chg": 17.77,
+   "mom20": 50.21,
+   "state": "long",
+   "new": false,
+   "asof": "2026-09-25",
+   "turn": 171224260,
+   "rank": 3
   }
  }
 }
