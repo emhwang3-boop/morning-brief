@@ -381,14 +381,14 @@
   "etfu": [
    {
     "code": "SOXX",
-    "name": "반도체",
+    "name": "SOXX (반도체)",
     "rank": 1
    }
   ],
   "levu": [
    {
     "code": "LABU",
-    "name": "바이오3x",
+    "name": "LABU (바이오3x)",
     "rank": 1
    }
   ],
