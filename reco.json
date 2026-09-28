@@ -1,5 +1,5 @@
 {
- "at": "2026-09-26 07:31",
+ "at": "2026-09-28 20:14",
  "rules": {
   "slots": 12,
   "tp": 15,
@@ -7,56 +7,56 @@
   "panic_stop": -10
  },
  "kr": {
-  "asof": "2026-09-23",
+  "asof": "2026-09-28",
   "regime": {
    "good": true,
-   "vs_ma60": 4.61,
+   "vs_ma60": 5.27,
    "cycle_exit": false
   },
   "buy12": [
    {
-    "code": "078350",
-    "name": "한양디지텍",
-    "close": 27650.0,
-    "r20": 22.6,
-    "en": "Hanyang Digitech"
+    "code": "458870",
+    "name": "씨어스",
+    "close": 27550.0,
+    "r20": 26.4,
+    "en": "Seers Technology"
    },
    {
-    "code": "020000",
-    "name": "한섬",
-    "close": 19890.0,
-    "r20": 24.8,
-    "en": "Handsome"
+    "code": "420770",
+    "name": "기가비스",
+    "close": 125900.0,
+    "r20": 16.4,
+    "en": "GigaVis"
    },
    {
-    "code": "281820",
-    "name": "케이씨텍",
-    "close": 87400.0,
-    "r20": 33.6,
-    "en": "KCTech"
+    "code": "330860",
+    "name": "네패스아크",
+    "close": 28300.0,
+    "r20": 3.9,
+    "en": "Nepes Ark"
    },
    {
-    "code": "144960",
-    "name": "뉴파워프라즈마",
-    "close": 12780.0,
-    "r20": 29.4,
-    "en": "New Power Plasma"
+    "code": "014680",
+    "name": "한솔케미칼",
+    "close": 239500.0,
+    "r20": 16.3,
+    "en": "Hansol Chemical"
    },
    {
-    "code": "005440",
-    "name": "현대지에프홀딩스",
-    "close": 13080.0,
-    "r20": 7.0,
-    "en": "Hyundai G.F. Holdings"
+    "code": "033160",
+    "name": "엠케이전자",
+    "close": 16030.0,
+    "r20": 9.9,
+    "en": "MK Electron"
    }
   ],
-  "n12": 56,
+  "n12": 52,
   "oversold": [],
   "n_over": 0,
   "panic": {
    "on": false,
    "list": [],
-   "idx3d": 0.59
+   "idx3d": 0.7
   }
  },
  "us": {
@@ -114,31 +114,31 @@
   }
  },
  "etfw": {
-  "n": 14,
+  "n": 4,
   "buy": [
-   {
-    "code": "0015B0",
-    "name": "KoAct 미국나스닥성장기업액티브",
-    "close": 19775.0,
-    "width": 1.2,
-    "r20": 11.1,
-    "en": "KoAct US Nasdaq Growth Active"
-   },
-   {
-    "code": "426030",
-    "name": "TIME 미국나스닥100액티브",
-    "close": 48835.0,
-    "width": 0.93,
-    "r20": 8.7,
-    "en": "TIME US NASDAQ100 ACTIVE"
-   },
    {
     "code": "442580",
     "name": "PLUS 글로벌HBM반도체",
-    "close": 108870.0,
-    "width": 0.89,
-    "r20": 10.1,
+    "close": 104695.0,
+    "width": 1.15,
+    "r20": 3.3,
     "en": "PLUS Global HBM"
+   },
+   {
+    "code": "381170",
+    "name": "TIGER 미국테크TOP10 INDXX",
+    "close": 31630.0,
+    "width": 0.81,
+    "r20": 3.9,
+    "en": "TIGER US Tech Top10 INDXX"
+   },
+   {
+    "code": "465580",
+    "name": "ACE 미국빅테크TOP7 Plus",
+    "close": 24420.0,
+    "width": 0.42,
+    "r20": 1.6,
+    "en": "ACE US Big Tech TOP 7 Plus"
    }
   ]
  },
@@ -164,23 +164,23 @@
   ]
  },
  "levw": {
-  "n": 10,
+  "n": 2,
   "buy": [
    {
     "code": "494310",
     "name": "KODEX 반도체레버리지",
-    "close": 93440.0,
-    "width": 2.4,
-    "r20": 25.3,
+    "close": 87500.0,
+    "width": 2.87,
+    "r20": 12.4,
     "en": "KODEX Semiconductor Leverage"
    },
    {
-    "code": "488080",
-    "name": "TIGER 반도체TOP10레버리지",
-    "close": 40000.0,
-    "width": 2.28,
-    "r20": 23.5,
-    "en": "TIGER Semiconductor TOP 10 Leve"
+    "code": "409820",
+    "name": "KODEX 미국나스닥100레버리지(합성 H)",
+    "close": 21005.0,
+    "width": 0.82,
+    "r20": 5.9,
+    "en": "KODEX US NASDAQ100 Leverage(SYN"
    }
   ]
  },
@@ -208,23 +208,23 @@
  "rep": {
   "069500": {
    "name": "KODEX 200",
-   "close": 113145.0,
-   "r20": 5.0
+   "close": 109500.0,
+   "r20": 0.3
   },
   "114260": {
    "name": "KODEX 국고채3년",
-   "close": 61690.0,
-   "r20": -0.3
+   "close": 61470.0,
+   "r20": -0.8
   },
   "360750": {
    "name": "TIGER 미국S&P500",
-   "close": 26200.0,
-   "r20": -0.5
+   "close": 26105.0,
+   "r20": -1.0
   },
   "305080": {
    "name": "TIGER 미국채10년선물",
-   "close": 11885.0,
-   "r20": -3.9
+   "close": 11765.0,
+   "r20": -4.5
   },
   "SPY": {
    "name": "SPY",
@@ -239,72 +239,72 @@
  },
  "coin": {
   "BTC": {
-   "price": 83979.8,
-   "chg": -0.51,
-   "mom20": 5.2,
+   "price": 83000.0,
+   "chg": -1.74,
+   "mom20": 5.79,
    "state": "long",
    "new": true,
-   "asof": "2026-09-25",
-   "turn": 1506560409
+   "asof": "2026-09-28",
+   "turn": 1300800790
   },
   "ETH": {
-   "price": 2690.42,
-   "chg": 0.09,
-   "mom20": 8.47,
+   "price": 2662.89,
+   "chg": -0.96,
+   "mom20": 7.16,
    "state": "long",
    "new": true,
-   "asof": "2026-09-25",
-   "turn": 640862772
-  },
-  "XRP": {
-   "price": 1.5659,
-   "chg": 2.03,
-   "mom20": 10.87,
-   "state": "long",
-   "new": false,
-   "asof": "2026-09-25",
-   "turn": 539245210,
-   "rank": 2
+   "asof": "2026-09-28",
+   "turn": 601947407
   },
   "SOL": {
-   "price": 121.96,
-   "chg": 4.2,
-   "mom20": 18.2,
+   "price": 118.56,
+   "chg": -2.81,
+   "mom20": 14.69,
    "state": "long",
    "new": false,
-   "asof": "2026-09-25",
-   "turn": 486019636,
+   "asof": "2026-09-28",
+   "turn": 299701176,
    "rank": 4
   },
-  "ZEC": {
-   "price": 1539.91,
-   "chg": -0.43,
-   "mom20": 50.1,
+  "QNT": {
+   "price": 238.8,
+   "chg": -16.58,
+   "mom20": 256.31,
    "state": "long",
    "new": false,
-   "asof": "2026-09-25",
-   "turn": 318042539,
-   "rank": 1
+   "asof": "2026-09-28",
+   "turn": 281850648,
+   "rank": 3
   },
-  "NEAR": {
-   "price": 4.956,
-   "chg": 7.95,
-   "mom20": 126.09,
+  "ZEC": {
+   "price": 1564.07,
+   "chg": -1.47,
+   "mom20": 32.79,
    "state": "long",
    "new": false,
-   "asof": "2026-09-25",
-   "turn": 261055185,
+   "asof": "2026-09-28",
+   "turn": 272705038,
+   "rank": 2
+  },
+  "XRP": {
+   "price": 1.4871,
+   "chg": -1.95,
+   "mom20": 4.94,
+   "state": "long",
+   "new": false,
+   "asof": "2026-09-28",
+   "turn": 220486140,
    "rank": 5
   },
-  "SUI": {
-   "price": 1.1943,
-   "chg": 17.77,
-   "mom20": 50.21,
+  "NEAR": {
+   "price": 5.091,
+   "chg": -5.49,
+   "mom20": 119.44,
    "state": "long",
    "new": false,
-   "asof": "2026-09-25",
-   "turn": 171224260,
-   "rank": 3
+   "asof": "2026-09-28",
+   "turn": 190292148,
+   "rank": 1
   }
  }
 }
