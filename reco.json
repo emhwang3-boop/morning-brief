@@ -306,5 +306,93 @@
    "turn": 236227102,
    "rank": 1
   }
+ },
+ "mom": {
+  "kr": [
+   {
+    "code": "010170",
+    "name": "대한광통신",
+    "rank": 1
+   },
+   {
+    "code": "009150",
+    "name": "삼성전기",
+    "rank": 2
+   },
+   {
+    "code": "131290",
+    "name": "티에스이",
+    "rank": 3
+   },
+   {
+    "code": "036930",
+    "name": "주성엔지니어링",
+    "rank": 4
+   },
+   {
+    "code": "402340",
+    "name": "SK스퀘어",
+    "rank": 5
+   }
+  ],
+  "asof_kr": "2026-09-28",
+  "us": [
+   {
+    "code": "SNDK",
+    "name": "SNDK",
+    "rank": 1
+   },
+   {
+    "code": "LITE",
+    "name": "LITE",
+    "rank": 2
+   },
+   {
+    "code": "MU",
+    "name": "MU",
+    "rank": 3
+   },
+   {
+    "code": "MRNA",
+    "name": "MRNA",
+    "rank": 4
+   },
+   {
+    "code": "WDC",
+    "name": "WDC",
+    "rank": 5
+   }
+  ],
+  "asof_us": "2026-09-28",
+  "etfw": [
+   {
+    "code": "442580",
+    "name": "PLUS 글로벌HBM반도체",
+    "rank": 1
+   }
+  ],
+  "levw": [
+   {
+    "code": "243880",
+    "name": "TIGER 200IT레버리지",
+    "rank": 1
+   }
+  ],
+  "etfu": [
+   {
+    "code": "SOXX",
+    "name": "반도체",
+    "rank": 1
+   }
+  ],
+  "levu": [
+   {
+    "code": "LABU",
+    "name": "바이오3x",
+    "rank": 1
+   }
+  ],
+  "month": "2026-09",
+  "at": "2026-09-29 08:12"
  }
 }
