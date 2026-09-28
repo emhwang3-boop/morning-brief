@@ -185,7 +185,7 @@
   ]
  },
  "levu": {
-  "n": 9,
+  "n": 7,
   "buy": [
    {
     "code": "SOXL",
@@ -196,12 +196,12 @@
     "en": "SOXL (Semiconductors 3x)"
    },
    {
-    "code": "BULZ",
-    "name": "BULZ (빅테크3x)",
-    "close": 45.48,
-    "width": 2.89,
-    "r20": 21.7,
-    "en": "BULZ (Big Tech 3x)"
+    "code": "TECL",
+    "name": "TECL (기술3x)",
+    "close": 234.5,
+    "width": 2.12,
+    "r20": 11.3,
+    "en": "TECL (Technology 3x)"
    }
   ]
  },
@@ -264,7 +264,7 @@
    "new": false,
    "asof": "2026-09-25",
    "turn": 539245210,
-   "rank": 5
+   "rank": 2
   },
   "SOL": {
    "price": 121.96,
@@ -284,7 +284,7 @@
    "new": false,
    "asof": "2026-09-25",
    "turn": 318042539,
-   "rank": 2
+   "rank": 1
   },
   "NEAR": {
    "price": 4.956,
@@ -294,7 +294,7 @@
    "new": false,
    "asof": "2026-09-25",
    "turn": 261055185,
-   "rank": 1
+   "rank": 5
   },
   "SUI": {
    "price": 1.1943,
