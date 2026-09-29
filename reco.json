@@ -1,1 +1,392 @@
-{"at": "2026-09-29 07:31", "rules": {"slots": 12, "tp": 15, "hold_days": 60, "panic_stop": -10}, "kr": {"asof": "2026-09-28", "regime": {"good": true, "vs_ma60": 5.27, "cycle_exit": false}, "buy12": [{"code": "458870", "name": "씨어스", "close": 27550.0, "r20": 26.4, "en": "Seers Technology"}, {"code": "420770", "name": "기가비스", "close": 125900.0, "r20": 16.4, "en": "GigaVis"}, {"code": "330860", "name": "네패스아크", "close": 28300.0, "r20": 3.9, "en": "Nepes Ark"}, {"code": "014680", "name": "한솔케미칼", "close": 239500.0, "r20": 16.3, "en": "Hansol Chemical"}, {"code": "033160", "name": "엠케이전자", "close": 16030.0, "r20": 9.9, "en": "MK Electron"}], "n12": 52, "oversold": [], "n_over": 0, "panic": {"on": false, "list": [], "idx3d": 0.7}}, "us": {"asof": "2026-09-28", "regime": {"good": false, "vs_ma60": -2.45, "cycle_exit": false}, "buy12": [{"code": "P", "name": "P", "close": 129.4, "r20": 38.5}, {"code": "MPWR", "name": "MPWR", "close": 1351.2, "r20": 7.6}, {"code": "TER", "name": "TER", "close": 401.3, "r20": 13.1}, {"code": "TXN", "name": "TXN", "close": 278.31, "r20": 7.6}, {"code": "MCHP", "name": "MCHP", "close": 77.97, "r20": 6.9}], "n12": 19, "oversold": [{"code": "GEN", "name": "GEN", "close": 20.85, "r20": -32.8}], "n_over": 1, "panic": {"on": false, "list": []}}, "etfw": {"n": 4, "buy": [{"code": "442580", "name": "PLUS 글로벌HBM반도체", "close": 104695.0, "width": 1.15, "r20": 3.3, "en": "PLUS Global HBM"}, {"code": "381170", "name": "TIGER 미국테크TOP10 INDXX", "close": 31630.0, "width": 0.81, "r20": 3.9, "en": "TIGER US Tech Top10 INDXX"}, {"code": "465580", "name": "ACE 미국빅테크TOP7 Plus", "close": 24420.0, "width": 0.42, "r20": 1.6, "en": "ACE US Big Tech TOP 7 Plus"}]}, "etfu": {"n": 9, "buy": [{"code": "SOXX", "name": "SOXX (반도체)", "close": 560.79, "width": 1.7, "r20": 10.3, "en": "SOXX (Semiconductors)"}, {"code": "SMH", "name": "SMH (반도체)", "close": 600.01, "width": 1.32, "r20": 8.5, "en": "SMH (Semiconductors)"}]}, "levw": {"n": 2, "buy": [{"code": "494310", "name": "KODEX 반도체레버리지", "close": 87500.0, "width": 2.87, "r20": 12.4, "en": "KODEX Semiconductor Leverage"}, {"code": "409820", "name": "KODEX 미국나스닥100레버리지(합성 H)", "close": 21005.0, "width": 0.82, "r20": 5.9, "en": "KODEX US NASDAQ100 Leverage(SYN"}]}, "levu": {"n": 5, "buy": [{"code": "SOXL", "name": "SOXL (반도체3x)", "close": 142.29, "width": 4.44, "r20": 27.8, "en": "SOXL (Semiconductors 3x)"}, {"code": "TECL", "name": "TECL (기술3x)", "close": 228.22, "width": 2.34, "r20": 13.6, "en": "TECL (Technology 3x)"}]}, "rep": {"069500": {"name": "KODEX 200", "close": 109500.0, "r20": 0.3}, "114260": {"name": "KODEX 국고채3년", "close": 61470.0, "r20": -0.8}, "360750": {"name": "TIGER 미국S&P500", "close": 26105.0, "r20": -1.0}, "305080": {"name": "TIGER 미국채10년선물", "close": 11765.0, "r20": -4.5}, "SPY": {"name": "SPY", "close": 765.61, "r20": -0.5}, "TLT": {"name": "TLT", "close": 78.62, "r20": -5.1}}, "coin": {"BTC": {"price": 83470.6, "chg": -0.04, "mom20": 6.59, "state": "long", "new": true, "asof": "2026-09-29", "_w": 1.0002, "turn": 1732235322}, "ETH": {"price": 2686.95, "chg": -0.07, "mom20": 8.87, "state": "long", "new": true, "asof": "2026-09-29", "_w": 1.1033, "turn": 767529799}, "ZEC": {"price": 1482.76, "chg": -0.05, "mom20": 19.17, "state": "long", "new": false, "asof": "2026-09-29", "_w": 4.2341, "turn": 311552667}, "SOL": {"price": 118.67, "chg": -0.19, "mom20": 16.84, "state": "long", "new": false, "asof": "2026-09-29", "_w": 1.9109, "turn": 300626590}, "XRP": {"price": 1.4973, "chg": 0.03, "mom20": 7.33, "state": "long", "new": false, "asof": "2026-09-29", "_w": 1.4073, "turn": 277697690}, "NEAR": {"price": 4.813, "chg": -0.21, "mom20": 93.68, "state": "long", "new": false, "asof": "2026-09-29", "_w": 5.8563, "turn": 229184510}, "HBAR": {"price": 0.12014, "chg": -1.56, "mom20": 56.92, "state": "long", "new": false, "asof": "2026-09-29", "_w": 2.3632, "turn": 202003418}}, "mom": {"kr": [{"code": "010170", "name": "대한광통신", "rank": 1}, {"code": "009150", "name": "삼성전기", "rank": 2}, {"code": "131290", "name": "티에스이", "rank": 3}, {"code": "036930", "name": "주성엔지니어링", "rank": 4}, {"code": "402340", "name": "SK스퀘어", "rank": 5}], "asof_kr": "2026-09-28", "us": [{"code": "SNDK", "name": "SNDK", "rank": 1}, {"code": "LITE", "name": "LITE", "rank": 2}, {"code": "MU", "name": "MU", "rank": 3}, {"code": "MRNA", "name": "MRNA", "rank": 4}, {"code": "WDC", "name": "WDC", "rank": 5}], "asof_us": "2026-09-28", "etfw": [{"code": "442580", "name": "PLUS 글로벌HBM반도체", "rank": 1}], "levw": [{"code": "243880", "name": "TIGER 200IT레버리지", "rank": 1}], "etfu": [{"code": "SOXX", "name": "SOXX (반도체)", "rank": 1}], "levu": [{"code": "LABU", "name": "LABU (바이오3x)", "rank": 1}], "month": "2026-09", "at": "2026-09-29 08:12", "start": false}}
+{
+ "at": "2026-09-30 07:31",
+ "rules": {
+  "slots": 12,
+  "tp": 15,
+  "hold_days": 60,
+  "panic_stop": -10
+ },
+ "kr": {
+  "asof": "2026-09-29",
+  "regime": {
+   "good": true,
+   "vs_ma60": 5.3,
+   "cycle_exit": false
+  },
+  "buy12": [
+   {
+    "code": "458870",
+    "name": "씨어스",
+    "close": 26100.0,
+    "r20": 18.1,
+    "en": "Seers Technology"
+   },
+   {
+    "code": "420770",
+    "name": "기가비스",
+    "close": 129000.0,
+    "r20": 17.5,
+    "en": "GigaVis"
+   },
+   {
+    "code": "330860",
+    "name": "네패스아크",
+    "close": 31700.0,
+    "r20": 20.5,
+    "en": "Nepes Ark"
+   },
+   {
+    "code": "328130",
+    "name": "루닛",
+    "close": 11820.0,
+    "r20": 28.1,
+    "en": "Lunit"
+   },
+   {
+    "code": "440110",
+    "name": "파두",
+    "close": 84400.0,
+    "r20": 33.3,
+    "en": "Fadu"
+   }
+  ],
+  "n12": 59,
+  "oversold": [],
+  "n_over": 0,
+  "panic": {
+   "on": false,
+   "list": [],
+   "idx3d": 1.05
+  }
+ },
+ "us": {
+  "asof": "2026-09-29",
+  "regime": {
+   "good": false,
+   "vs_ma60": -2.55,
+   "cycle_exit": false
+  },
+  "buy12": [
+   {
+    "code": "GNRC",
+    "name": "GNRC",
+    "close": 212.22,
+    "r20": 14.5
+   },
+   {
+    "code": "AMAT",
+    "name": "AMAT",
+    "close": 512.01,
+    "r20": 11.7
+   },
+   {
+    "code": "KLAC",
+    "name": "KLAC",
+    "close": 196.53,
+    "r20": 12.0
+   },
+   {
+    "code": "TXN",
+    "name": "TXN",
+    "close": 281.69,
+    "r20": 8.0
+   },
+   {
+    "code": "MCHP",
+    "name": "MCHP",
+    "close": 78.78,
+    "r20": 7.3
+   }
+  ],
+  "n12": 21,
+  "oversold": [],
+  "n_over": 0,
+  "panic": {
+   "on": false,
+   "list": []
+  }
+ },
+ "etfw": {
+  "n": 5,
+  "buy": [
+   {
+    "code": "442580",
+    "name": "PLUS 글로벌HBM반도체",
+    "close": 105145.0,
+    "width": 1.19,
+    "r20": 7.9,
+    "en": "PLUS Global HBM"
+   },
+   {
+    "code": "390390",
+    "name": "KODEX 미국반도체",
+    "close": 55255.0,
+    "width": 1.14,
+    "r20": 4.4,
+    "en": "KODEX US Semiconductor"
+   },
+   {
+    "code": "446770",
+    "name": "ACE 글로벌반도체TOP4 Plus",
+    "close": 79955.0,
+    "width": 0.99,
+    "r20": 4.5,
+    "en": "ACE Global Semiconductor TOP4 P"
+   }
+  ]
+ },
+ "etfu": {
+  "n": 8,
+  "buy": [
+   {
+    "code": "SOXX",
+    "name": "SOXX (반도체)",
+    "close": 567.44,
+    "width": 1.69,
+    "r20": 11.0,
+    "en": "SOXX (Semiconductors)"
+   },
+   {
+    "code": "SMH",
+    "name": "SMH (반도체)",
+    "close": 606.9,
+    "width": 1.34,
+    "r20": 9.0,
+    "en": "SMH (Semiconductors)"
+   }
+  ]
+ },
+ "levw": {
+  "n": 3,
+  "buy": [
+   {
+    "code": "494310",
+    "name": "KODEX 반도체레버리지",
+    "close": 94000.0,
+    "width": 2.84,
+    "r20": 26.5,
+    "en": "KODEX Semiconductor Leverage"
+   },
+   {
+    "code": "488080",
+    "name": "TIGER 반도체TOP10레버리지",
+    "close": 37705.0,
+    "width": 2.52,
+    "r20": 18.6,
+    "en": "TIGER Semiconductor TOP 10 Leve"
+   }
+  ]
+ },
+ "levu": {
+  "n": 5,
+  "buy": [
+   {
+    "code": "SOXL",
+    "name": "SOXL (반도체3x)",
+    "close": 147.0,
+    "width": 4.33,
+    "r20": 30.3,
+    "en": "SOXL (Semiconductors 3x)"
+   },
+   {
+    "code": "TECL",
+    "name": "TECL (기술3x)",
+    "close": 227.76,
+    "width": 2.3,
+    "r20": 12.0,
+    "en": "TECL (Technology 3x)"
+   }
+  ]
+ },
+ "rep": {
+  "069500": {
+   "name": "KODEX 200",
+   "close": 109990.0,
+   "r20": 2.6
+  },
+  "114260": {
+   "name": "KODEX 국고채3년",
+   "close": 61650.0,
+   "r20": -0.4
+  },
+  "360750": {
+   "name": "TIGER 미국S&P500",
+   "close": 25855.0,
+   "r20": -1.6
+  },
+  "305080": {
+   "name": "TIGER 미국채10년선물",
+   "close": 11680.0,
+   "r20": -4.3
+  },
+  "SPY": {
+   "name": "SPY",
+   "close": 764.2,
+   "r20": -0.4
+  },
+  "TLT": {
+   "name": "TLT",
+   "close": 78.23,
+   "r20": -5.2
+  }
+ },
+ "coin": {
+  "BTC": {
+   "price": 83581.2,
+   "chg": 0.1,
+   "mom20": 6.74,
+   "state": "long",
+   "new": true,
+   "asof": "2026-09-29",
+   "turn": 1115242784
+  },
+  "ETH": {
+   "price": 2678.0,
+   "chg": -0.4,
+   "mom20": 8.5,
+   "state": "long",
+   "new": true,
+   "asof": "2026-09-29",
+   "turn": 853085094
+  },
+  "ZEC": {
+   "price": 1409.49,
+   "chg": -4.99,
+   "mom20": 13.28,
+   "state": "long",
+   "new": false,
+   "asof": "2026-09-29",
+   "turn": 303335824,
+   "rank": 2
+  },
+  "SOL": {
+   "price": 119.0,
+   "chg": 0.09,
+   "mom20": 17.16,
+   "state": "long",
+   "new": false,
+   "asof": "2026-09-29",
+   "turn": 290484297,
+   "rank": 4
+  },
+  "XRP": {
+   "price": 1.4929,
+   "chg": -0.26,
+   "mom20": 7.02,
+   "state": "long",
+   "new": false,
+   "asof": "2026-09-29",
+   "turn": 279473695,
+   "rank": 5
+  },
+  "NEAR": {
+   "price": 4.936,
+   "chg": 2.34,
+   "mom20": 98.63,
+   "state": "long",
+   "new": false,
+   "asof": "2026-09-29",
+   "turn": 201011332,
+   "rank": 1
+  },
+  "AVAX": {
+   "price": 11.438,
+   "chg": 7.74,
+   "mom20": 46.68,
+   "state": "long",
+   "new": false,
+   "asof": "2026-09-29",
+   "turn": 117848086,
+   "rank": 3
+  }
+ },
+ "mom": {
+  "kr": [
+   {
+    "code": "010170",
+    "name": "대한광통신",
+    "rank": 1
+   },
+   {
+    "code": "009150",
+    "name": "삼성전기",
+    "rank": 2
+   },
+   {
+    "code": "131290",
+    "name": "티에스이",
+    "rank": 3
+   },
+   {
+    "code": "036930",
+    "name": "주성엔지니어링",
+    "rank": 4
+   },
+   {
+    "code": "402340",
+    "name": "SK스퀘어",
+    "rank": 5
+   }
+  ],
+  "asof_kr": "2026-09-28",
+  "us": [
+   {
+    "code": "SNDK",
+    "name": "SNDK",
+    "rank": 1
+   },
+   {
+    "code": "LITE",
+    "name": "LITE",
+    "rank": 2
+   },
+   {
+    "code": "MU",
+    "name": "MU",
+    "rank": 3
+   },
+   {
+    "code": "MRNA",
+    "name": "MRNA",
+    "rank": 4
+   },
+   {
+    "code": "WDC",
+    "name": "WDC",
+    "rank": 5
+   }
+  ],
+  "asof_us": "2026-09-28",
+  "etfw": [
+   {
+    "code": "442580",
+    "name": "PLUS 글로벌HBM반도체",
+    "rank": 1
+   }
+  ],
+  "levw": [
+   {
+    "code": "243880",
+    "name": "TIGER 200IT레버리지",
+    "rank": 1
+   }
+  ],
+  "etfu": [
+   {
+    "code": "SOXX",
+    "name": "SOXX (반도체)",
+    "rank": 1
+   }
+  ],
+  "levu": [
+   {
+    "code": "LABU",
+    "name": "LABU (바이오3x)",
+    "rank": 1
+   }
+  ],
+  "month": "2026-09",
+  "at": "2026-09-29 08:12",
+  "start": false
+ }
+}
