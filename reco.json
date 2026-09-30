@@ -1,5 +1,5 @@
 {
- "at": "2026-09-30 07:31",
+ "at": "2026-09-30 20:37",
  "rules": {
   "slots": 12,
   "tp": 15,
@@ -7,56 +7,56 @@
   "panic_stop": -10
  },
  "kr": {
-  "asof": "2026-09-29",
+  "asof": "2026-09-30",
   "regime": {
    "good": true,
-   "vs_ma60": 5.3,
+   "vs_ma60": 5.32,
    "cycle_exit": false
   },
   "buy12": [
    {
-    "code": "458870",
-    "name": "씨어스",
-    "close": 26100.0,
-    "r20": 18.1,
-    "en": "Seers Technology"
+    "code": "047920",
+    "name": "HLB제약",
+    "close": 11630.0,
+    "r20": 63.6,
+    "en": "HLB Pharmaceutical"
    },
    {
-    "code": "420770",
-    "name": "기가비스",
-    "close": 129000.0,
-    "r20": 17.5,
-    "en": "GigaVis"
+    "code": "394800",
+    "name": "쓰리빌리언",
+    "close": 6420.0,
+    "r20": 23.9,
+    "en": "3billion"
    },
    {
-    "code": "330860",
-    "name": "네패스아크",
-    "close": 31700.0,
-    "r20": 20.5,
-    "en": "Nepes Ark"
+    "code": "338220",
+    "name": "뷰노",
+    "close": 7980.0,
+    "r20": 42.8,
+    "en": "Vuno"
    },
    {
-    "code": "328130",
-    "name": "루닛",
-    "close": 11820.0,
-    "r20": 28.1,
-    "en": "Lunit"
+    "code": "159010",
+    "name": "아스플로",
+    "close": 29450.0,
+    "r20": 37.0,
+    "en": "Asflow"
    },
    {
-    "code": "440110",
-    "name": "파두",
-    "close": 84400.0,
-    "r20": 33.3,
-    "en": "Fadu"
+    "code": "170920",
+    "name": "엘티씨",
+    "close": 41100.0,
+    "r20": 22.7,
+    "en": "LTC"
    }
   ],
-  "n12": 59,
+  "n12": 52,
   "oversold": [],
   "n_over": 0,
   "panic": {
    "on": false,
    "list": [],
-   "idx3d": 1.05
+   "idx3d": 0.82
   }
  },
  "us": {
@@ -107,31 +107,31 @@
   }
  },
  "etfw": {
-  "n": 5,
+  "n": 7,
   "buy": [
    {
-    "code": "442580",
-    "name": "PLUS 글로벌HBM반도체",
-    "close": 105145.0,
-    "width": 1.19,
-    "r20": 7.9,
-    "en": "PLUS Global HBM"
+    "code": "381180",
+    "name": "TIGER 미국필라델피아반도체나스닥",
+    "close": 44310.0,
+    "width": 1.38,
+    "r20": 7.7,
+    "en": "TIGER US PHLX Semiconductor Nas"
    },
    {
     "code": "390390",
     "name": "KODEX 미국반도체",
-    "close": 55255.0,
-    "width": 1.14,
-    "r20": 4.4,
+    "close": 55685.0,
+    "width": 1.27,
+    "r20": 7.3,
     "en": "KODEX US Semiconductor"
    },
    {
-    "code": "446770",
-    "name": "ACE 글로벌반도체TOP4 Plus",
-    "close": 79955.0,
-    "width": 0.99,
-    "r20": 4.5,
-    "en": "ACE Global Semiconductor TOP4 P"
+    "code": "497570",
+    "name": "TIGER 미국필라델피아AI반도체나스닥",
+    "close": 22455.0,
+    "width": 1.24,
+    "r20": 7.0,
+    "en": "TIGER PHLX US AI Semiconductor"
    }
   ]
  },
@@ -162,17 +162,17 @@
    {
     "code": "494310",
     "name": "KODEX 반도체레버리지",
-    "close": 94000.0,
-    "width": 2.84,
-    "r20": 26.5,
+    "close": 95620.0,
+    "width": 3.07,
+    "r20": 28.2,
     "en": "KODEX Semiconductor Leverage"
    },
    {
     "code": "488080",
     "name": "TIGER 반도체TOP10레버리지",
-    "close": 37705.0,
-    "width": 2.52,
-    "r20": 18.6,
+    "close": 38190.0,
+    "width": 2.5,
+    "r20": 18.5,
     "en": "TIGER Semiconductor TOP 10 Leve"
    }
   ]
@@ -201,23 +201,23 @@
  "rep": {
   "069500": {
    "name": "KODEX 200",
-   "close": 109990.0,
-   "r20": 2.6
+   "close": 109545.0,
+   "r20": 1.8
   },
   "114260": {
    "name": "KODEX 국고채3년",
-   "close": 61650.0,
-   "r20": -0.4
+   "close": 61735.0,
+   "r20": -0.2
   },
   "360750": {
    "name": "TIGER 미국S&P500",
-   "close": 25855.0,
-   "r20": -1.6
+   "close": 25825.0,
+   "r20": -1.2
   },
   "305080": {
    "name": "TIGER 미국채10년선물",
-   "close": 11680.0,
-   "r20": -4.3
+   "close": 11665.0,
+   "r20": -4.2
   },
   "SPY": {
    "name": "SPY",
@@ -232,71 +232,71 @@
  },
  "coin": {
   "BTC": {
-   "price": 83581.2,
-   "chg": 0.1,
-   "mom20": 6.74,
+   "price": 83932.1,
+   "chg": 0.32,
+   "mom20": 9.62,
    "state": "long",
    "new": true,
-   "asof": "2026-09-29",
-   "turn": 1115242784
+   "asof": "2026-09-30",
+   "turn": 1071601427
   },
   "ETH": {
-   "price": 2678.0,
-   "chg": -0.4,
-   "mom20": 8.5,
+   "price": 2697.89,
+   "chg": 0.74,
+   "mom20": 10.65,
    "state": "long",
    "new": true,
-   "asof": "2026-09-29",
-   "turn": 853085094
-  },
-  "ZEC": {
-   "price": 1409.49,
-   "chg": -4.99,
-   "mom20": 13.28,
-   "state": "long",
-   "new": false,
-   "asof": "2026-09-29",
-   "turn": 303335824,
-   "rank": 2
-  },
-  "SOL": {
-   "price": 119.0,
-   "chg": 0.09,
-   "mom20": 17.16,
-   "state": "long",
-   "new": false,
-   "asof": "2026-09-29",
-   "turn": 290484297,
-   "rank": 4
+   "asof": "2026-09-30",
+   "turn": 696749850
   },
   "XRP": {
-   "price": 1.4929,
-   "chg": -0.26,
-   "mom20": 7.02,
+   "price": 1.5153,
+   "chg": 1.66,
+   "mom20": 13.54,
    "state": "long",
    "new": false,
-   "asof": "2026-09-29",
-   "turn": 279473695,
+   "asof": "2026-09-30",
+   "turn": 297520399,
    "rank": 5
   },
-  "NEAR": {
-   "price": 4.936,
-   "chg": 2.34,
-   "mom20": 98.63,
+  "SOL": {
+   "price": 119.66,
+   "chg": 0.43,
+   "mom20": 21.27,
    "state": "long",
    "new": false,
-   "asof": "2026-09-29",
-   "turn": 201011332,
+   "asof": "2026-09-30",
+   "turn": 296904876,
+   "rank": 4
+  },
+  "ZEC": {
+   "price": 1428.36,
+   "chg": 0.78,
+   "mom20": 32.26,
+   "state": "long",
+   "new": false,
+   "asof": "2026-09-30",
+   "turn": 217599742,
+   "rank": 2
+  },
+  "NEAR": {
+   "price": 5.293,
+   "chg": 8.33,
+   "mom20": 116.75,
+   "state": "long",
+   "new": false,
+   "asof": "2026-09-30",
+   "turn": 211083259,
    "rank": 1
   },
-  "AVAX": {
-   "price": 11.438,
-   "chg": 7.74,
-   "mom20": 46.68,
+  "SUI": {
+   "price": 1.1554,
+   "chg": 0.25,
+   "mom20": 58.8,
    "state": "long",
    "new": false,
-   "asof": "2026-09-29",
-   "turn": 117848086,
+   "asof": "2026-09-30",
+   "turn": 94156737,
    "rank": 3
   }
  },
