@@ -1,5 +1,5 @@
 {
- "at": "2026-09-30 20:37",
+ "at": "2026-10-01 07:31",
  "rules": {
   "slots": 12,
   "tp": 15,
@@ -60,47 +60,54 @@
   }
  },
  "us": {
-  "asof": "2026-09-29",
+  "asof": "2026-09-30",
   "regime": {
    "good": false,
-   "vs_ma60": -2.55,
+   "vs_ma60": -3.25,
    "cycle_exit": false
   },
   "buy12": [
    {
-    "code": "GNRC",
-    "name": "GNRC",
-    "close": 212.22,
-    "r20": 14.5
-   },
-   {
     "code": "AMAT",
     "name": "AMAT",
-    "close": 512.01,
-    "r20": 11.7
+    "close": 511.38,
+    "r20": 15.7
    },
    {
     "code": "KLAC",
     "name": "KLAC",
-    "close": 196.53,
-    "r20": 12.0
+    "close": 194.93,
+    "r20": 14.1
    },
    {
-    "code": "TXN",
-    "name": "TXN",
-    "close": 281.69,
-    "r20": 8.0
+    "code": "CDNS",
+    "name": "CDNS",
+    "close": 330.185,
+    "r20": 5.5
    },
    {
-    "code": "MCHP",
-    "name": "MCHP",
-    "close": 78.78,
-    "r20": 7.3
+    "code": "LRCX",
+    "name": "LRCX",
+    "close": 328.51,
+    "r20": 13.3
+   },
+   {
+    "code": "NTAP",
+    "name": "NTAP",
+    "close": 210.08,
+    "r20": 14.7
    }
   ],
-  "n12": 21,
-  "oversold": [],
-  "n_over": 0,
+  "n12": 10,
+  "oversold": [
+   {
+    "code": "WY",
+    "name": "WY",
+    "close": 19.05,
+    "r20": -17.8
+   }
+  ],
+  "n_over": 1,
   "panic": {
    "on": false,
    "list": []
@@ -141,17 +148,17 @@
    {
     "code": "SOXX",
     "name": "SOXX (반도체)",
-    "close": 567.44,
-    "width": 1.69,
-    "r20": 11.0,
+    "close": 568.64,
+    "width": 1.67,
+    "r20": 13.7,
     "en": "SOXX (Semiconductors)"
    },
    {
     "code": "SMH",
     "name": "SMH (반도체)",
-    "close": 606.9,
-    "width": 1.34,
-    "r20": 9.0,
+    "close": 609.0,
+    "width": 1.36,
+    "r20": 11.7,
     "en": "SMH (Semiconductors)"
    }
   ]
@@ -183,17 +190,17 @@
    {
     "code": "SOXL",
     "name": "SOXL (반도체3x)",
-    "close": 147.0,
-    "width": 4.33,
-    "r20": 30.3,
+    "close": 147.86,
+    "width": 4.27,
+    "r20": 39.6,
     "en": "SOXL (Semiconductors 3x)"
    },
    {
     "code": "TECL",
     "name": "TECL (기술3x)",
-    "close": 227.76,
-    "width": 2.3,
-    "r20": 12.0,
+    "close": 232.8,
+    "width": 2.17,
+    "r20": 20.0,
     "en": "TECL (Technology 3x)"
    }
   ]
@@ -221,82 +228,82 @@
   },
   "SPY": {
    "name": "SPY",
-   "close": 764.2,
-   "r20": -0.4
+   "close": 762.63,
+   "r20": 0.1
   },
   "TLT": {
    "name": "TLT",
-   "close": 78.23,
-   "r20": -5.2
+   "close": 77.78,
+   "r20": -5.0
   }
  },
  "coin": {
   "BTC": {
-   "price": 83932.1,
-   "chg": 0.32,
-   "mom20": 9.62,
+   "price": 83828.5,
+   "chg": 0.2,
+   "mom20": 9.48,
    "state": "long",
    "new": true,
    "asof": "2026-09-30",
-   "turn": 1071601427
+   "turn": 1526310507
   },
   "ETH": {
-   "price": 2697.89,
-   "chg": 0.74,
-   "mom20": 10.65,
+   "price": 2690.0,
+   "chg": 0.45,
+   "mom20": 10.32,
    "state": "long",
    "new": true,
    "asof": "2026-09-30",
-   "turn": 696749850
-  },
-  "XRP": {
-   "price": 1.5153,
-   "chg": 1.66,
-   "mom20": 13.54,
-   "state": "long",
-   "new": false,
-   "asof": "2026-09-30",
-   "turn": 297520399,
-   "rank": 5
+   "turn": 733813082
   },
   "SOL": {
-   "price": 119.66,
-   "chg": 0.43,
-   "mom20": 21.27,
+   "price": 118.33,
+   "chg": -0.69,
+   "mom20": 19.93,
    "state": "long",
    "new": false,
    "asof": "2026-09-30",
-   "turn": 296904876,
+   "turn": 342112464,
    "rank": 4
   },
   "ZEC": {
-   "price": 1428.36,
-   "chg": 0.78,
-   "mom20": 32.26,
+   "price": 1429.9,
+   "chg": 0.88,
+   "mom20": 32.4,
    "state": "long",
    "new": false,
    "asof": "2026-09-30",
-   "turn": 217599742,
+   "turn": 257235898,
    "rank": 2
   },
   "NEAR": {
-   "price": 5.293,
-   "chg": 8.33,
-   "mom20": 116.75,
+   "price": 5.395,
+   "chg": 10.42,
+   "mom20": 120.93,
    "state": "long",
    "new": false,
    "asof": "2026-09-30",
-   "turn": 211083259,
+   "turn": 238033207,
    "rank": 1
   },
-  "SUI": {
-   "price": 1.1554,
-   "chg": 0.25,
-   "mom20": 58.8,
+  "XRP": {
+   "price": 1.4923,
+   "chg": 0.11,
+   "mom20": 11.82,
    "state": "long",
    "new": false,
    "asof": "2026-09-30",
-   "turn": 94156737,
+   "turn": 231798067,
+   "rank": 5
+  },
+  "SUI": {
+   "price": 1.169,
+   "chg": 1.43,
+   "mom20": 60.67,
+   "state": "long",
+   "new": false,
+   "asof": "2026-09-30",
+   "turn": 132255623,
    "rank": 3
   }
  },
@@ -313,8 +320,8 @@
     "rank": 2
    },
    {
-    "code": "131290",
-    "name": "티에스이",
+    "code": "000500",
+    "name": "가온전선",
     "rank": 3
    },
    {
@@ -323,12 +330,12 @@
     "rank": 4
    },
    {
-    "code": "402340",
-    "name": "SK스퀘어",
+    "code": "047040",
+    "name": "대우건설",
     "rank": 5
    }
   ],
-  "asof_kr": "2026-09-28",
+  "asof_kr": "2026-09-30",
   "us": [
    {
     "code": "SNDK",
@@ -336,13 +343,13 @@
     "rank": 1
    },
    {
-    "code": "LITE",
-    "name": "LITE",
+    "code": "MU",
+    "name": "MU",
     "rank": 2
    },
    {
-    "code": "MU",
-    "name": "MU",
+    "code": "LITE",
+    "name": "LITE",
     "rank": 3
    },
    {
@@ -356,7 +363,7 @@
     "rank": 5
    }
   ],
-  "asof_us": "2026-09-28",
+  "asof_us": "2026-09-30",
   "etfw": [
    {
     "code": "442580",
@@ -380,13 +387,13 @@
   ],
   "levu": [
    {
-    "code": "LABU",
-    "name": "LABU (바이오3x)",
+    "code": "SOXL",
+    "name": "SOXL (반도체3x)",
     "rank": 1
    }
   ],
-  "month": "2026-09",
-  "at": "2026-09-29 08:12",
-  "start": false
+  "month": "2026-10",
+  "at": "2026-10-01 07:34",
+  "start": true
  }
 }
