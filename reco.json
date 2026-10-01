@@ -69,31 +69,31 @@
   "buy12": [
    {
     "code": "AMAT",
-    "name": "AMAT",
+    "name": "어플라이드 머티어리얼즈",
     "close": 511.38,
     "r20": 15.7
    },
    {
     "code": "KLAC",
-    "name": "KLAC",
+    "name": "케이엘에이",
     "close": 194.93,
     "r20": 14.1
    },
    {
     "code": "CDNS",
-    "name": "CDNS",
+    "name": "케이던스 디자인 시스템즈",
     "close": 330.185,
     "r20": 5.5
    },
    {
     "code": "LRCX",
-    "name": "LRCX",
+    "name": "램 리서치",
     "close": 328.51,
     "r20": 13.3
    },
    {
     "code": "NTAP",
-    "name": "NTAP",
+    "name": "넷앱",
     "close": 210.08,
     "r20": 14.7
    }
@@ -102,7 +102,7 @@
   "oversold": [
    {
     "code": "WY",
-    "name": "WY",
+    "name": "와이어하우저",
     "close": 19.05,
     "r20": -17.8
    }
@@ -339,27 +339,27 @@
   "us": [
    {
     "code": "SNDK",
-    "name": "SNDK",
+    "name": "샌디스크",
     "rank": 1
    },
    {
     "code": "MU",
-    "name": "MU",
+    "name": "마이크론 테크놀로지",
     "rank": 2
    },
    {
     "code": "LITE",
-    "name": "LITE",
+    "name": "루멘텀 홀딩스",
     "rank": 3
    },
    {
     "code": "MRNA",
-    "name": "MRNA",
+    "name": "모더나",
     "rank": 4
    },
    {
     "code": "WDC",
-    "name": "WDC",
+    "name": "웨스턴 디지털",
     "rank": 5
    }
   ],
