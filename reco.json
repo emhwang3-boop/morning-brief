@@ -1,5 +1,5 @@
 {
- "at": "2026-10-05 20:17",
+ "at": "2026-10-06 07:31",
  "rules": {
   "slots": 12,
   "tp": 15,
@@ -60,45 +60,45 @@
   }
  },
  "us": {
-  "asof": "2026-10-02",
+  "asof": "2026-10-05",
   "regime": {
    "good": false,
-   "vs_ma60": -2.59,
+   "vs_ma60": -1.96,
    "cycle_exit": false
   },
   "buy12": [
    {
-    "code": "CDNS",
-    "name": "케이던스 디자인 시스템즈",
-    "close": 351.35,
-    "r20": 15.2
-   },
-   {
     "code": "ON",
     "name": "온 세미컨덕터",
-    "close": 84.89,
-    "r20": 15.3
-   },
-   {
-    "code": "NXPI",
-    "name": "NXP 세미컨덕터스",
-    "close": 243.66,
-    "r20": 8.8
+    "close": 85.93,
+    "r20": 15.5
    },
    {
     "code": "CCL",
     "name": "카니발",
-    "close": 25.76,
-    "r20": 9.7
+    "close": 25.56,
+    "r20": 8.7
+   },
+   {
+    "code": "COHR",
+    "name": "코히어런트",
+    "close": 333.64,
+    "r20": 18.4
    },
    {
     "code": "Q",
     "name": "큐니티 일렉트로닉스",
-    "close": 131.48,
-    "r20": 11.0
+    "close": 131.53,
+    "r20": 9.2
+   },
+   {
+    "code": "NXPI",
+    "name": "NXP 세미컨덕터스",
+    "close": 241.97,
+    "r20": 6.7
    }
   ],
-  "n12": 22,
+  "n12": 24,
   "oversold": [],
   "n_over": 0,
   "panic": {
@@ -141,17 +141,17 @@
    {
     "code": "SOXX",
     "name": "SOXX (반도체)",
-    "close": 588.9,
-    "width": 1.66,
-    "r20": 17.3,
+    "close": 589.51,
+    "width": 1.74,
+    "r20": 13.4,
     "en": "SOXX (Semiconductors)"
    },
    {
     "code": "SMH",
     "name": "SMH (반도체)",
-    "close": 630.6,
-    "width": 1.43,
-    "r20": 14.1,
+    "close": 633.9,
+    "width": 1.55,
+    "r20": 11.8,
     "en": "SMH (Semiconductors)"
    }
   ]
@@ -178,22 +178,22 @@
   ]
  },
  "levu": {
-  "n": 5,
+  "n": 6,
   "buy": [
    {
     "code": "SOXL",
     "name": "SOXL (반도체3x)",
-    "close": 163.71,
-    "width": 4.03,
-    "r20": 53.4,
+    "close": 164.27,
+    "width": 4.29,
+    "r20": 40.1,
     "en": "SOXL (Semiconductors 3x)"
    },
    {
     "code": "TECL",
     "name": "TECL (기술3x)",
-    "close": 246.31,
-    "width": 2.17,
-    "r20": 22.4,
+    "close": 250.5,
+    "width": 2.32,
+    "r20": 22.0,
     "en": "TECL (Technology 3x)"
    }
   ]
@@ -221,83 +221,83 @@
   },
   "SPY": {
    "name": "SPY",
-   "close": 769.64,
-   "r20": -0.5
+   "close": 774.83,
+   "r20": 0.6
   },
   "TLT": {
    "name": "TLT",
-   "close": 77.48,
-   "r20": -5.6
+   "close": 77.11,
+   "r20": -6.2
   }
  },
  "coin": {
   "BTC": {
-   "price": 86013.7,
-   "chg": -0.6,
-   "mom20": 13.71,
+   "price": 85944.7,
+   "chg": -0.68,
+   "mom20": 13.62,
    "state": "long",
    "new": true,
    "asof": "2026-10-05",
-   "turn": 1120430524
+   "turn": 1442332508
   },
   "ETH": {
-   "price": 2713.96,
-   "chg": -0.48,
-   "mom20": 13.16,
+   "price": 2716.39,
+   "chg": -0.39,
+   "mom20": 13.27,
    "state": "long",
    "new": true,
    "asof": "2026-10-05",
-   "turn": 468633854
+   "turn": 756498242
   },
   "SOL": {
-   "price": 120.63,
-   "chg": -0.8,
-   "mom20": 24.51,
+   "price": 121.31,
+   "chg": -0.24,
+   "mom20": 25.22,
    "state": "long",
    "new": false,
    "asof": "2026-10-05",
-   "turn": 190371790,
-   "rank": 4
-  },
-  "XRP": {
-   "price": 1.5166,
-   "chg": -0.26,
-   "mom20": 18.18,
-   "state": "long",
-   "new": false,
-   "asof": "2026-10-05",
-   "turn": 135901272,
-   "rank": 5
-  },
-  "SUI": {
-   "price": 1.2339,
-   "chg": 2.12,
-   "mom20": 79.63,
-   "state": "long",
-   "new": false,
-   "asof": "2026-10-05",
-   "turn": 118379443,
-   "rank": 2
-  },
-  "ZEC": {
-   "price": 1318.35,
-   "chg": -2.52,
-   "mom20": 18.72,
-   "state": "long",
-   "new": false,
-   "asof": "2026-10-05",
-   "turn": 117667426,
+   "turn": 196084908,
    "rank": 3
   },
-  "NEAR": {
-   "price": 5.013,
-   "chg": 1.95,
-   "mom20": 114.51,
+  "ZEC": {
+   "price": 1343.57,
+   "chg": -0.65,
+   "mom20": 21.0,
    "state": "long",
    "new": false,
    "asof": "2026-10-05",
-   "turn": 117475974,
+   "turn": 187033452,
+   "rank": 2
+  },
+  "XRP": {
+   "price": 1.5109,
+   "chg": -0.64,
+   "mom20": 17.74,
+   "state": "long",
+   "new": false,
+   "asof": "2026-10-05",
+   "turn": 156655532,
+   "rank": 4
+  },
+  "NEAR": {
+   "price": 5.261,
+   "chg": 7.0,
+   "mom20": 125.12,
+   "state": "long",
+   "new": false,
+   "asof": "2026-10-05",
+   "turn": 134683737,
    "rank": 1
+  },
+  "BNB": {
+   "price": 788.9,
+   "chg": -0.82,
+   "mom20": 10.79,
+   "state": "long",
+   "new": false,
+   "asof": "2026-10-05",
+   "turn": 114931868,
+   "rank": 5
   }
  },
  "mom": {
