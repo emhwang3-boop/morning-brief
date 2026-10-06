@@ -1,5 +1,5 @@
 {
- "at": "2026-10-06 20:17",
+ "at": "2026-10-07 07:31",
  "rules": {
   "slots": 12,
   "tp": 15,
@@ -60,47 +60,60 @@
   }
  },
  "us": {
-  "asof": "2026-10-05",
+  "asof": "2026-10-06",
   "regime": {
    "good": false,
-   "vs_ma60": -1.96,
+   "vs_ma60": -1.34,
    "cycle_exit": false
   },
   "buy12": [
    {
-    "code": "ON",
-    "name": "온 세미컨덕터",
-    "close": 85.93,
-    "r20": 15.5
-   },
-   {
     "code": "CCL",
     "name": "카니발",
-    "close": 25.56,
-    "r20": 8.7
+    "close": 26.58,
+    "r20": 14.6
    },
    {
-    "code": "COHR",
-    "name": "코히어런트",
-    "close": 333.64,
-    "r20": 18.4
+    "code": "PTC",
+    "name": "피티씨",
+    "close": 193.0,
+    "r20": 44.8
+   },
+   {
+    "code": "CIEN",
+    "name": "시에나",
+    "close": 443.65,
+    "r20": 30.0
    },
    {
     "code": "Q",
     "name": "큐니티 일렉트로닉스",
-    "close": 131.53,
-    "r20": 9.2
+    "close": 133.63,
+    "r20": 8.4
    },
    {
-    "code": "NXPI",
-    "name": "NXP 세미컨덕터스",
-    "close": 241.97,
-    "r20": 6.7
+    "code": "RCL",
+    "name": "로열 캐리비언 크루즈",
+    "close": 288.78,
+    "r20": 9.8
    }
   ],
-  "n12": 24,
-  "oversold": [],
-  "n_over": 0,
+  "n12": 27,
+  "oversold": [
+   {
+    "code": "CTVA",
+    "name": "코르테바",
+    "close": 13.91,
+    "r20": -83.8
+   },
+   {
+    "code": "WY",
+    "name": "와이어하우저",
+    "close": 18.6,
+    "r20": -18.0
+   }
+  ],
+  "n_over": 2,
   "panic": {
    "on": false,
    "list": []
@@ -136,22 +149,22 @@
   ]
  },
  "etfu": {
-  "n": 8,
+  "n": 9,
   "buy": [
    {
     "code": "SOXX",
     "name": "SOXX (반도체)",
-    "close": 589.51,
-    "width": 1.74,
-    "r20": 13.4,
+    "close": 589.45,
+    "width": 1.79,
+    "r20": 11.6,
     "en": "SOXX (Semiconductors)"
    },
    {
     "code": "SMH",
     "name": "SMH (반도체)",
-    "close": 633.9,
-    "width": 1.55,
-    "r20": 11.8,
+    "close": 632.5,
+    "width": 1.63,
+    "r20": 10.2,
     "en": "SMH (Semiconductors)"
    }
   ]
@@ -183,17 +196,17 @@
    {
     "code": "SOXL",
     "name": "SOXL (반도체3x)",
-    "close": 164.27,
-    "width": 4.29,
-    "r20": 40.1,
+    "close": 164.26,
+    "width": 4.47,
+    "r20": 33.3,
     "en": "SOXL (Semiconductors 3x)"
    },
    {
     "code": "TECL",
     "name": "TECL (기술3x)",
-    "close": 250.5,
-    "width": 2.32,
-    "r20": 22.0,
+    "close": 254.4,
+    "width": 2.47,
+    "r20": 23.0,
     "en": "TECL (Technology 3x)"
    }
   ]
@@ -221,83 +234,83 @@
   },
   "SPY": {
    "name": "SPY",
-   "close": 774.83,
-   "r20": 0.6
+   "close": 779.09,
+   "r20": 1.7
   },
   "TLT": {
    "name": "TLT",
-   "close": 77.11,
-   "r20": -6.2
+   "close": 77.28,
+   "r20": -6.0
   }
  },
  "coin": {
   "BTC": {
-   "price": 86335.9,
-   "chg": 0.66,
-   "mom20": 13.29,
+   "price": 85504.0,
+   "chg": -0.31,
+   "mom20": 12.2,
    "state": "long",
    "new": true,
    "asof": "2026-10-06",
-   "turn": 1178460072
+   "turn": 1083079868
   },
   "ETH": {
-   "price": 2716.85,
-   "chg": 0.25,
-   "mom20": 12.35,
+   "price": 2695.93,
+   "chg": -0.52,
+   "mom20": 11.48,
    "state": "long",
    "new": true,
    "asof": "2026-10-06",
-   "turn": 650963243
-  },
-  "ZEC": {
-   "price": 1365.58,
-   "chg": 2.09,
-   "mom20": 2.07,
-   "state": "long",
-   "new": false,
-   "asof": "2026-10-06",
-   "turn": 197591746,
-   "rank": 3
+   "turn": 625527751
   },
   "SOL": {
-   "price": 120.37,
-   "chg": -0.34,
-   "mom20": 22.0,
+   "price": 121.14,
+   "chg": 0.3,
+   "mom20": 22.79,
    "state": "long",
    "new": false,
    "asof": "2026-10-06",
-   "turn": 173121057,
-   "rank": 4
+   "turn": 179649749,
+   "rank": 3
+  },
+  "ZEC": {
+   "price": 1348.4,
+   "chg": 0.8,
+   "mom20": 0.79,
+   "state": "long",
+   "new": false,
+   "asof": "2026-10-06",
+   "turn": 161816806,
+   "rank": 2
   },
   "NEAR": {
-   "price": 5.267,
-   "chg": -0.51,
-   "mom20": 100.95,
+   "price": 5.111,
+   "chg": -3.46,
+   "mom20": 95.0,
    "state": "long",
    "new": false,
    "asof": "2026-10-06",
-   "turn": 131928707,
+   "turn": 117265469,
    "rank": 1
   },
   "XRP": {
-   "price": 1.5123,
-   "chg": 0.31,
-   "mom20": 16.38,
+   "price": 1.4994,
+   "chg": -0.55,
+   "mom20": 15.38,
    "state": "long",
    "new": false,
    "asof": "2026-10-06",
-   "turn": 120898556,
-   "rank": 5
+   "turn": 116728596,
+   "rank": 4
   },
-  "SUI": {
-   "price": 1.2018,
-   "chg": -0.99,
-   "mom20": 68.44,
-   "state": "long",
+  "RLUSD": {
+   "price": 1.0,
+   "chg": -0.02,
+   "mom20": -0.08,
+   "state": "cash",
    "new": false,
    "asof": "2026-10-06",
-   "turn": 79707702,
-   "rank": 2
+   "turn": 75173038,
+   "rank": 5
   }
  },
  "mom": {
