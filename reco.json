@@ -1,5 +1,5 @@
 {
- "at": "2026-10-07 20:17",
+ "at": "2026-10-08 07:31",
  "rules": {
   "slots": 12,
   "tp": 15,
@@ -60,57 +60,57 @@
   }
  },
  "us": {
-  "asof": "2026-10-06",
+  "asof": "2026-10-07",
   "regime": {
    "good": false,
-   "vs_ma60": -1.34,
+   "vs_ma60": -2.11,
    "cycle_exit": false
   },
   "buy12": [
    {
-    "code": "CCL",
-    "name": "카니발",
-    "close": 26.58,
-    "r20": 14.6
-   },
-   {
     "code": "PTC",
     "name": "피티씨",
-    "close": 193.0,
-    "r20": 44.8
-   },
-   {
-    "code": "CIEN",
-    "name": "시에나",
-    "close": 443.65,
-    "r20": 30.0
-   },
-   {
-    "code": "Q",
-    "name": "큐니티 일렉트로닉스",
-    "close": 133.63,
-    "r20": 8.4
+    "close": 193.6,
+    "r20": 50.2
    },
    {
     "code": "RCL",
     "name": "로열 캐리비언 크루즈",
-    "close": 288.78,
-    "r20": 9.8
+    "close": 282.32,
+    "r20": 9.3
+   },
+   {
+    "code": "VST",
+    "name": "비스트라 에너지",
+    "close": 166.72,
+    "r20": 10.5
+   },
+   {
+    "code": "MPC",
+    "name": "매러선 페트롤리엄",
+    "close": 442.26,
+    "r20": 10.7
+   },
+   {
+    "code": "CSCO",
+    "name": "시스코 시스템즈",
+    "close": 117.39,
+    "r20": 7.7
    }
   ],
-  "n12": 27,
+  "n12": 12,
   "oversold": [
    {
     "code": "CTVA",
     "name": "코르테바",
-    "close": 13.91,
-    "r20": -83.8
+    "close": 14.45,
+    "r20": -82.9
    },
    {
     "code": "WY",
     "name": "와이어하우저",
-    "close": 18.6,
-    "r20": -18.0
+    "close": 18.57,
+    "r20": -17.8
    }
   ],
   "n_over": 2,
@@ -149,22 +149,22 @@
   ]
  },
  "etfu": {
-  "n": 9,
+  "n": 10,
   "buy": [
    {
     "code": "SOXX",
     "name": "SOXX (반도체)",
-    "close": 589.45,
+    "close": 582.82,
     "width": 1.79,
-    "r20": 11.6,
+    "r20": 9.6,
     "en": "SOXX (Semiconductors)"
    },
    {
     "code": "SMH",
     "name": "SMH (반도체)",
-    "close": 632.5,
-    "width": 1.63,
-    "r20": 10.2,
+    "close": 625.03,
+    "width": 1.66,
+    "r20": 8.8,
     "en": "SMH (Semiconductors)"
    }
   ]
@@ -196,17 +196,17 @@
    {
     "code": "SOXL",
     "name": "SOXL (반도체3x)",
-    "close": 164.26,
-    "width": 4.47,
-    "r20": 33.3,
+    "close": 158.91,
+    "width": 4.62,
+    "r20": 26.2,
     "en": "SOXL (Semiconductors 3x)"
    },
    {
     "code": "TECL",
     "name": "TECL (기술3x)",
-    "close": 254.4,
-    "width": 2.47,
-    "r20": 23.0,
+    "close": 252.47,
+    "width": 2.62,
+    "r20": 21.8,
     "en": "TECL (Technology 3x)"
    }
   ]
@@ -234,83 +234,83 @@
   },
   "SPY": {
    "name": "SPY",
-   "close": 779.09,
-   "r20": 1.7
+   "close": 777.22,
+   "r20": 1.9
   },
   "TLT": {
    "name": "TLT",
-   "close": 77.28,
-   "r20": -6.0
+   "close": 77.145,
+   "r20": -5.6
   }
  },
  "coin": {
   "BTC": {
-   "price": 83715.5,
-   "chg": -2.14,
-   "mom20": 9.55,
+   "price": 83317.1,
+   "chg": -2.61,
+   "mom20": 9.03,
    "state": "long",
    "new": true,
    "asof": "2026-10-07",
-   "turn": 1627085141
+   "turn": 1734019274
   },
   "ETH": {
-   "price": 2577.18,
-   "chg": -4.46,
-   "mom20": 5.31,
+   "price": 2570.97,
+   "chg": -4.69,
+   "mom20": 5.05,
    "state": "long",
    "new": true,
    "asof": "2026-10-07",
-   "turn": 1094820936
-  },
-  "SOL": {
-   "price": 117.54,
-   "chg": -2.63,
-   "mom20": 15.64,
-   "state": "long",
-   "new": false,
-   "asof": "2026-10-07",
-   "turn": 215457637,
-   "rank": 3
+   "turn": 1121686262
   },
   "XRP": {
-   "price": 1.4498,
-   "chg": -3.16,
-   "mom20": 11.83,
+   "price": 1.4192,
+   "chg": -5.2,
+   "mom20": 9.47,
    "state": "long",
    "new": false,
    "asof": "2026-10-07",
-   "turn": 206142610,
+   "turn": 238677483,
    "rank": 5
   },
-  "ZEC": {
-   "price": 1296.99,
-   "chg": -5.1,
-   "mom20": -11.58,
+  "SOL": {
+   "price": 116.07,
+   "chg": -3.84,
+   "mom20": 14.2,
    "state": "long",
    "new": false,
    "asof": "2026-10-07",
-   "turn": 147758826,
+   "turn": 235000484,
+   "rank": 3
+  },
+  "NEAR": {
+   "price": 5.345,
+   "chg": 5.51,
+   "mom20": 69.84,
+   "state": "long",
+   "new": false,
+   "asof": "2026-10-07",
+   "turn": 179739548,
+   "rank": 1
+  },
+  "ZEC": {
+   "price": 1326.8,
+   "chg": -2.92,
+   "mom20": -9.55,
+   "state": "long",
+   "new": false,
+   "asof": "2026-10-07",
+   "turn": 156213858,
    "rank": 2
   },
   "DOGE": {
-   "price": 0.08921,
-   "chg": -4.78,
-   "mom20": 9.17,
+   "price": 0.08879,
+   "chg": -5.23,
+   "mom20": 8.65,
    "state": "long",
    "new": false,
    "asof": "2026-10-07",
-   "turn": 125812190,
+   "turn": 117042659,
    "rank": 4
-  },
-  "NEAR": {
-   "price": 5.038,
-   "chg": -0.55,
-   "mom20": 60.09,
-   "state": "long",
-   "new": false,
-   "asof": "2026-10-07",
-   "turn": 125514540,
-   "rank": 1
   }
  },
  "mom": {
