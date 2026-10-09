@@ -1,5 +1,5 @@
 {
- "at": "2026-10-09 20:16",
+ "at": "2026-10-10 07:30",
  "rules": {
   "slots": 12,
   "tp": 15,
@@ -154,17 +154,17 @@
    {
     "code": "SOXX",
     "name": "SOXX (반도체)",
-    "close": 563.28,
-    "width": 1.69,
-    "r20": 8.9,
+    "close": 559.4,
+    "width": 1.4,
+    "r20": 6.1,
     "en": "SOXX (Semiconductors)"
    },
    {
     "code": "SMH",
     "name": "SMH (반도체)",
-    "close": 607.27,
-    "width": 1.56,
-    "r20": 8.4,
+    "close": 603.33,
+    "width": 1.32,
+    "r20": 6.1,
     "en": "SMH (Semiconductors)"
    }
   ]
@@ -196,17 +196,17 @@
    {
     "code": "SOXL",
     "name": "SOXL (반도체3x)",
-    "close": 142.52,
-    "width": 4.65,
-    "r20": 23.1,
+    "close": 139.76,
+    "width": 3.83,
+    "r20": 14.7,
     "en": "SOXL (Semiconductors 3x)"
    },
    {
     "code": "BRZU",
     "name": "BRZU (브라질3x)",
-    "close": 130.04,
-    "width": 2.91,
-    "r20": 19.6,
+    "close": 135.33,
+    "width": 3.25,
+    "r20": 26.9,
     "en": "BRZU (Brazil 3x)"
    }
   ]
@@ -234,82 +234,82 @@
   },
   "SPY": {
    "name": "SPY",
-   "close": 773.93,
-   "r20": 2.1
+   "close": 778.57,
+   "r20": 1.9
   },
   "TLT": {
    "name": "TLT",
-   "close": 77.87,
+   "close": 77.98,
    "r20": -3.6
   }
  },
  "coin": {
   "BTC": {
-   "price": 82565.2,
-   "chg": 0.99,
-   "mom20": 1.62,
+   "price": 82524.0,
+   "chg": 0.94,
+   "mom20": 1.57,
    "state": "long",
    "new": true,
    "asof": "2026-10-09",
-   "turn": 1548609325
+   "turn": 976562848
   },
   "ETH": {
-   "price": 2492.32,
-   "chg": 0.71,
-   "mom20": -5.33,
+   "price": 2486.79,
+   "chg": 0.48,
+   "mom20": -5.54,
    "state": "cash",
    "new": false,
    "asof": "2026-10-09",
-   "turn": 947780127
+   "turn": 455521111
   },
   "SOL": {
-   "price": 110.03,
-   "chg": 0.37,
-   "mom20": -0.93,
+   "price": 109.09,
+   "chg": -0.48,
+   "mom20": -1.77,
    "state": "long",
    "new": false,
    "asof": "2026-10-09",
-   "turn": 375640115,
+   "turn": 211282982,
    "rank": 3
   },
   "ZEC": {
-   "price": 1224.0,
-   "chg": 3.12,
-   "mom20": -16.79,
+   "price": 1210.46,
+   "chg": 1.97,
+   "mom20": -17.71,
    "state": "long",
    "new": false,
    "asof": "2026-10-09",
-   "turn": 302848717,
+   "turn": 162610551,
    "rank": 2
   },
   "NEAR": {
-   "price": 4.81,
-   "chg": 7.75,
-   "mom20": 34.06,
+   "price": 4.834,
+   "chg": 8.29,
+   "mom20": 34.73,
    "state": "long",
    "new": false,
    "asof": "2026-10-09",
-   "turn": 258678072,
+   "turn": 136635939,
    "rank": 1
   },
   "XRP": {
-   "price": 1.3875,
-   "chg": 0.51,
-   "mom20": -1.62,
+   "price": 1.3937,
+   "chg": 0.96,
+   "mom20": -1.18,
    "state": "cash",
    "new": false,
    "asof": "2026-10-09",
-   "turn": 224146231,
+   "turn": 123148372,
    "rank": 5
   },
   "BNB": {
-   "price": 740.64,
-   "chg": 0.62,
-   "mom20": -2.81,
+   "price": 739.96,
+   "chg": 0.53,
+   "mom20": -2.89,
    "state": "cash",
    "new": false,
    "asof": "2026-10-09",
-   "turn": 143126650,
+   "turn": 64385094,
    "rank": 4
   }
  },
