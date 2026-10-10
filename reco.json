@@ -15,39 +15,29 @@
   },
   "buy12": [
    {
-    "code": "174900",
-    "name": "앱클론",
-    "close": 25200.0,
-    "r20": 15.3,
-    "en": "Abclon"
+    "code": "MASK01",
+    "name": "●●●",
+    "en": "●●●"
    },
    {
-    "code": "456160",
-    "name": "지투지바이오",
-    "close": 42050.0,
-    "r20": 9.8,
-    "en": "G2Gbio"
+    "code": "MASK02",
+    "name": "●●●",
+    "en": "●●●"
    },
    {
-    "code": "290650",
-    "name": "엘앤씨바이오",
-    "close": 55800.0,
-    "r20": 19.1,
-    "en": "L&C Bio"
+    "code": "MASK03",
+    "name": "●●●",
+    "en": "●●●"
    },
    {
-    "code": "018880",
-    "name": "한온시스템",
-    "close": 4020.0,
-    "r20": 13.1,
-    "en": "Hanon Systems"
+    "code": "MASK04",
+    "name": "●●●",
+    "en": "●●●"
    },
    {
-    "code": "247540",
-    "name": "에코프로비엠",
-    "close": 126500.0,
-    "r20": 18.6,
-    "en": "Ecopro BM"
+    "code": "MASK05",
+    "name": "●●●",
+    "en": "●●●"
    }
   ],
   "n12": 63,
@@ -68,49 +58,35 @@
   },
   "buy12": [
    {
-    "code": "PTC",
-    "name": "피티씨",
-    "close": 193.6,
-    "r20": 50.2
+    "code": "MASK06",
+    "name": "●●●"
    },
    {
-    "code": "RCL",
-    "name": "로열 캐리비언 크루즈",
-    "close": 282.32,
-    "r20": 9.3
+    "code": "MASK07",
+    "name": "●●●"
    },
    {
-    "code": "VST",
-    "name": "비스트라 에너지",
-    "close": 166.72,
-    "r20": 10.5
+    "code": "MASK08",
+    "name": "●●●"
    },
    {
-    "code": "MPC",
-    "name": "매러선 페트롤리엄",
-    "close": 442.26,
-    "r20": 10.7
+    "code": "MASK09",
+    "name": "●●●"
    },
    {
-    "code": "CSCO",
-    "name": "시스코 시스템즈",
-    "close": 117.39,
-    "r20": 7.7
+    "code": "MASK10",
+    "name": "●●●"
    }
   ],
   "n12": 12,
   "oversold": [
    {
-    "code": "CTVA",
-    "name": "코르테바",
-    "close": 14.45,
-    "r20": -82.9
+    "code": "MASK11",
+    "name": "●●●"
    },
    {
-    "code": "WY",
-    "name": "와이어하우저",
-    "close": 18.57,
-    "r20": -17.8
+    "code": "MASK12",
+    "name": "●●●"
    }
   ],
   "n_over": 2,
@@ -123,28 +99,19 @@
   "n": 15,
   "buy": [
    {
-    "code": "381180",
-    "name": "TIGER 미국필라델피아반도체나스닥",
-    "close": 45145.0,
-    "width": 1.91,
-    "r20": 9.5,
-    "en": "TIGER US PHLX Semiconductor Nas"
+    "code": "MASK13",
+    "name": "●●●",
+    "en": "●●●"
    },
    {
-    "code": "497570",
-    "name": "TIGER 미국필라델피아AI반도체나스닥",
-    "close": 22900.0,
-    "width": 1.79,
-    "r20": 9.4,
-    "en": "TIGER PHLX US AI Semiconductor"
+    "code": "MASK14",
+    "name": "●●●",
+    "en": "●●●"
    },
    {
-    "code": "390390",
-    "name": "KODEX 미국반도체",
-    "close": 56505.0,
-    "width": 1.78,
-    "r20": 8.7,
-    "en": "KODEX US Semiconductor"
+    "code": "MASK15",
+    "name": "●●●",
+    "en": "●●●"
    }
   ]
  },
@@ -152,20 +119,14 @@
   "n": 9,
   "buy": [
    {
-    "code": "SOXX",
-    "name": "SOXX (반도체)",
-    "close": 559.4,
-    "width": 1.4,
-    "r20": 6.1,
-    "en": "SOXX (Semiconductors)"
+    "code": "MASK16",
+    "name": "●●●",
+    "en": "●●●"
    },
    {
-    "code": "SMH",
-    "name": "SMH (반도체)",
-    "close": 603.33,
-    "width": 1.32,
-    "r20": 6.1,
-    "en": "SMH (Semiconductors)"
+    "code": "MASK17",
+    "name": "●●●",
+    "en": "●●●"
    }
   ]
  },
@@ -173,20 +134,14 @@
   "n": 11,
   "buy": [
    {
-    "code": "494310",
-    "name": "KODEX 반도체레버리지",
-    "close": 100125.0,
-    "width": 3.99,
-    "r20": 22.3,
-    "en": "KODEX Semiconductor Leverage"
+    "code": "MASK18",
+    "name": "●●●",
+    "en": "●●●"
    },
    {
-    "code": "423920",
-    "name": "TIGER 미국필라델피아반도체레버리지(합성)",
-    "close": 92495.0,
-    "width": 3.66,
-    "r20": 20.8,
-    "en": "TIGER SYNTH-US PHLX Semiconduct"
+    "code": "MASK19",
+    "name": "●●●",
+    "en": "●●●"
    }
   ]
  },
@@ -194,20 +149,14 @@
   "n": 6,
   "buy": [
    {
-    "code": "SOXL",
-    "name": "SOXL (반도체3x)",
-    "close": 139.76,
-    "width": 3.83,
-    "r20": 14.7,
-    "en": "SOXL (Semiconductors 3x)"
+    "code": "MASK20",
+    "name": "●●●",
+    "en": "●●●"
    },
    {
-    "code": "BRZU",
-    "name": "BRZU (브라질3x)",
-    "close": 135.33,
-    "width": 3.25,
-    "r20": 26.9,
-    "en": "BRZU (Brazil 3x)"
+    "code": "MASK21",
+    "name": "●●●",
+    "en": "●●●"
    }
   ]
  },
@@ -262,7 +211,7 @@
    "asof": "2026-10-09",
    "turn": 455521111
   },
-  "SOL": {
+  "ALT01": {
    "price": 109.09,
    "chg": -0.48,
    "mom20": -1.77,
@@ -270,9 +219,10 @@
    "new": false,
    "asof": "2026-10-09",
    "turn": 211282982,
-   "rank": 3
+   "rank": 3,
+   "masked": true
   },
-  "ZEC": {
+  "ALT02": {
    "price": 1210.46,
    "chg": 1.97,
    "mom20": -17.71,
@@ -280,9 +230,10 @@
    "new": false,
    "asof": "2026-10-09",
    "turn": 162610551,
-   "rank": 2
+   "rank": 2,
+   "masked": true
   },
-  "NEAR": {
+  "ALT03": {
    "price": 4.834,
    "chg": 8.29,
    "mom20": 34.73,
@@ -290,9 +241,10 @@
    "new": false,
    "asof": "2026-10-09",
    "turn": 136635939,
-   "rank": 1
+   "rank": 1,
+   "masked": true
   },
-  "XRP": {
+  "ALT04": {
    "price": 1.3937,
    "chg": 0.96,
    "mom20": -1.18,
@@ -300,9 +252,10 @@
    "new": false,
    "asof": "2026-10-09",
    "turn": 123148372,
-   "rank": 5
+   "rank": 5,
+   "masked": true
   },
-  "BNB": {
+  "ALT05": {
    "price": 739.96,
    "chg": 0.53,
    "mom20": -2.89,
@@ -310,96 +263,98 @@
    "new": false,
    "asof": "2026-10-09",
    "turn": 64385094,
-   "rank": 4
+   "rank": 4,
+   "masked": true
   }
  },
  "mom": {
   "kr": [
    {
-    "code": "010170",
-    "name": "대한광통신",
+    "code": "MASK22",
+    "name": "●●●",
     "rank": 1
    },
    {
-    "code": "009150",
-    "name": "삼성전기",
+    "code": "MASK23",
+    "name": "●●●",
     "rank": 2
    },
    {
-    "code": "000500",
-    "name": "가온전선",
+    "code": "MASK24",
+    "name": "●●●",
     "rank": 3
    },
    {
-    "code": "036930",
-    "name": "주성엔지니어링",
+    "code": "MASK25",
+    "name": "●●●",
     "rank": 4
    },
    {
-    "code": "047040",
-    "name": "대우건설",
+    "code": "MASK26",
+    "name": "●●●",
     "rank": 5
    }
   ],
   "asof_kr": "2026-09-30",
   "us": [
    {
-    "code": "SNDK",
-    "name": "샌디스크",
+    "code": "MASK27",
+    "name": "●●●",
     "rank": 1
    },
    {
-    "code": "MU",
-    "name": "마이크론 테크놀로지",
+    "code": "MASK28",
+    "name": "●●●",
     "rank": 2
    },
    {
-    "code": "LITE",
-    "name": "루멘텀 홀딩스",
+    "code": "MASK29",
+    "name": "●●●",
     "rank": 3
    },
    {
-    "code": "MRNA",
-    "name": "모더나",
+    "code": "MASK30",
+    "name": "●●●",
     "rank": 4
    },
    {
-    "code": "WDC",
-    "name": "웨스턴 디지털",
+    "code": "MASK31",
+    "name": "●●●",
     "rank": 5
    }
   ],
   "asof_us": "2026-09-30",
   "etfw": [
    {
-    "code": "442580",
-    "name": "PLUS 글로벌HBM반도체",
+    "code": "MASK32",
+    "name": "●●●",
     "rank": 1
    }
   ],
   "levw": [
    {
-    "code": "243880",
-    "name": "TIGER 200IT레버리지",
+    "code": "MASK33",
+    "name": "●●●",
     "rank": 1
    }
   ],
   "etfu": [
    {
-    "code": "SOXX",
-    "name": "SOXX (반도체)",
+    "code": "MASK34",
+    "name": "●●●",
     "rank": 1
    }
   ],
   "levu": [
    {
-    "code": "SOXL",
-    "name": "SOXL (반도체3x)",
+    "code": "MASK35",
+    "name": "●●●",
     "rank": 1
    }
   ],
   "month": "2026-10",
   "at": "2026-10-01 07:34",
   "start": true
- }
+ },
+ "masked": true
 }
