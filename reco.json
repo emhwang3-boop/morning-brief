@@ -1,5 +1,5 @@
 {
- "at": "2026-10-23 20:16",
+ "at": "2026-10-24 07:30",
  "rules": {
   "slots": 12,
   "tp": 15,
@@ -100,7 +100,7 @@
   "buy": []
  },
  "etfu": {
-  "n": 14,
+  "n": 10,
   "buy": [
    {
     "code": "MASK13",
@@ -119,7 +119,7 @@
   "buy": []
  },
  "levu": {
-  "n": 14,
+  "n": 10,
   "buy": [
    {
     "code": "MASK15",
@@ -156,87 +156,87 @@
   },
   "SPY": {
    "name": "SPY",
-   "close": 763.96,
-   "r20": -0.4
+   "close": 759.97,
+   "r20": -1.5
   },
   "TLT": {
    "name": "TLT",
-   "close": 81.74,
-   "r20": 2.9
+   "close": 81.34,
+   "r20": 2.5
   }
  },
  "coin": {
   "BTC": {
-   "price": 81615.3,
-   "chg": 0.24,
-   "mom20": -3.7,
+   "price": 81266.8,
+   "chg": -0.18,
+   "mom20": -4.11,
    "state": "cash",
    "new": false,
    "asof": "2026-10-23",
-   "turn": 1160508854
+   "turn": 942086466
   },
   "ETH": {
-   "price": 2396.18,
-   "chg": 0.29,
-   "mom20": -10.83,
+   "price": 2390.59,
+   "chg": 0.06,
+   "mom20": -11.04,
    "state": "cash",
    "new": false,
    "asof": "2026-10-23",
-   "turn": 744470998
+   "turn": 461293127
   },
   "ALT01": {
-   "price": 1211.76,
-   "chg": -0.61,
-   "mom20": -7.16,
+   "price": 1213.84,
+   "chg": -0.44,
+   "mom20": -7.0,
    "state": "cash",
    "new": false,
    "asof": "2026-10-23",
-   "turn": 182906656,
+   "turn": 164943144,
    "rank": 2,
    "masked": true
   },
   "ALT02": {
-   "price": 103.98,
-   "chg": 0.32,
-   "mom20": -13.07,
+   "price": 103.37,
+   "chg": -0.27,
+   "mom20": -13.58,
    "state": "cash",
    "new": false,
    "asof": "2026-10-23",
-   "turn": 145659803,
-   "rank": 4,
-   "masked": true
-  },
-  "ALT03": {
-   "price": 4.884,
-   "chg": 0.0,
-   "mom20": 1.06,
-   "state": "long",
-   "new": false,
-   "asof": "2026-10-23",
-   "turn": 106256106,
-   "rank": 1,
-   "masked": true
-  },
-  "ALT04": {
-   "price": 1.318,
-   "chg": 0.66,
-   "mom20": -11.33,
-   "state": "cash",
-   "new": false,
-   "asof": "2026-10-23",
-   "turn": 95265849,
+   "turn": 145920861,
    "rank": 3,
    "masked": true
   },
-  "ALT05": {
-   "price": 4030.44,
-   "chg": 0.01,
-   "mom20": -2.69,
-   "state": "short",
+  "ALT03": {
+   "price": 4.63e-06,
+   "chg": 5.23,
+   "mom20": 7.42,
+   "state": "long",
+   "new": true,
+   "asof": "2026-10-23",
+   "turn": 107419686,
+   "rank": 5,
+   "masked": true
+  },
+  "ALT04": {
+   "price": 4.717,
+   "chg": -3.42,
+   "mom20": -2.4,
+   "state": "long",
    "new": false,
    "asof": "2026-10-23",
-   "turn": 85630968,
-   "rank": 5,
+   "turn": 96231029,
+   "rank": 1,
+   "masked": true
+  },
+  "ALT05": {
+   "price": 740.11,
+   "chg": 1.21,
+   "mom20": -5.94,
+   "state": "cash",
+   "new": false,
+   "asof": "2026-10-23",
+   "turn": 93944868,
+   "rank": 4,
    "masked": true
   }
  },
