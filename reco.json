@@ -1,5 +1,5 @@
 {
- "at": "2026-10-27 07:30",
+ "at": "2026-10-27 20:16",
  "rules": {
   "slots": 12,
   "tp": 15,
@@ -7,10 +7,10 @@
   "panic_stop": -10
  },
  "kr": {
-  "asof": "2026-10-26",
+  "asof": "2026-10-27",
   "regime": {
    "good": false,
-   "vs_ma60": -8.72,
+   "vs_ma60": -6.84,
    "cycle_exit": false
   },
   "buy12": [
@@ -41,43 +41,17 @@
    }
   ],
   "n12": 12,
-  "oversold": [],
-  "n_over": 0,
+  "oversold": [
+   {
+    "code": "MASK11",
+    "name": "●●●"
+   }
+  ],
+  "n_over": 1,
   "panic": {
-   "on": true,
-   "idx3d": -6.5,
-   "list": [
-    {
-     "code": "122630",
-     "name": "122630",
-     "close": 65475.0,
-     "r20": -42.8
-    },
-    {
-     "code": "009150",
-     "name": "삼성전기",
-     "close": 1118000.0,
-     "r20": -24.9
-    },
-    {
-     "code": "402340",
-     "name": "SK스퀘어",
-     "close": 776000.0,
-     "r20": -31.6
-    },
-    {
-     "code": "036930",
-     "name": "주성엔지니어링",
-     "close": 167700.0,
-     "r20": -17.6
-    },
-    {
-     "code": "079550",
-     "name": "LIG디펜스앤에어로스페이스",
-     "close": 425000.0,
-     "r20": -40.0
-    }
-   ]
+   "on": false,
+   "list": [],
+   "idx3d": -1.67
   }
  },
  "us": {
@@ -112,11 +86,11 @@
   "n12": 12,
   "oversold": [
    {
-    "code": "MASK11",
+    "code": "MASK12",
     "name": "●●●"
    },
    {
-    "code": "MASK12",
+    "code": "MASK13",
     "name": "●●●"
    }
   ],
@@ -127,17 +101,8 @@
   }
  },
  "etfw": {
-  "n": 0,
-  "buy": []
- },
- "etfu": {
-  "n": 12,
+  "n": 1,
   "buy": [
-   {
-    "code": "MASK13",
-    "name": "●●●",
-    "en": "●●●"
-   },
    {
     "code": "MASK14",
     "name": "●●●",
@@ -145,12 +110,8 @@
    }
   ]
  },
- "levw": {
-  "n": 0,
-  "buy": []
- },
- "levu": {
-  "n": 10,
+ "etfu": {
+  "n": 12,
   "buy": [
    {
     "code": "MASK15",
@@ -164,26 +125,45 @@
    }
   ]
  },
+ "levw": {
+  "n": 0,
+  "buy": []
+ },
+ "levu": {
+  "n": 10,
+  "buy": [
+   {
+    "code": "MASK17",
+    "name": "●●●",
+    "en": "●●●"
+   },
+   {
+    "code": "MASK18",
+    "name": "●●●",
+    "en": "●●●"
+   }
+  ]
+ },
  "rep": {
   "069500": {
    "name": "KODEX 200",
-   "close": 85995.0,
-   "r20": -23.1
+   "close": 88905.0,
+   "r20": -21.4
   },
   "114260": {
    "name": "KODEX 국고채3년",
-   "close": 62355.0,
+   "close": 62430.0,
    "r20": 1.2
   },
   "360750": {
    "name": "TIGER 미국S&P500",
-   "close": 25080.0,
-   "r20": -4.4
+   "close": 25225.0,
+   "r20": -3.7
   },
   "305080": {
    "name": "TIGER 미국채10년선물",
-   "close": 11605.0,
-   "r20": -2.2
+   "close": 11595.0,
+   "r20": -2.4
   },
   "SPY": {
    "name": "SPY",
@@ -198,75 +178,75 @@
  },
  "coin": {
   "BTC": {
-   "price": 79947.5,
-   "chg": -0.26,
-   "mom20": -6.55,
+   "price": 79868.3,
+   "chg": -0.35,
+   "mom20": -4.14,
    "state": "cash",
    "new": false,
-   "asof": "2026-10-26",
-   "turn": 1246800642
+   "asof": "2026-10-27",
+   "turn": 1207156642
   },
   "ETH": {
-   "price": 2308.44,
-   "chg": -0.92,
-   "mom20": -14.42,
+   "price": 2313.22,
+   "chg": -0.49,
+   "mom20": -10.14,
    "state": "cash",
    "new": false,
-   "asof": "2026-10-26",
-   "turn": 471764913
+   "asof": "2026-10-27",
+   "turn": 392091368
   },
   "ALT01": {
-   "price": 1220.5,
-   "chg": 0.56,
-   "mom20": -10.69,
+   "price": 100.08,
+   "chg": -0.86,
+   "mom20": -13.95,
    "state": "cash",
    "new": false,
-   "asof": "2026-10-26",
-   "turn": 192252093,
-   "rank": 1,
+   "asof": "2026-10-27",
+   "turn": 163577616,
+   "rank": 2,
    "masked": true
   },
   "ALT02": {
-   "price": 100.22,
-   "chg": -1.16,
-   "mom20": -16.97,
+   "price": 1251.72,
+   "chg": 1.5,
+   "mom20": -5.74,
    "state": "cash",
    "new": false,
-   "asof": "2026-10-26",
-   "turn": 167700711,
-   "rank": 3,
+   "asof": "2026-10-27",
+   "turn": 162563059,
+   "rank": 1,
    "masked": true
   },
   "ALT03": {
-   "price": 1.0016,
-   "chg": 0.02,
-   "mom20": 0.15,
+   "price": 1.0017,
+   "chg": 0.0,
+   "mom20": 0.11,
    "state": "cash",
    "new": false,
-   "asof": "2026-10-26",
-   "turn": 155617605,
+   "asof": "2026-10-27",
+   "turn": 125680706,
    "rank": 5,
    "masked": true
   },
   "ALT04": {
-   "price": 1.2904,
-   "chg": -0.45,
-   "mom20": -13.81,
+   "price": 1.304,
+   "chg": -0.4,
+   "mom20": -8.27,
    "state": "cash",
    "new": false,
-   "asof": "2026-10-26",
-   "turn": 94773280,
-   "rank": 2,
+   "asof": "2026-10-27",
+   "turn": 90609235,
+   "rank": 3,
    "masked": true
   },
   "ALT05": {
-   "price": 4.448,
-   "chg": -3.22,
-   "mom20": -12.2,
+   "price": 4.49,
+   "chg": -0.44,
+   "mom20": -15.84,
    "state": "long",
    "new": false,
-   "asof": "2026-10-26",
-   "turn": 94523329,
+   "asof": "2026-10-27",
+   "turn": 90087952,
    "rank": 4,
    "masked": true
   }
@@ -274,27 +254,27 @@
  "mom": {
   "kr": [
    {
-    "code": "MASK17",
+    "code": "MASK19",
     "name": "●●●",
     "rank": 1
    },
    {
-    "code": "MASK18",
+    "code": "MASK20",
     "name": "●●●",
     "rank": 2
    },
    {
-    "code": "MASK19",
+    "code": "MASK21",
     "name": "●●●",
     "rank": 3
    },
    {
-    "code": "MASK20",
+    "code": "MASK22",
     "name": "●●●",
     "rank": 4
    },
    {
-    "code": "MASK21",
+    "code": "MASK23",
     "name": "●●●",
     "rank": 5
    }
@@ -302,27 +282,27 @@
   "asof_kr": "2026-09-30",
   "us": [
    {
-    "code": "MASK22",
+    "code": "MASK24",
     "name": "●●●",
     "rank": 1
    },
    {
-    "code": "MASK23",
+    "code": "MASK25",
     "name": "●●●",
     "rank": 2
    },
    {
-    "code": "MASK24",
+    "code": "MASK26",
     "name": "●●●",
     "rank": 3
    },
    {
-    "code": "MASK25",
+    "code": "MASK27",
     "name": "●●●",
     "rank": 4
    },
    {
-    "code": "MASK26",
+    "code": "MASK28",
     "name": "●●●",
     "rank": 5
    }
@@ -330,28 +310,28 @@
   "asof_us": "2026-09-30",
   "etfw": [
    {
-    "code": "MASK27",
+    "code": "MASK29",
     "name": "●●●",
     "rank": 1
    }
   ],
   "levw": [
    {
-    "code": "MASK28",
+    "code": "MASK30",
     "name": "●●●",
     "rank": 1
    }
   ],
   "etfu": [
    {
-    "code": "MASK29",
+    "code": "MASK31",
     "name": "●●●",
     "rank": 1
    }
   ],
   "levu": [
    {
-    "code": "MASK30",
+    "code": "MASK32",
     "name": "●●●",
     "rank": 1
    }
