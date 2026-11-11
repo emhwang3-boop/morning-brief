@@ -1,5 +1,5 @@
 {
- "at": "2026-11-11 07:30",
+ "at": "2026-11-11 20:16",
  "rules": {
   "slots": 12,
   "tp": 15,
@@ -7,10 +7,10 @@
   "panic_stop": -10
  },
  "kr": {
-  "asof": "2026-11-10",
+  "asof": "2026-11-11",
   "regime": {
    "good": false,
-   "vs_ma60": -11.05,
+   "vs_ma60": -7.51,
    "cycle_exit": false
   },
   "buy12": [
@@ -40,13 +40,13 @@
     "en": "●●●"
    }
   ],
-  "n12": 23,
+  "n12": 33,
   "oversold": [],
   "n_over": 0,
   "panic": {
    "on": false,
    "list": [],
-   "idx3d": -1.33
+   "idx3d": 5.92
   }
  },
  "us": {
@@ -152,23 +152,23 @@
  "rep": {
   "069500": {
    "name": "KODEX 200",
-   "close": 82000.0,
-   "r20": -13.9
+   "close": 84540.0,
+   "r20": -10.8
   },
   "114260": {
    "name": "KODEX 국고채3년",
-   "close": 62750.0,
-   "r20": 1.0
+   "close": 62580.0,
+   "r20": 0.8
   },
   "360750": {
    "name": "TIGER 미국S&P500",
-   "close": 25085.0,
-   "r20": -3.6
+   "close": 25020.0,
+   "r20": -3.7
   },
   "305080": {
    "name": "TIGER 미국채10년선물",
-   "close": 11830.0,
-   "r20": 1.7
+   "close": 11680.0,
+   "r20": 0.8
   },
   "SPY": {
    "name": "SPY",
@@ -183,76 +183,76 @@
  },
  "coin": {
   "BTC": {
-   "price": 73655.0,
-   "chg": -2.27,
-   "mom20": -12.41,
+   "price": 74040.0,
+   "chg": 0.33,
+   "mom20": -9.06,
    "state": "short",
    "new": false,
-   "asof": "2026-11-10",
-   "turn": 1215743905
+   "asof": "2026-11-11",
+   "turn": 1416039106
   },
   "ETH": {
-   "price": 2051.15,
-   "chg": -3.94,
-   "mom20": -17.08,
+   "price": 2061.85,
+   "chg": 0.42,
+   "mom20": -13.7,
    "state": "short",
    "new": false,
-   "asof": "2026-11-10",
-   "turn": 689158246
+   "asof": "2026-11-11",
+   "turn": 671820893
   },
   "ALT01": {
-   "price": 1053.12,
-   "chg": -9.52,
-   "mom20": -19.96,
+   "price": 988.91,
+   "chg": -5.36,
+   "mom20": -18.89,
    "state": "cash",
    "new": false,
-   "asof": "2026-11-10",
-   "turn": 256378498,
+   "asof": "2026-11-11",
+   "turn": 281480352,
    "rank": 3,
    "masked": true
   },
   "ALT02": {
-   "price": 83.15,
-   "chg": -4.14,
-   "mom20": -22.27,
+   "price": 83.88,
+   "chg": 0.64,
+   "mom20": -19.07,
    "state": "short",
    "new": false,
-   "asof": "2026-11-10",
-   "turn": 205839633,
+   "asof": "2026-11-11",
+   "turn": 206838193,
    "rank": 1,
    "masked": true
   },
   "ALT03": {
-   "price": 1.0611,
-   "chg": -3.44,
-   "mom20": -22.29,
+   "price": 1.0607,
+   "chg": 0.4,
+   "mom20": -18.99,
    "state": "short",
    "new": false,
-   "asof": "2026-11-10",
-   "turn": 162096358,
+   "asof": "2026-11-11",
+   "turn": 157427990,
    "rank": 2,
    "masked": true
   },
   "ALT04": {
-   "price": 1.001,
-   "chg": -0.01,
-   "mom20": 0.01,
-   "state": "cash",
+   "price": 4.96e-06,
+   "chg": -7.81,
+   "mom20": 12.73,
+   "state": "long",
    "new": false,
-   "asof": "2026-11-10",
-   "turn": 100115204,
-   "rank": 5,
+   "asof": "2026-11-11",
+   "turn": 106626810,
+   "rank": 4,
    "masked": true
   },
   "ALT05": {
-   "price": 5.29e-06,
-   "chg": 3.32,
-   "mom20": 14.25,
-   "state": "long",
+   "price": 1.0008,
+   "chg": -0.04,
+   "mom20": -0.05,
+   "state": "cash",
    "new": false,
-   "asof": "2026-11-10",
-   "turn": 94342688,
-   "rank": 4,
+   "asof": "2026-11-11",
+   "turn": 105971654,
+   "rank": 5,
    "masked": true
   }
  },
