@@ -1,5 +1,5 @@
 {
- "at": "2026-11-19 07:30",
+ "at": "2026-11-19 20:16",
  "rules": {
   "slots": 12,
   "tp": 15,
@@ -7,10 +7,10 @@
   "panic_stop": -10
  },
  "kr": {
-  "asof": "2026-11-18",
+  "asof": "2026-11-19",
   "regime": {
    "good": false,
-   "vs_ma60": -10.38,
+   "vs_ma60": -9.19,
    "cycle_exit": false
   },
   "buy12": [
@@ -40,13 +40,13 @@
     "en": "●●●"
    }
   ],
-  "n12": 21,
+  "n12": 32,
   "oversold": [],
   "n_over": 0,
   "panic": {
    "on": false,
    "list": [],
-   "idx3d": -3.42
+   "idx3d": 1.41
   }
  },
  "us": {
@@ -96,7 +96,11 @@
   }
  },
  "etfw": {
-  "n": 4,
+  "n": 0,
+  "buy": []
+ },
+ "etfu": {
+  "n": 6,
   "buy": [
    {
     "code": "MASK13",
@@ -107,26 +111,6 @@
     "code": "MASK14",
     "name": "●●●",
     "en": "●●●"
-   },
-   {
-    "code": "MASK15",
-    "name": "●●●",
-    "en": "●●●"
-   }
-  ]
- },
- "etfu": {
-  "n": 6,
-  "buy": [
-   {
-    "code": "MASK16",
-    "name": "●●●",
-    "en": "●●●"
-   },
-   {
-    "code": "MASK17",
-    "name": "●●●",
-    "en": "●●●"
    }
   ]
  },
@@ -135,15 +119,15 @@
   "buy": []
  },
  "levu": {
-  "n": 14,
+  "n": 13,
   "buy": [
    {
-    "code": "MASK18",
+    "code": "MASK15",
     "name": "●●●",
     "en": "●●●"
    },
    {
-    "code": "MASK19",
+    "code": "MASK16",
     "name": "●●●",
     "en": "●●●"
    }
@@ -152,8 +136,8 @@
  "rep": {
   "069500": {
    "name": "KODEX 200",
-   "close": 79400.0,
-   "r20": -11.5
+   "close": 80630.0,
+   "r20": -6.8
   },
   "114260": {
    "name": "KODEX 국고채3년",
@@ -162,124 +146,124 @@
   },
   "360750": {
    "name": "TIGER 미국S&P500",
-   "close": 24305.0,
-   "r20": -4.4
+   "close": 24400.0,
+   "r20": -3.5
   },
   "305080": {
    "name": "TIGER 미국채10년선물",
-   "close": 11645.0,
-   "r20": 1.3
+   "close": 11615.0,
+   "r20": 0.9
   },
   "SPY": {
    "name": "SPY",
-   "close": 728.565,
-   "r20": -5.8
+   "close": 730.2,
+   "r20": -5.5
   },
   "TLT": {
    "name": "TLT",
-   "close": 80.045,
-   "r20": -0.2
+   "close": 80.22,
+   "r20": -0.0
   }
  },
  "coin": {
   "BTC": {
-   "price": 62568.3,
-   "chg": -3.66,
-   "mom20": -19.78,
+   "price": 63761.4,
+   "chg": 1.1,
+   "mom20": -17.59,
    "state": "short",
    "new": false,
-   "asof": "2026-11-18",
-   "turn": 1175870034
+   "asof": "2026-11-19",
+   "turn": 1213133089
   },
   "ETH": {
-   "price": 1765.01,
-   "chg": -3.28,
-   "mom20": -21.66,
+   "price": 1803.3,
+   "chg": 1.47,
+   "mom20": -19.69,
    "state": "short",
    "new": false,
-   "asof": "2026-11-18",
-   "turn": 529909699
+   "asof": "2026-11-19",
+   "turn": 522442178
   },
   "ALT01": {
-   "price": 72.97,
-   "chg": -2.95,
-   "mom20": -23.7,
+   "price": 74.52,
+   "chg": 1.2,
+   "mom20": -22.68,
    "state": "short",
    "new": false,
-   "asof": "2026-11-18",
-   "turn": 170058063,
-   "rank": 1,
-   "masked": true
-  },
-  "ALT02": {
-   "price": 910.12,
-   "chg": -6.03,
-   "mom20": -25.58,
-   "state": "short",
-   "new": false,
-   "asof": "2026-11-18",
-   "turn": 119003263,
+   "asof": "2026-11-19",
+   "turn": 148036174,
    "rank": 2,
    "masked": true
   },
-  "ALT03": {
-   "price": 0.9648,
-   "chg": -1.92,
-   "mom20": -22.05,
+  "ALT02": {
+   "price": 949.76,
+   "chg": 3.95,
+   "mom20": -25.21,
    "state": "short",
    "new": false,
-   "asof": "2026-11-18",
-   "turn": 103935310,
+   "asof": "2026-11-19",
+   "turn": 118285993,
    "rank": 3,
    "masked": true
   },
-  "ALT04": {
-   "price": 1.0013,
-   "chg": 0.02,
-   "mom20": -0.05,
+  "ALT03": {
+   "price": 1.0012,
+   "chg": -0.02,
+   "mom20": -0.02,
    "state": "cash",
    "new": false,
-   "asof": "2026-11-18",
-   "turn": 103132376,
+   "asof": "2026-11-19",
+   "turn": 87535369,
    "rank": 5,
    "masked": true
   },
-  "ALT05": {
-   "price": 579.1,
-   "chg": -3.07,
-   "mom20": -17.09,
+  "ALT04": {
+   "price": 0.9823,
+   "chg": 1.51,
+   "mom20": -21.83,
    "state": "short",
    "new": false,
-   "asof": "2026-11-18",
-   "turn": 76087122,
+   "asof": "2026-11-19",
+   "turn": 87195880,
    "rank": 4,
+   "masked": true
+  },
+  "ALT05": {
+   "price": 3.387,
+   "chg": 2.54,
+   "mom20": -21.18,
+   "state": "cash",
+   "new": false,
+   "asof": "2026-11-19",
+   "turn": 71983393,
+   "rank": 1,
    "masked": true
   }
  },
  "mom": {
   "kr": [
    {
-    "code": "MASK20",
+    "code": "MASK17",
     "name": "●●●",
     "rank": 1
    },
    {
-    "code": "MASK21",
+    "code": "MASK18",
     "name": "●●●",
     "rank": 2
    },
    {
-    "code": "MASK22",
+    "code": "MASK19",
     "name": "●●●",
     "rank": 3
    },
    {
-    "code": "MASK23",
+    "code": "MASK20",
     "name": "●●●",
     "rank": 4
    },
    {
-    "code": "MASK24",
+    "code": "MASK21",
     "name": "●●●",
     "rank": 5
    }
@@ -287,27 +271,27 @@
   "asof_kr": "2026-10-30",
   "us": [
    {
-    "code": "MASK25",
+    "code": "MASK22",
     "name": "●●●",
     "rank": 1
    },
    {
-    "code": "MASK26",
+    "code": "MASK23",
     "name": "●●●",
     "rank": 2
    },
    {
-    "code": "MASK27",
+    "code": "MASK24",
     "name": "●●●",
     "rank": 3
    },
    {
-    "code": "MASK28",
+    "code": "MASK25",
     "name": "●●●",
     "rank": 4
    },
    {
-    "code": "MASK29",
+    "code": "MASK26",
     "name": "●●●",
     "rank": 5
    }
@@ -315,28 +299,28 @@
   "asof_us": "2026-10-07",
   "etfw": [
    {
-    "code": "MASK30",
+    "code": "MASK27",
     "name": "●●●",
     "rank": 1
    }
   ],
   "levw": [
    {
-    "code": "MASK31",
+    "code": "MASK28",
     "name": "●●●",
     "rank": 1
    }
   ],
   "etfu": [
    {
-    "code": "MASK32",
+    "code": "MASK29",
     "name": "●●●",
     "rank": 1
    }
   ],
   "levu": [
    {
-    "code": "MASK33",
+    "code": "MASK30",
     "name": "●●●",
     "rank": 1
    }
