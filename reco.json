@@ -1,5 +1,5 @@
 {
- "at": "2026-11-23 20:16",
+ "at": "2026-11-24 07:30",
  "rules": {
   "slots": 12,
   "tp": 15,
@@ -136,29 +136,18 @@
   "buy": []
  },
  "etfu": {
-  "n": 1,
-  "buy": [
-   {
-    "code": "MASK14",
-    "name": "●●●",
-    "en": "●●●"
-   }
-  ]
+  "n": 0,
+  "buy": []
  },
  "levw": {
   "n": 0,
   "buy": []
  },
  "levu": {
-  "n": 3,
+  "n": 1,
   "buy": [
    {
-    "code": "MASK15",
-    "name": "●●●",
-    "en": "●●●"
-   },
-   {
-    "code": "MASK16",
+    "code": "MASK14",
     "name": "●●●",
     "en": "●●●"
    }
@@ -187,86 +176,86 @@
   },
   "SPY": {
    "name": "SPY",
-   "close": 689.81,
-   "r20": -9.2
+   "close": 722.29,
+   "r20": -5.6
   },
   "TLT": {
    "name": "TLT",
-   "close": 81.45,
-   "r20": 0.1
+   "close": 81.69,
+   "r20": 0.0
   }
  },
  "coin": {
   "BTC": {
-   "price": 61328.0,
-   "chg": 0.09,
-   "mom20": -20.82,
+   "price": 61228.4,
+   "chg": -0.07,
+   "mom20": -20.95,
    "state": "short",
    "new": false,
    "asof": "2026-11-23",
-   "turn": 1077666230
+   "turn": 1745199515
   },
   "ETH": {
-   "price": 1722.78,
-   "chg": -0.09,
-   "mom20": -24.27,
+   "price": 1715.9,
+   "chg": -0.49,
+   "mom20": -24.57,
    "state": "short",
    "new": false,
    "asof": "2026-11-23",
-   "turn": 387029855
+   "turn": 756557086
   },
   "ALT01": {
-   "price": 72.31,
-   "chg": 2.23,
-   "mom20": -22.1,
+   "price": 72.23,
+   "chg": 2.12,
+   "mom20": -22.19,
    "state": "short",
    "new": false,
    "asof": "2026-11-23",
-   "turn": 134624008,
+   "turn": 288440974,
    "rank": 3,
    "masked": true
   },
   "ALT02": {
-   "price": 789.18,
-   "chg": -1.18,
-   "mom20": -35.26,
+   "price": 771.12,
+   "chg": -3.44,
+   "mom20": -36.74,
    "state": "short",
    "new": false,
    "asof": "2026-11-23",
-   "turn": 83145176,
+   "turn": 203255986,
    "rank": 2,
    "masked": true
   },
   "ALT03": {
-   "price": 0.9394,
-   "chg": 1.12,
-   "mom20": -26.42,
+   "price": 0.9393,
+   "chg": 1.11,
+   "mom20": -26.43,
    "state": "short",
    "new": false,
    "asof": "2026-11-23",
-   "turn": 76029698,
+   "turn": 169087824,
    "rank": 4,
    "masked": true
   },
   "ALT04": {
-   "price": 3.009,
-   "chg": 0.77,
-   "mom20": -21.48,
+   "price": 2.959,
+   "chg": -0.9,
+   "mom20": -22.78,
    "state": "short",
    "new": false,
    "asof": "2026-11-23",
-   "turn": 66198552,
+   "turn": 97514376,
    "rank": 1,
    "masked": true
   },
   "ALT05": {
-   "price": 556.23,
-   "chg": -0.6,
-   "mom20": -20.33,
+   "price": 556.83,
+   "chg": -0.49,
+   "mom20": -20.24,
    "state": "short",
    "new": false,
    "asof": "2026-11-23",
-   "turn": 60585762,
+   "turn": 95846858,
    "rank": 5,
    "masked": true
   }
@@ -274,27 +263,27 @@
  "mom": {
   "kr": [
    {
-    "code": "MASK17",
+    "code": "MASK15",
     "name": "●●●",
     "rank": 1
    },
    {
-    "code": "MASK18",
+    "code": "MASK16",
     "name": "●●●",
     "rank": 2
    },
    {
-    "code": "MASK19",
+    "code": "MASK17",
     "name": "●●●",
     "rank": 3
    },
    {
-    "code": "MASK20",
+    "code": "MASK18",
     "name": "●●●",
     "rank": 4
    },
    {
-    "code": "MASK21",
+    "code": "MASK19",
     "name": "●●●",
     "rank": 5
    }
@@ -302,27 +291,27 @@
   "asof_kr": "2026-10-30",
   "us": [
    {
-    "code": "MASK22",
+    "code": "MASK20",
     "name": "●●●",
     "rank": 1
    },
    {
-    "code": "MASK23",
+    "code": "MASK21",
     "name": "●●●",
     "rank": 2
    },
    {
-    "code": "MASK24",
+    "code": "MASK22",
     "name": "●●●",
     "rank": 3
    },
    {
-    "code": "MASK25",
+    "code": "MASK23",
     "name": "●●●",
     "rank": 4
    },
    {
-    "code": "MASK26",
+    "code": "MASK24",
     "name": "●●●",
     "rank": 5
    }
@@ -330,28 +319,28 @@
   "asof_us": "2026-10-07",
   "etfw": [
    {
-    "code": "MASK27",
+    "code": "MASK25",
     "name": "●●●",
     "rank": 1
    }
   ],
   "levw": [
    {
-    "code": "MASK28",
+    "code": "MASK26",
     "name": "●●●",
     "rank": 1
    }
   ],
   "etfu": [
    {
-    "code": "MASK29",
+    "code": "MASK27",
     "name": "●●●",
     "rank": 1
    }
   ],
   "levu": [
    {
-    "code": "MASK30",
+    "code": "MASK28",
     "name": "●●●",
     "rank": 1
    }
