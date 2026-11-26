@@ -1,5 +1,5 @@
 {
- "at": "2026-11-26 20:17",
+ "at": "2026-11-27 07:30",
  "rules": {
   "slots": 12,
   "tp": 15,
@@ -151,75 +151,75 @@
  },
  "coin": {
   "BTC": {
-   "price": 60654.6,
-   "chg": 0.33,
-   "mom20": -20.03,
+   "price": 60590.0,
+   "chg": 0.22,
+   "mom20": -20.11,
    "state": "short",
    "new": false,
    "asof": "2026-11-26",
-   "turn": 1561602894
+   "turn": 1016184660
   },
   "ETH": {
-   "price": 1699.06,
-   "chg": 0.38,
-   "mom20": -24.1,
+   "price": 1697.11,
+   "chg": 0.26,
+   "mom20": -24.19,
    "state": "short",
    "new": false,
    "asof": "2026-11-26",
-   "turn": 670524323
+   "turn": 374037283
   },
   "ALT01": {
-   "price": 731.1,
-   "chg": -5.23,
-   "mom20": -44.74,
+   "price": 702.38,
+   "chg": -8.95,
+   "mom20": -46.91,
    "state": "short",
    "new": false,
    "asof": "2026-11-26",
-   "turn": 207590709,
+   "turn": 186246678,
    "rank": 1,
    "masked": true
   },
   "ALT02": {
-   "price": 70.75,
-   "chg": 0.4,
-   "mom20": -21.5,
+   "price": 71.23,
+   "chg": 1.08,
+   "mom20": -20.97,
    "state": "short",
    "new": false,
    "asof": "2026-11-26",
-   "turn": 206051406,
+   "turn": 124138746,
    "rank": 3,
    "masked": true
   },
   "ALT03": {
-   "price": 0.9524,
-   "chg": 1.55,
-   "mom20": -19.22,
+   "price": 0.9494,
+   "chg": 1.23,
+   "mom20": -19.47,
    "state": "short",
    "new": false,
    "asof": "2026-11-26",
-   "turn": 106966076,
+   "turn": 76669729,
    "rank": 4,
    "masked": true
   },
   "ALT04": {
-   "price": 3.054,
-   "chg": -0.03,
-   "mom20": -17.77,
+   "price": 3.068,
+   "chg": 0.43,
+   "mom20": -17.39,
    "state": "short",
    "new": false,
    "asof": "2026-11-26",
-   "turn": 90315623,
+   "turn": 74411415,
    "rank": 2,
    "masked": true
   },
   "ALT05": {
-   "price": 551.39,
-   "chg": -0.48,
-   "mom20": -20.51,
+   "price": 554.89,
+   "chg": 0.16,
+   "mom20": -20.01,
    "state": "short",
    "new": false,
    "asof": "2026-11-26",
-   "turn": 75880496,
+   "turn": 50257295,
    "rank": 5,
    "masked": true
   }
