@@ -1,5 +1,5 @@
 {
- "at": "2026-11-26 07:30",
+ "at": "2026-11-26 20:17",
  "rules": {
   "slots": 12,
   "tp": 15,
@@ -7,10 +7,10 @@
   "panic_stop": -10
  },
  "kr": {
-  "asof": "2026-11-25",
+  "asof": "2026-11-26",
   "regime": {
    "good": false,
-   "vs_ma60": -13.53,
+   "vs_ma60": -11.27,
    "cycle_exit": false
   },
   "buy12": [
@@ -40,18 +40,13 @@
     "en": "●●●"
    }
   ],
-  "n12": 26,
-  "oversold": [
-   {
-    "code": "MASK11",
-    "name": "●●●"
-   }
-  ],
-  "n_over": 1,
+  "n12": 47,
+  "oversold": [],
+  "n_over": 0,
   "panic": {
    "on": false,
    "list": [],
-   "idx3d": -0.91
+   "idx3d": 2.78
   }
  },
  "us": {
@@ -86,11 +81,11 @@
   "n12": 12,
   "oversold": [
    {
-    "code": "MASK12",
+    "code": "MASK11",
     "name": "●●●"
    },
    {
-    "code": "MASK13",
+    "code": "MASK12",
     "name": "●●●"
    }
   ],
@@ -116,7 +111,7 @@
   "n": 1,
   "buy": [
    {
-    "code": "MASK14",
+    "code": "MASK13",
     "name": "●●●",
     "en": "●●●"
    }
@@ -125,23 +120,23 @@
  "rep": {
   "069500": {
    "name": "KODEX 200",
-   "close": 73140.0,
-   "r20": -23.5
+   "close": 73395.0,
+   "r20": -22.3
   },
   "114260": {
    "name": "KODEX 국고채3년",
-   "close": 62925.0,
-   "r20": 0.9
+   "close": 62880.0,
+   "r20": 0.7
   },
   "360750": {
    "name": "TIGER 미국S&P500",
-   "close": 23805.0,
-   "r20": -7.2
+   "close": 24010.0,
+   "r20": -6.1
   },
   "305080": {
    "name": "TIGER 미국채10년선물",
-   "close": 11880.0,
-   "r20": 1.8
+   "close": 11875.0,
+   "r20": 1.5
   },
   "SPY": {
    "name": "SPY",
@@ -156,75 +151,75 @@
  },
  "coin": {
   "BTC": {
-   "price": 60146.0,
-   "chg": 0.52,
-   "mom20": -20.95,
+   "price": 60654.6,
+   "chg": 0.33,
+   "mom20": -20.03,
    "state": "short",
    "new": false,
-   "asof": "2026-11-25",
-   "turn": 1584488272
+   "asof": "2026-11-26",
+   "turn": 1561602894
   },
   "ETH": {
-   "price": 1685.04,
-   "chg": 0.29,
-   "mom20": -24.71,
+   "price": 1699.06,
+   "chg": 0.38,
+   "mom20": -24.1,
    "state": "short",
    "new": false,
-   "asof": "2026-11-25",
-   "turn": 652756002
+   "asof": "2026-11-26",
+   "turn": 670524323
   },
   "ALT01": {
-   "price": 70.45,
-   "chg": 1.09,
-   "mom20": -21.14,
+   "price": 731.1,
+   "chg": -5.23,
+   "mom20": -44.74,
    "state": "short",
    "new": false,
-   "asof": "2026-11-25",
-   "turn": 237631399,
-   "rank": 3,
+   "asof": "2026-11-26",
+   "turn": 207590709,
+   "rank": 1,
    "masked": true
   },
   "ALT02": {
-   "price": 756.96,
-   "chg": 2.32,
-   "mom20": -40.91,
+   "price": 70.75,
+   "chg": 0.4,
+   "mom20": -21.5,
    "state": "short",
    "new": false,
-   "asof": "2026-11-25",
-   "turn": 158306713,
-   "rank": 2,
+   "asof": "2026-11-26",
+   "turn": 206051406,
+   "rank": 3,
    "masked": true
   },
   "ALT03": {
-   "price": 0.9372,
-   "chg": 1.31,
-   "mom20": -22.37,
+   "price": 0.9524,
+   "chg": 1.55,
+   "mom20": -19.22,
    "state": "short",
    "new": false,
-   "asof": "2026-11-25",
-   "turn": 100856178,
+   "asof": "2026-11-26",
+   "turn": 106966076,
    "rank": 4,
    "masked": true
   },
   "ALT04": {
-   "price": 3.042,
-   "chg": 5.26,
-   "mom20": -16.91,
+   "price": 3.054,
+   "chg": -0.03,
+   "mom20": -17.77,
    "state": "short",
    "new": false,
-   "asof": "2026-11-25",
-   "turn": 70297504,
-   "rank": 1,
+   "asof": "2026-11-26",
+   "turn": 90315623,
+   "rank": 2,
    "masked": true
   },
   "ALT05": {
-   "price": 551.97,
-   "chg": 0.61,
-   "mom20": -19.97,
+   "price": 551.39,
+   "chg": -0.48,
+   "mom20": -20.51,
    "state": "short",
    "new": false,
-   "asof": "2026-11-25",
-   "turn": 65104954,
+   "asof": "2026-11-26",
+   "turn": 75880496,
    "rank": 5,
    "masked": true
   }
@@ -232,27 +227,27 @@
  "mom": {
   "kr": [
    {
-    "code": "MASK15",
+    "code": "MASK14",
     "name": "●●●",
     "rank": 1
    },
    {
-    "code": "MASK16",
+    "code": "MASK15",
     "name": "●●●",
     "rank": 2
    },
    {
-    "code": "MASK17",
+    "code": "MASK16",
     "name": "●●●",
     "rank": 3
    },
    {
-    "code": "MASK18",
+    "code": "MASK17",
     "name": "●●●",
     "rank": 4
    },
    {
-    "code": "MASK19",
+    "code": "MASK18",
     "name": "●●●",
     "rank": 5
    }
@@ -260,27 +255,27 @@
   "asof_kr": "2026-10-30",
   "us": [
    {
-    "code": "MASK20",
+    "code": "MASK19",
     "name": "●●●",
     "rank": 1
    },
    {
-    "code": "MASK21",
+    "code": "MASK20",
     "name": "●●●",
     "rank": 2
    },
    {
-    "code": "MASK22",
+    "code": "MASK21",
     "name": "●●●",
     "rank": 3
    },
    {
-    "code": "MASK23",
+    "code": "MASK22",
     "name": "●●●",
     "rank": 4
    },
    {
-    "code": "MASK24",
+    "code": "MASK23",
     "name": "●●●",
     "rank": 5
    }
@@ -288,28 +283,28 @@
   "asof_us": "2026-10-07",
   "etfw": [
    {
-    "code": "MASK25",
+    "code": "MASK24",
     "name": "●●●",
     "rank": 1
    }
   ],
   "levw": [
    {
-    "code": "MASK26",
+    "code": "MASK25",
     "name": "●●●",
     "rank": 1
    }
   ],
   "etfu": [
    {
-    "code": "MASK27",
+    "code": "MASK26",
     "name": "●●●",
     "rank": 1
    }
   ],
   "levu": [
    {
-    "code": "MASK28",
+    "code": "MASK27",
     "name": "●●●",
     "rank": 1
    }
