@@ -1,5 +1,5 @@
 {
- "at": "2026-11-27 20:16",
+ "at": "2026-11-28 07:30",
  "rules": {
   "slots": 12,
   "tp": 15,
@@ -108,10 +108,15 @@
   "buy": []
  },
  "levu": {
-  "n": 1,
+  "n": 3,
   "buy": [
    {
     "code": "MASK13",
+    "name": "●●●",
+    "en": "●●●"
+   },
+   {
+    "code": "MASK14",
     "name": "●●●",
     "en": "●●●"
    }
@@ -140,114 +145,114 @@
   },
   "SPY": {
    "name": "SPY",
-   "close": 716.7,
-   "r20": -7.2
+   "close": 728.32,
+   "r20": -5.3
   },
   "TLT": {
    "name": "TLT",
-   "close": 82.24,
-   "r20": 1.5
+   "close": 81.27,
+   "r20": -0.3
   }
  },
  "coin": {
   "BTC": {
-   "price": 61708.8,
-   "chg": 1.87,
-   "mom20": -18.66,
+   "price": 59754.1,
+   "chg": -1.36,
+   "mom20": -21.24,
    "state": "short",
    "new": false,
    "asof": "2026-11-27",
-   "turn": 949319771
+   "turn": 1258468798
   },
   "ETH": {
-   "price": 1728.95,
-   "chg": 2.31,
-   "mom20": -22.82,
+   "price": 1659.03,
+   "chg": -1.82,
+   "mom20": -25.94,
    "state": "short",
    "new": false,
    "asof": "2026-11-27",
-   "turn": 432815667
+   "turn": 609923879
   },
   "ALT01": {
-   "price": 760.28,
-   "chg": 11.39,
-   "mom20": -39.73,
+   "price": 727.27,
+   "chg": 6.56,
+   "mom20": -42.35,
    "state": "short",
    "new": false,
    "asof": "2026-11-27",
-   "turn": 210866594,
+   "turn": 190279916,
    "rank": 1,
    "masked": true
   },
   "ALT02": {
-   "price": 73.35,
-   "chg": 3.27,
-   "mom20": -18.33,
+   "price": 71.58,
+   "chg": 0.77,
+   "mom20": -20.3,
    "state": "short",
    "new": false,
    "asof": "2026-11-27",
-   "turn": 139419824,
+   "turn": 188009553,
    "rank": 3,
    "masked": true
   },
   "ALT03": {
-   "price": 0.9815,
-   "chg": 3.99,
-   "mom20": -15.68,
+   "price": 0.9445,
+   "chg": 0.07,
+   "mom20": -18.86,
    "state": "short",
    "new": false,
    "asof": "2026-11-27",
-   "turn": 81265923,
+   "turn": 106831013,
    "rank": 4,
    "masked": true
   },
   "ALT04": {
-   "price": 3.128,
-   "chg": 2.56,
-   "mom20": -16.27,
+   "price": 552.78,
+   "chg": -0.26,
+   "mom20": -20.6,
    "state": "short",
    "new": false,
    "asof": "2026-11-27",
-   "turn": 54352654,
-   "rank": 2,
+   "turn": 60964745,
+   "rank": 5,
    "masked": true
   },
   "ALT05": {
-   "price": 564.64,
-   "chg": 1.88,
-   "mom20": -18.9,
+   "price": 3.031,
+   "chg": -0.62,
+   "mom20": -18.87,
    "state": "short",
    "new": false,
    "asof": "2026-11-27",
-   "turn": 44085812,
-   "rank": 5,
+   "turn": 58185219,
+   "rank": 2,
    "masked": true
   }
  },
  "mom": {
   "kr": [
    {
-    "code": "MASK14",
+    "code": "MASK15",
     "name": "●●●",
     "rank": 1
    },
    {
-    "code": "MASK15",
+    "code": "MASK16",
     "name": "●●●",
     "rank": 2
    },
    {
-    "code": "MASK16",
+    "code": "MASK17",
     "name": "●●●",
     "rank": 3
    },
    {
-    "code": "MASK17",
+    "code": "MASK18",
     "name": "●●●",
     "rank": 4
    },
    {
-    "code": "MASK18",
+    "code": "MASK19",
     "name": "●●●",
     "rank": 5
    }
@@ -255,27 +260,27 @@
   "asof_kr": "2026-10-30",
   "us": [
    {
-    "code": "MASK19",
+    "code": "MASK20",
     "name": "●●●",
     "rank": 1
    },
    {
-    "code": "MASK20",
+    "code": "MASK21",
     "name": "●●●",
     "rank": 2
    },
    {
-    "code": "MASK21",
+    "code": "MASK22",
     "name": "●●●",
     "rank": 3
    },
    {
-    "code": "MASK22",
+    "code": "MASK23",
     "name": "●●●",
     "rank": 4
    },
    {
-    "code": "MASK23",
+    "code": "MASK24",
     "name": "●●●",
     "rank": 5
    }
@@ -283,28 +288,28 @@
   "asof_us": "2026-10-07",
   "etfw": [
    {
-    "code": "MASK24",
+    "code": "MASK25",
     "name": "●●●",
     "rank": 1
    }
   ],
   "levw": [
    {
-    "code": "MASK25",
+    "code": "MASK26",
     "name": "●●●",
     "rank": 1
    }
   ],
   "etfu": [
    {
-    "code": "MASK26",
+    "code": "MASK27",
     "name": "●●●",
     "rank": 1
    }
   ],
   "levu": [
    {
-    "code": "MASK27",
+    "code": "MASK28",
     "name": "●●●",
     "rank": 1
    }
